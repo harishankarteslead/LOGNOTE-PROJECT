@@ -20,9 +20,7 @@ from django.urls import path,include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Taskapp.urls.page_urls.login_page_urls')),
-    path('', include('Taskapp.urls.page_urls.superadmin_dashboard_urls')),
-    path('', include('Taskapp.urls.page_urls.admin_dashboard_urls')),
-    path('', include('Taskapp.urls.page_urls.employee_dashboard_urls')),
+    path('', include('Taskapp.urls.page_urls.dashboard_urls')),
     path('', include('Taskapp.urls.page_urls.logout_urls')),
 ]
 

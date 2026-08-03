@@ -4,13 +4,8 @@ from Taskapp.services import employee_service
 
 def login(request):
     if request.method == 'GET' and request.session.get('role'):
-        role = request.session.get('role')
-        if role =='superadmin':
-            return redirect('superadmin_dashboard')
-        elif role =='admin':
-            return redirect('admin_dashboard')
-        elif role =='employee':
-            return redirect('employee_dashboard')
+        return redirect('dashboard')
+
     if request.method == 'POST':
         username_input = request.POST.get('username', '').strip()
         password_input = request.POST.get('password', '').strip()
@@ -22,16 +17,7 @@ def login(request):
             request.session['username'] = user['username']
             request.session['role'] = user['role']
 
-            role = user['role']
-            if role == 'superadmin':
-                return redirect('superadmin_dashboard')
-            elif role == 'admin':
-                return redirect('admin_dashboard')
-            elif role == 'employee':
-                return redirect('employee_dashboard')
-            else:
-                messages.error(request, 'Invalid user role assigned.')
-                return render(request, 'login.html')
+            return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
             return render(request, 'login.html')
