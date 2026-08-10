@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from Taskapp.services import employee_service, task_service
+from Taskapp.services import employee_service, task_service, project_service
 
 
 def dashboard(request):
@@ -39,14 +39,10 @@ def dashboard(request):
             new_username = request.POST.get('username', '').strip()
             new_password = request.POST.get('password', '').strip()
             new_email = request.POST.get('email', '').strip()
+            role = request.POST.get('role', 'employee').strip()
 
-            if user_role == 'superadmin':
-                role = request.POST.get('role', 'employee').strip()
-            else:
-                role = 'employee'
-
-            if not target_user_id or not new_username or not new_email or not new_password:
-                messages.error(request, 'All fields (Username, Email, Password) are required for update.')
+            if not target_user_id or not new_username or not new_email:
+                messages.error(request, 'Username and Email are required.')
             else:
                 try:
                     employee_service.update_user(int(target_user_id), new_username, new_email, new_password, role)
@@ -72,24 +68,32 @@ def dashboard(request):
 
             task_name = request.POST.get('task_name', '').strip()
             description = request.POST.get('description', '').strip()
-            assigned_to_id = request.POST.get('assigned_to_id', '').strip()
-            employee_name = request.POST.get('employee_name', '').strip()
+            assigned_to_ids = request.POST.getlist('assigned_to_ids')
             due_date = request.POST.get('due_date', '').strip() or None
-            status = request.POST.get('status', 'Pending').strip()
+            status = request.POST.get('status', 'Not Worked').strip()
 
-            if not task_name or not assigned_to_id or not employee_name:
-                messages.error(request, 'Task Name, Assigned To, and Employee Name are required fields.')
+            if not task_name or not assigned_to_ids:
+                messages.error(request, 'Atleast One Assigned Employee is Required.')
             else:
                 try:
-                    new_task_id = task_service.create_task(
-                        task_name=task_name,
-                        description=description,
-                        assigned_to_id=int(assigned_to_id),
-                        employee_name=employee_name,
-                        due_date=due_date,
-                        status=status
-                    )
-                    messages.success(request, f'Task #{new_task_id} ("{task_name}") assigned to {employee_name} successfully!')
+                    emp_list = []
+                    for emp_id in assigned_to_ids:
+                        emp = employee_service.get_user_by_id(int(emp_id))
+                        if emp:
+                            emp_list.append(emp)
+
+                    if emp_list:
+                        employee_names_str = ", ".join([e['username'] for e in emp_list])
+                        primary_emp_id = emp_list[0]['id']
+                        new_task_id = task_service.create_task(
+                            task_name=task_name,
+                            description=description,
+                            assigned_to_id=primary_emp_id,
+                            employee_name=employee_names_str,
+                            due_date=due_date,
+                            status=status
+                        )
+                        messages.success(request, f'Task #{new_task_id} ("{task_name}") assigned to {employee_names_str} successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to assign task: {str(e)}')
             return redirect('dashboard')
@@ -118,6 +122,45 @@ def dashboard(request):
                     messages.error(request, f'Failed to delete task: {str(e)}')
             return redirect('dashboard')
 
+        elif action == 'add_project':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+            project_name = request.POST.get('project_name', '').strip()
+            project_type = request.POST.get('project_type', '').strip()
+            start_date = request.POST.get('start_date', '').strip() or None
+            due_date = request.POST.get('due_date', '').strip() or None
+            description = request.POST.get('description', '').strip()
+
+            if not project_name or not project_type:
+                messages.error(request, 'Project Name and Project Type are required fields.')
+            else:
+                try:
+                    new_proj_id = project_service.create_project(
+                        project_name=project_name,
+                        project_type=project_type,
+                        start_date=start_date,
+                        due_date=due_date,
+                        description=description
+                    )
+                    messages.success(request, f'Project "{project_name}" (#{new_proj_id}) created successfully!')
+                except Exception as e:
+                    messages.error(request, f'Failed to create project: {str(e)}')
+            return redirect('dashboard')
+
+        elif action == 'delete_project':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+            project_id = request.POST.get('project_id', '')
+            if project_id:
+                try:
+                    project_service.delete_project(int(project_id))
+                    messages.success(request, f'Project #{project_id} deleted successfully.')
+                except Exception as e:
+                    messages.error(request, f'Failed to delete project: {str(e)}')
+            return redirect('dashboard')
+
     # Fetch data based on role
     context = {
         'username': username,
@@ -131,13 +174,26 @@ def dashboard(request):
 
     if user_role in ('superadmin', 'admin'):
         tasks = task_service.get_all_tasks()
+        projects = project_service.get_all_projects()
         context['tasks'] = tasks
+        context['projects'] = projects
         context['total_tasks'] = len(tasks)
+        context['total_projects'] = len(projects)
+        context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
+        context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])
+        context['in_progress_tasks'] = len([t for t in tasks if t.get('status') == 'In Progress'])
+        context['on_hold_tasks'] = len([t for t in tasks if t.get('status') in ('On Hold', 'Hold')])
+        context['completed_tasks'] = len([t for t in tasks if t.get('status') == 'Completed'])
     else:
         # Employee role
         tasks = task_service.get_tasks_by_employee(user_id, username)
         context['tasks'] = tasks
         context['total_tasks'] = len(tasks)
+        context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
+        context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])
+        context['in_progress_tasks'] = len([t for t in tasks if t.get('status') == 'In Progress'])
+        context['on_hold_tasks'] = len([t for t in tasks if t.get('status') in ('On Hold', 'Hold')])
+        context['completed_tasks'] = len([t for t in tasks if t.get('status') == 'Completed'])
 
     if user_role == 'superadmin':
         all_users = employee_service.get_all_users()

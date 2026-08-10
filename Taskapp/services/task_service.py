@@ -71,15 +71,17 @@ def get_all_tasks():
 def get_tasks_by_employee(assigned_to_id, employee_name=None):
     """
     Retrieve tasks assigned specifically to a given employee by ID or username.
+    Supports comma-separated employee names.
     """
     create_task_table()
+    emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at
             FROM tasks
-            WHERE assigned_to_id = %s OR LOWER(employee_name) = LOWER(%s)
+            WHERE assigned_to_id = %s OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s))
             ORDER BY id DESC;
-        """, [assigned_to_id, employee_name or ''])
+        """, [assigned_to_id, employee_name or '', emp_search])
         rows = cursor.fetchall()
         tasks = []
         for r in rows:
