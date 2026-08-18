@@ -1110,8 +1110,10 @@
                                     <th>ID</th>
                                     <th>Project Name</th>
                                     <th>Project Type</th>
+                                    <th>Status</th>
                                     <th>Start Date</th>
                                     <th>Due Date</th>
+                                    <th>Actual Complete Date</th>
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
@@ -1124,12 +1126,16 @@
                                     <td>
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                     </td>
+                                    <td>
+                                        <span class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
+                                    </td>
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
+                                    <td>{{ proj.actual_complete_date|default:"-" }}</td>
                                     <td>{{ proj.description|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.start_date|default:'' }}', '{{ proj.due_date|default:'' }}', '{{ proj.description|escapejs }}')">
+                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|default:'' }}', '{{ proj.due_date|default:'' }}', '{{ proj.actual_complete_date|default:'' }}', '{{ proj.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1145,7 +1151,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 20px;">No
+                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No
                                         projects created yet.</td>
                                 </tr>
                                 {% endfor %}
@@ -1411,13 +1417,28 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="project_status">Status</label>
+                        <select id="project_status" name="status" class="form-control" onchange="handleProjectStatusChange(this, 'add')">
+                            <option value="Not Worked" selected>Not Worked</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label for="start_date">Start Date</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control">
+                        <input type="date" id="start_date" name="start_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
 
                     <div class="form-group">
                         <label for="due_date">Due Date</label>
                         <input type="date" id="due_date" name="due_date" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="actual_complete_date">Actual Complete Date</label>
+                        <input type="date" id="actual_complete_date" name="actual_complete_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -1536,21 +1557,32 @@
                         <select id="edit-project-type" name="project_type" class="form-control" required>
                             <option value="Data logger">Data Logger</option>
                             <option value="Internal project">Internal project</option>
-                            <!-- <option value="UI/UX Design">UI/UX Design</option>
-                            <option value="Database/Cloud">Database/Cloud</option>
-                            <option value="Marketing/SEO">Marketing/SEO</option>
-                            <option value="Other">Other</option> -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-status">Status</label>
+                        <select id="edit-project-status" name="status" class="form-control" onchange="handleProjectStatusChange(this, 'edit')">
+                            <option value="Not Worked">Not Worked</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="edit-project-start-date">Start Date</label>
-                        <input type="date" id="edit-project-start-date" name="start_date" class="form-control">
+                        <input type="date" id="edit-project-start-date" name="start_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
 
                     <div class="form-group">
                         <label for="edit-project-due-date">Due Date</label>
                         <input type="date" id="edit-project-due-date" name="due_date" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-actual-complete-date">Actual Complete Date</label>
+                        <input type="date" id="edit-project-actual-complete-date" name="actual_complete_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -1675,12 +1707,34 @@
             if (modal) modal.classList.remove('active');
         }
 
-        function openEditProjectModal(id, name, type, startDate, dueDate, description) {
+        function handleProjectStatusChange(selectEl, mode) {
+            const val = selectEl.value;
+            const today = new Date().toISOString().split('T')[0];
+            const startDateInput = document.getElementById(mode === 'add' ? 'start_date' : 'edit-project-start-date');
+            const actualDateInput = document.getElementById(mode === 'add' ? 'actual_complete_date' : 'edit-project-actual-complete-date');
+
+            if (val === 'In Progress') {
+                if (startDateInput && !startDateInput.value) {
+                    startDateInput.value = today;
+                }
+            } else if (val === 'Completed') {
+                if (startDateInput && !startDateInput.value) {
+                    startDateInput.value = today;
+                }
+                if (actualDateInput && !actualDateInput.value) {
+                    actualDateInput.value = today;
+                }
+            }
+        }
+
+        function openEditProjectModal(id, name, type, status, startDate, dueDate, actualCompleteDate, description) {
             document.getElementById('edit-project-id').value = id;
             document.getElementById('edit-project-name').value = name;
             document.getElementById('edit-project-type').value = type;
+            document.getElementById('edit-project-status').value = status || 'Not Worked';
             document.getElementById('edit-project-start-date').value = startDate;
             document.getElementById('edit-project-due-date').value = dueDate;
+            document.getElementById('edit-project-actual-complete-date').value = actualCompleteDate;
             document.getElementById('edit-project-description').value = description;
 
             const modal = document.getElementById('editProjectModal');

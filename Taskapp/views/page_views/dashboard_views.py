@@ -131,8 +131,10 @@ def dashboard(request):
                 return redirect('dashboard')
             project_name = request.POST.get('project_name', '').strip()
             project_type = request.POST.get('project_type', '').strip()
+            status = request.POST.get('status', 'Not Worked').strip()
             start_date = request.POST.get('start_date', '').strip() or None
             due_date = request.POST.get('due_date', '').strip() or None
+            actual_complete_date = request.POST.get('actual_complete_date', '').strip() or None
             description = request.POST.get('description', '').strip()
 
             if not project_name or not project_type:
@@ -142,8 +144,10 @@ def dashboard(request):
                     new_proj_id = project_service.create_project(
                         project_name=project_name,
                         project_type=project_type,
+                        status=status,
                         start_date=start_date,
                         due_date=due_date,
+                        actual_complete_date=actual_complete_date,
                         description=description
                     )
                     messages.success(request, f'Project "{project_name}" (#{new_proj_id}) created successfully!')
@@ -213,8 +217,10 @@ def dashboard(request):
             project_id = request.POST.get('project_id', '')
             project_name = request.POST.get('project_name', '').strip()
             project_type = request.POST.get('project_type', '').strip()
+            status = request.POST.get('status', 'Not Worked').strip()
             start_date = request.POST.get('start_date', '').strip() or None
             due_date = request.POST.get('due_date', '').strip() or None
+            actual_complete_date = request.POST.get('actual_complete_date', '').strip() or None
             description = request.POST.get('description', '').strip()
 
             if not project_id or not project_name or not project_type:
@@ -225,8 +231,10 @@ def dashboard(request):
                         project_id=int(project_id),
                         project_name=project_name,
                         project_type=project_type,
+                        status=status,
                         start_date=start_date,
                         due_date=due_date,
+                        actual_complete_date=actual_complete_date,
                         description=description
                     )
                     messages.success(request, f'Project #{project_id} ("{project_name}") updated successfully!')
