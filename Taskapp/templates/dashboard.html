@@ -739,7 +739,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
                                     <th>Description</th>
@@ -752,7 +752,7 @@
                             <tbody>
                                 {% for task in tasks %}
                                 <tr>
-                                    <td><strong>#{{ task.id }}</strong></td>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
@@ -824,7 +824,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
                                     <th>Description</th>
@@ -837,7 +837,7 @@
                             <tbody>
                                 {% for task in tasks %}
                                 <tr>
-                                    <td><strong>#{{ task.id }}</strong></td>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
@@ -884,7 +884,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
                                     <th>Description</th>
@@ -897,7 +897,7 @@
                             <tbody>
                                 {% for task in tasks %}
                                 <tr>
-                                    <td><strong>#{{ task.id }}</strong></td>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
@@ -947,7 +947,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Username</th>
                                     <th>Email</th>
                                     <th>Role</th>
@@ -959,7 +959,7 @@
                                 {% if role == 'superadmin' %}
                                 {% for u in all_users %}
                                 <tr>
-                                    <td>#{{ u.id }}</td>
+                                    <td>{{ forloop.counter }}</td>
                                     <td><strong>{{ u.username }}</strong></td>
                                     <td>{{ u.email }}</td>
                                     <td><span class="role-tag role-{{ u.role }}">{{ u.role }}</span></td>
@@ -986,7 +986,7 @@
                                 {% else %}
                                 {% for emp in employees %}
                                 <tr>
-                                    <td>#{{ emp.id }}</td>
+                                    <td>{{ forloop.counter }}</td>
                                     <td><strong>{{ emp.username }}</strong></td>
                                     <td>{{ emp.email }}</td>
                                     <td><span class="role-tag role-{{ emp.role }}">{{ emp.role }}</span></td>
@@ -1035,7 +1035,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
                                     <th>Description</th>
@@ -1048,7 +1048,7 @@
                             <tbody>
                                 {% for task in tasks %}
                                 <tr>
-                                    <td><strong>#{{ task.id }}</strong></td>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
@@ -1105,7 +1105,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>S.No</th>
                                     <th>Project Name</th>
                                     <th>Project Type</th>
                                     <th>Status</th>
@@ -1119,7 +1119,7 @@
                             <tbody>
                                 {% for proj in projects %}
                                 <tr>
-                                    <td><strong>#{{ proj.id }}</strong></td>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
                                     <td>
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
