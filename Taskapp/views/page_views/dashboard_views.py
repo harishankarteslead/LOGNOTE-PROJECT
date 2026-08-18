@@ -32,7 +32,7 @@ def dashboard(request):
                     messages.success(request, f'{role.capitalize()} "{new_username}" created successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to create user: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=add-members')
 
         elif action == 'edit':
             target_user_id = request.POST.get('user_id', '')
@@ -49,7 +49,7 @@ def dashboard(request):
                     messages.success(request, f'User "{new_username}" updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update user: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=add-members')
 
         elif action == 'delete':
             target_user_id = request.POST.get('user_id', '')
@@ -59,7 +59,7 @@ def dashboard(request):
                     messages.success(request, 'User deleted successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to delete user: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=add-members')
 
         elif action == 'assign_task':
             if user_role not in ('superadmin', 'admin'):
@@ -98,18 +98,19 @@ def dashboard(request):
                         messages.success(request, f'Task #{new_task_id} ("{task_name}") assigned to {employee_names_str} successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to assign task: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=form-data')
 
         elif action == 'update_task_status':
             task_id = request.POST.get('task_id', '')
             new_status = request.POST.get('status', '').strip()
+            redirect_tab = request.POST.get('active_tab', 'dashboard')
             if task_id and new_status:
                 try:
                     task_service.update_task_status(int(task_id), new_status)
                     messages.success(request, f'Task #{task_id} status updated to "{new_status}".')
                 except Exception as e:
                     messages.error(request, f'Failed to update task status: {str(e)}')
-            return redirect('dashboard')
+            return redirect(f'/dashboard/?tab={redirect_tab}')
 
         elif action == 'delete_task':
             if user_role not in ('superadmin', 'admin'):
@@ -122,7 +123,7 @@ def dashboard(request):
                     messages.success(request, f'Task #{task_id} deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to delete task: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=form-data')
 
         elif action == 'add_project':
             if user_role not in ('superadmin', 'admin'):
@@ -148,7 +149,7 @@ def dashboard(request):
                     messages.success(request, f'Project "{project_name}" (#{new_proj_id}) created successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to create project: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=add-project')
 
         elif action == 'delete_project':
             if user_role not in ('superadmin', 'admin'):
@@ -161,7 +162,7 @@ def dashboard(request):
                     messages.success(request, f'Project #{project_id} deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to delete project: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=add-project')
 
         elif action == 'edit_task':
             if user_role not in ('superadmin', 'admin'):
@@ -202,7 +203,7 @@ def dashboard(request):
                         messages.success(request, f'Task #{task_id} updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update task: {str(e)}')
-            return redirect('dashboard')
+            return redirect('/dashboard/?tab=form-data')
 
         elif action == 'edit_project':
             if user_role not in ('superadmin', 'admin'):
@@ -231,14 +232,32 @@ def dashboard(request):
                     messages.success(request, f'Project #{project_id} ("{project_name}") updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update project: {str(e)}')
+            return redirect('/dashboard/?tab=add-project')
+
+        elif action == 'employee_edit_task':
+            task_id = request.POST.get('task_id', '')
+            description = request.POST.get('description', '').strip()
+            status = request.POST.get('status', 'Not Worked').strip()
+
+            if not task_id:
+                messages.error(request, 'Task ID is required.')
+            else:
+                try:
+                    task_service.update_task_employee_fields(int(task_id), description, status)
+                    messages.success(request, f'Task #{task_id} details updated successfully!')
+                except Exception as e:
+                    messages.error(request, f'Failed to update task: {str(e)}')
             return redirect('dashboard')
 
 
+
     # Fetch data based on role
+    active_tab = request.GET.get('tab', 'dashboard').strip()
     context = {
         'username': username,
         'role': user_role,
         'user_id': user_id,
+        'active_tab': active_tab,
     }
 
     # Retrieve tasks & employees lists

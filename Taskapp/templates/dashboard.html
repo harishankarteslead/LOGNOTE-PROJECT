@@ -863,7 +863,7 @@
                 <!-- Employee Personal Dashboard -->
                 <div class="card" style="margin-bottom: 24px;">
                     <div class="card-header">
-                        <h2>Welcome to LOGNOTE Employee Portal</h2>
+                        <h2>W LOGNOTE</h2>
                     </div>
                     <div style="padding: 10px 0; line-height: 1.8;">
                         <p><strong>Username:</strong> {{ user_info.username }}</p>
@@ -908,22 +908,10 @@
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                     <td>
-                                        <form method="POST" action="{% url 'dashboard' %}"
-                                            style="display:flex; gap: 8px; align-items: center;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="action" value="update_task_status">
-                                            <input type="hidden" name="task_id" value="{{ task.id }}">
-                                            <select name="status" class="form-control"
-                                                style="padding: 4px 8px; font-size: 13px; height: auto;">
-                                                <option value="Not Worked" {% if task.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
-                                                <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
-                                                <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
-                                                <option value="On Hold" {% if task.status == 'On Hold' %}selected{% endif %}>On Hold</option>
-                                                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-edit"
-                                                style="padding: 4px 10px;">Update</button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-edit"
+                                            onclick="openEmployeeEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:''|escapejs }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}')">
+                                            <i class="fa-solid fa-pen"></i> Edit
+                                        </button>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -1578,6 +1566,60 @@
             </form>
         </div>
     </div>
+    </div>
+    {% endif %}
+
+    <!-- EMPLOYEE EDIT TASK MODAL (DESCRIPTION & STATUS ONLY) -->
+    {% if role == 'employee' %}
+    <div id="employeeEditTaskModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3>
+                    <i class="fa-solid fa-pen-to-square" style="color: var(--primary); margin-right: 8px;"></i>
+                    Edit Task Status & Description
+                </h3>
+                <span style="cursor: pointer; font-size: 20px;" onclick="closeEmployeeEditTaskModal()">&times;</span>
+            </div>
+            <form method="POST" action="{% url 'dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="employee_edit_task">
+                <input type="hidden" id="emp-edit-task-id" name="task_id">
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group">
+                        <label for="emp-edit-task-name">Task Name</label>
+                        <input type="text" id="emp-edit-task-name" class="form-control" readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emp-edit-task-project">Project</label>
+                        <input type="text" id="emp-edit-task-project" class="form-control" readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="emp-edit-task-status">Status</label>
+                        <select id="emp-edit-task-status" name="status" class="form-control">
+                            <option value="Not Worked">Not Worked</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label for="emp-edit-task-description">Description</label>
+                    <textarea id="emp-edit-task-description" name="description" class="form-control" rows="4" placeholder="Enter status update or task notes..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEmployeeEditTaskModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
     {% endif %}
 
     <!-- JavaScript Navigation & Modals -->
@@ -1650,6 +1692,22 @@
             if (modal) modal.classList.remove('active');
         }
 
+        function openEmployeeEditTaskModal(id, name, project, status, description) {
+            document.getElementById('emp-edit-task-id').value = id;
+            document.getElementById('emp-edit-task-name').value = name;
+            document.getElementById('emp-edit-task-project').value = project || '-';
+            document.getElementById('emp-edit-task-status').value = status;
+            document.getElementById('emp-edit-task-description').value = description;
+
+            const modal = document.getElementById('employeeEditTaskModal');
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeEmployeeEditTaskModal() {
+            const modal = document.getElementById('employeeEditTaskModal');
+            if (modal) modal.classList.remove('active');
+        }
+
         function switchTab(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
@@ -1660,6 +1718,9 @@
             }
             if (element) {
                 element.classList.add('active');
+            } else {
+                const menuItem = document.querySelector(`.menu-item[onclick*="'${tabName}'"]`);
+                if (menuItem) menuItem.classList.add('active');
             }
 
             const role = "{{ role }}";
@@ -1669,8 +1730,19 @@
                 'form-data': 'Form Data & Task Assignment',
                 'add-project': 'Projects Management'
             };
-            document.getElementById('page-title').innerText = titles[tabName] || 'Dashboard';
+            const pageTitle = document.getElementById('page-title');
+            if (pageTitle) {
+                pageTitle.innerText = titles[tabName] || 'Dashboard';
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab') || "{{ active_tab|default:'dashboard' }}";
+            if (activeTab) {
+                switchTab(activeTab);
+            }
+        });
 
         function openAddModal() {
             const modal = document.getElementById('addMemberModal');

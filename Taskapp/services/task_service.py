@@ -145,3 +145,18 @@ def update_task_details(task_id, task_name, description, assigned_to_id, employe
         """, [task_name, description, assigned_to_id, employee_name, due_val, status, proj_val, task_id])
         return cursor.rowcount
 
+
+def update_task_employee_fields(task_id, description, status):
+    """
+    Update description and status of a task (for Employee role).
+    """
+    create_task_table()
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tasks
+            SET description = %s, status = %s
+            WHERE id = %s;
+        """, [description, status, task_id])
+        return cursor.rowcount
+
+
