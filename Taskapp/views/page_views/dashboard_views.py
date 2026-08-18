@@ -67,6 +67,7 @@ def dashboard(request):
                 return redirect('dashboard')
 
             task_name = request.POST.get('task_name', '').strip()
+            project_name = request.POST.get('project_name', '').strip()
             description = request.POST.get('description', '').strip()
             assigned_to_ids = request.POST.getlist('assigned_to_ids')
             due_date = request.POST.get('due_date', '').strip() or None
@@ -91,7 +92,8 @@ def dashboard(request):
                             assigned_to_id=primary_emp_id,
                             employee_name=employee_names_str,
                             due_date=due_date,
-                            status=status
+                            status=status,
+                            project_name=project_name
                         )
                         messages.success(request, f'Task #{new_task_id} ("{task_name}") assigned to {employee_names_str} successfully!')
                 except Exception as e:
@@ -160,6 +162,77 @@ def dashboard(request):
                 except Exception as e:
                     messages.error(request, f'Failed to delete project: {str(e)}')
             return redirect('dashboard')
+
+        elif action == 'edit_task':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+
+            task_id = request.POST.get('task_id', '')
+            task_name = request.POST.get('task_name', '').strip()
+            project_name = request.POST.get('project_name', '').strip()
+            description = request.POST.get('description', '').strip()
+            assigned_to_ids = request.POST.getlist('assigned_to_ids')
+            due_date = request.POST.get('due_date', '').strip() or None
+            status = request.POST.get('status', 'Not Worked').strip()
+
+            if not task_id or not task_name or not assigned_to_ids:
+                messages.error(request, 'Task ID, Task Name, and at least one Assigned Employee are required.')
+            else:
+                try:
+                    emp_list = []
+                    for emp_id in assigned_to_ids:
+                        emp = employee_service.get_user_by_id(int(emp_id))
+                        if emp:
+                            emp_list.append(emp)
+
+                    if emp_list:
+                        employee_names_str = ", ".join([e['username'] for e in emp_list])
+                        primary_emp_id = emp_list[0]['id']
+                        task_service.update_task_details(
+                            task_id=int(task_id),
+                            task_name=task_name,
+                            description=description,
+                            assigned_to_id=primary_emp_id,
+                            employee_name=employee_names_str,
+                            due_date=due_date,
+                            status=status,
+                            project_name=project_name
+                        )
+                        messages.success(request, f'Task #{task_id} updated successfully!')
+                except Exception as e:
+                    messages.error(request, f'Failed to update task: {str(e)}')
+            return redirect('dashboard')
+
+        elif action == 'edit_project':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+
+            project_id = request.POST.get('project_id', '')
+            project_name = request.POST.get('project_name', '').strip()
+            project_type = request.POST.get('project_type', '').strip()
+            start_date = request.POST.get('start_date', '').strip() or None
+            due_date = request.POST.get('due_date', '').strip() or None
+            description = request.POST.get('description', '').strip()
+
+            if not project_id or not project_name or not project_type:
+                messages.error(request, 'Project ID, Project Name, and Project Type are required.')
+            else:
+                try:
+                    project_service.update_project(
+                        project_id=int(project_id),
+                        project_name=project_name,
+                        project_type=project_type,
+                        start_date=start_date,
+                        due_date=due_date,
+                        description=description
+                    )
+                    messages.success(request, f'Project #{project_id} ("{project_name}") updated successfully!')
+                except Exception as e:
+                    messages.error(request, f'Failed to update project: {str(e)}')
+            return redirect('dashboard')
+
 
     # Fetch data based on role
     context = {

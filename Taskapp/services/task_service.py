@@ -20,24 +20,27 @@ def create_task_table():
             );
         """)
         
-        # Ensure due_date column exists if table was created earlier without it
+        # Ensure due_date & project_name columns exist if table was created earlier without them
         cursor.execute("SHOW COLUMNS FROM tasks;")
         existing_cols = [col[0] for col in cursor.fetchall()]
         if 'due_date' not in existing_cols:
             cursor.execute("ALTER TABLE tasks ADD COLUMN due_date DATE NULL;")
+        if 'project_name' not in existing_cols:
+            cursor.execute("ALTER TABLE tasks ADD COLUMN project_name VARCHAR(255) NULL;")
 
 
-def create_task(task_name, description, assigned_to_id, employee_name, due_date=None, status='Pending'):
+def create_task(task_name, description, assigned_to_id, employee_name, due_date=None, status='Pending', project_name=None):
     """
     Insert a new task into the tasks table.
     """
     create_task_table()
     due_val = due_date if due_date else None
+    proj_val = project_name if project_name else None
     with connection.cursor() as cursor:
         cursor.execute("""
-            INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status)
-            VALUES (%s, %s, %s, %s, %s, %s);
-        """, [task_name, description, assigned_to_id, employee_name, due_val, status])
+            INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
+            VALUES (%s, %s, %s, %s, %s, %s, %s);
+        """, [task_name, description, assigned_to_id, employee_name, due_val, status, proj_val])
         return cursor.lastrowid
 
 
@@ -48,7 +51,7 @@ def get_all_tasks():
     create_task_table()
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at
+            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
             FROM tasks
             ORDER BY id DESC;
         """)
@@ -63,7 +66,8 @@ def get_all_tasks():
                 'employee_name': r[4],
                 'due_date': r[5],
                 'status': r[6],
-                'created_at': r[7]
+                'created_at': r[7],
+                'project_name': r[8] if len(r) > 8 else None
             })
         return tasks
 
@@ -77,7 +81,7 @@ def get_tasks_by_employee(assigned_to_id, employee_name=None):
     emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at
+            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
             FROM tasks
             WHERE assigned_to_id = %s OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s))
             ORDER BY id DESC;
@@ -93,7 +97,8 @@ def get_tasks_by_employee(assigned_to_id, employee_name=None):
                 'employee_name': r[4],
                 'due_date': r[5],
                 'status': r[6],
-                'created_at': r[7]
+                'created_at': r[7],
+                'project_name': r[8] if len(r) > 8 else None
             })
         return tasks
 
@@ -123,3 +128,20 @@ def delete_task(task_id):
             WHERE id = %s;
         """, [task_id])
         return cursor.rowcount
+
+
+def update_task_details(task_id, task_name, description, assigned_to_id, employee_name, due_date=None, status='Pending', project_name=None):
+    """
+    Update all details of a specific task.
+    """
+    create_task_table()
+    due_val = due_date if due_date else None
+    proj_val = project_name if project_name else None
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE tasks
+            SET task_name = %s, description = %s, assigned_to_id = %s, employee_name = %s, due_date = %s, status = %s, project_name = %s
+            WHERE id = %s;
+        """, [task_name, description, assigned_to_id, employee_name, due_val, status, proj_val, task_id])
+        return cursor.rowcount
+

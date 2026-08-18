@@ -71,3 +71,20 @@ def delete_project(project_id):
             WHERE id = %s;
         """, [project_id])
         return cursor.rowcount
+
+
+def update_project(project_id, project_name, project_type, start_date=None, due_date=None, description=''):
+    """
+    Update an existing project record in the projects table.
+    """
+    create_project_table()
+    start_val = start_date if start_date else None
+    due_val = due_date if due_date else None
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE projects
+            SET project_name = %s, project_type = %s, start_date = %s, due_date = %s, description = %s
+            WHERE id = %s;
+        """, [project_name, project_type, start_val, due_val, description, project_id])
+        return cursor.rowcount
+
