@@ -629,7 +629,7 @@
 
             {% if role == 'superadmin' or role == 'admin' %}
             <li class="menu-item" onclick="switchTab('form-data', this)">
-                <i class="fa-solid fa-clipboard-list"></i> Form Data
+                <i class="fa-solid fa-clipboard-list"></i> Task
             </li>
 
             <li class="menu-item" onclick="switchTab('add-project', this)">
@@ -863,7 +863,7 @@
                 <!-- Employee Personal Dashboard -->
                 <div class="card" style="margin-bottom: 24px;">
                     <div class="card-header">
-                        <h2>W LOGNOTE</h2>
+                        <h2>WELCOME TO LOGNOTE</h2>
                     </div>
                     <div style="padding: 10px 0; line-height: 1.8;">
                         <p><strong>Username:</strong> {{ user_info.username }}</p>
@@ -909,7 +909,7 @@
                                     <td>{{ task.created_at }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit"
-                                            onclick="openEmployeeEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:''|escapejs }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}')">
+                                            onclick="openEmployeeEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                     </td>
@@ -1039,7 +1039,6 @@
                                     <th>Task Name</th>
                                     <th>Project</th>
                                     <th>Description</th>
-                                    <th>Assigned To</th>
                                     <th>Employee Name</th>
                                     <th>Due Date</th>
                                     <th>Status</th>
@@ -1053,7 +1052,6 @@
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
-                                    <td>#{{ task.assigned_to_id }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -1062,7 +1060,7 @@
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:''|escapejs }}', '{{ task.due_date|default:'' }}', '{{ task.status|escapejs }}', '{{ task.assigned_to_id }}', '{{ task.description|escapejs }}')">
+                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1135,7 +1133,7 @@
                                     <td>{{ proj.description|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|default:'' }}', '{{ proj.due_date|default:'' }}', '{{ proj.actual_complete_date|default:'' }}', '{{ proj.description|escapejs }}')">
+                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|default:"" }}', '{{ proj.due_date|default:"" }}', '{{ proj.actual_complete_date|default:"" }}', '{{ proj.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1182,11 +1180,11 @@
 
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="task_id_display">Task ID</label>
                         <input type="text" id="task_id_display" class="form-control" value="#AUTO (Auto-Generated)"
-                            readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
-                    </div>
+                            readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600; display: none;">
+                    </div> -->
 
                     <div class="form-group">
                         <label for="task_name">Task Name</label>
@@ -1598,7 +1596,6 @@
             </form>
         </div>
     </div>
-    </div>
     {% endif %}
 
     <!-- EMPLOYEE EDIT TASK MODAL (DESCRIPTION & STATUS ONLY) -->
@@ -1685,18 +1682,13 @@
             if (modal) modal.classList.remove('active');
         }
 
-        function openEditTaskModal(id, name, project, dueDate, status, assignedId, description) {
+        function openEditTaskModal(id, name, project, dueDate, status, description) {
             document.getElementById('edit-task-id').value = id;
             document.getElementById('edit-task-name').value = name;
             document.getElementById('edit-task-project').value = project;
             document.getElementById('edit-task-due-date').value = dueDate;
             document.getElementById('edit-task-status').value = status;
             document.getElementById('edit-task-description').value = description;
-
-            const checkboxes = document.querySelectorAll('.edit-emp-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = (cb.value == assignedId);
-            });
 
             const modal = document.getElementById('editTaskModal');
             if (modal) modal.classList.add('active');
