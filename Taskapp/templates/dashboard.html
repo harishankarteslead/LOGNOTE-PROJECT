@@ -153,16 +153,19 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
             padding: 24px !important;
         }
+
         .swal-dark-title {
             color: #f8fafc !important;
             font-size: 22px !important;
             font-weight: 700 !important;
         }
+
         .swal-dark-text {
             color: #94a3b8 !important;
             font-size: 15px !important;
             margin-top: 8px !important;
         }
+
         .swal-dark-confirm-btn {
             background-color: var(--primary) !important;
             box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
@@ -171,10 +174,12 @@
             padding: 10px 22px !important;
             transition: all 0.2s ease !important;
         }
+
         .swal-dark-confirm-btn:hover {
             background-color: var(--primary-hover) !important;
             transform: translateY(-1px);
         }
+
         .swal-dark-cancel-btn {
             background-color: #334155 !important;
             color: #cbd5e1 !important;
@@ -183,6 +188,7 @@
             padding: 10px 22px !important;
             transition: all 0.2s ease !important;
         }
+
         .swal-dark-cancel-btn:hover {
             background-color: #475569 !important;
             color: #ffffff !important;
@@ -754,18 +760,21 @@
                                 <tr>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
-                                    <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
+                                    <td><span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{ task.status|default:"Pending" }}</span>
+                                        <span
+                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">No tasks assigned yet.</td>
+                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">No tasks
+                                        assigned yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -839,12 +848,14 @@
                                 <tr>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
-                                    <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
+                                    <td><span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{ task.status|default:"Pending" }}</span>
+                                        <span
+                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending" }}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -899,7 +910,8 @@
                                 <tr>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
-                                    <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
+                                    <td><span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -1050,7 +1062,8 @@
                                 <tr>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
-                                    <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span></td>
+                                    <td><span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
@@ -1125,7 +1138,8 @@
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
+                                        <span
+                                            class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
@@ -1416,7 +1430,8 @@
 
                     <div class="form-group">
                         <label for="project_status">Status</label>
-                        <select id="project_status" name="status" class="form-control" onchange="handleProjectStatusChange(this, 'add')">
+                        <select id="project_status" name="status" class="form-control"
+                            onchange="handleProjectStatusChange(this, 'add')">
                             <option value="Not Worked" selected>Not Worked</option>
                             <option value="Pending">Pending</option>
                             <option value="In Progress">In Progress</option>
@@ -1426,7 +1441,8 @@
 
                     <div class="form-group">
                         <label for="start_date">Start Date</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                        <input type="date" id="start_date" name="start_date" class="form-control" readonly
+                            style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
 
                     <div class="form-group">
@@ -1436,7 +1452,8 @@
 
                     <div class="form-group">
                         <label for="actual_complete_date">Actual Complete Date</label>
-                        <input type="date" id="actual_complete_date" name="actual_complete_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                        <input type="date" id="actual_complete_date" name="actual_complete_date" class="form-control"
+                            readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -1471,7 +1488,8 @@
                 <input type="hidden" name="action" value="edit_task">
                 <input type="hidden" id="edit-task-id" name="task_id">
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
                     <div class="form-group">
                         <label for="edit-task-name">Task Name</label>
                         <input type="text" id="edit-task-name" name="task_name" class="form-control" required>
@@ -1504,11 +1522,17 @@
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label style="font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-dark);">Assign To Employees</label>
-                        <div style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; border-radius: 8px; background: #ffffff; display: flex; flex-direction: column; gap: 8px;">
+                        <label
+                            style="font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-dark);">Assign
+                            To Employees</label>
+                        <div
+                            style="max-height: 140px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; border-radius: 8px; background: #ffffff; display: flex; flex-direction: column; gap: 8px;">
                             {% for emp in all_assignable_employees %}
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; color: var(--text-dark);">
-                                <input type="checkbox" name="assigned_to_ids" value="{{ emp.id }}" class="edit-emp-checkbox" style="width: 16px; height: 16px; accent-color: var(--primary);">
+                            <label
+                                style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; color: var(--text-dark);">
+                                <input type="checkbox" name="assigned_to_ids" value="{{ emp.id }}"
+                                    class="edit-emp-checkbox"
+                                    style="width: 16px; height: 16px; accent-color: var(--primary);">
                                 <span>{{ emp.username }}</span>
                             </label>
                             {% endfor %}
@@ -1523,7 +1547,8 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEditTaskModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update Task</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update
+                        Task</button>
                 </div>
             </form>
         </div>
@@ -1544,7 +1569,8 @@
                 <input type="hidden" name="action" value="edit_project">
                 <input type="hidden" id="edit-project-id" name="project_id">
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
                     <div class="form-group">
                         <label for="edit-project-name">Project Name</label>
                         <input type="text" id="edit-project-name" name="project_name" class="form-control" required>
@@ -1560,7 +1586,8 @@
 
                     <div class="form-group">
                         <label for="edit-project-status">Status</label>
-                        <select id="edit-project-status" name="status" class="form-control" onchange="handleProjectStatusChange(this, 'edit')">
+                        <select id="edit-project-status" name="status" class="form-control"
+                            onchange="handleProjectStatusChange(this, 'edit')">
                             <option value="Not Worked">Not Worked</option>
                             <option value="Pending">Pending</option>
                             <option value="In Progress">In Progress</option>
@@ -1570,7 +1597,8 @@
 
                     <div class="form-group">
                         <label for="edit-project-start-date">Start Date</label>
-                        <input type="date" id="edit-project-start-date" name="start_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                        <input type="date" id="edit-project-start-date" name="start_date" class="form-control" readonly
+                            style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
 
                     <div class="form-group">
@@ -1580,7 +1608,8 @@
 
                     <div class="form-group">
                         <label for="edit-project-actual-complete-date">Actual Complete Date</label>
-                        <input type="date" id="edit-project-actual-complete-date" name="actual_complete_date" class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                        <input type="date" id="edit-project-actual-complete-date" name="actual_complete_date"
+                            class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -1591,7 +1620,8 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEditProjectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update Project</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update
+                        Project</button>
                 </div>
             </form>
         </div>
@@ -1614,15 +1644,18 @@
                 <input type="hidden" name="action" value="employee_edit_task">
                 <input type="hidden" id="emp-edit-task-id" name="task_id">
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
                     <div class="form-group">
                         <label for="emp-edit-task-name">Task Name</label>
-                        <input type="text" id="emp-edit-task-name" class="form-control" readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
+                        <input type="text" id="emp-edit-task-name" class="form-control" readonly
+                            style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
                     </div>
 
                     <div class="form-group">
                         <label for="emp-edit-task-project">Project</label>
-                        <input type="text" id="emp-edit-task-project" class="form-control" readonly style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
+                        <input type="text" id="emp-edit-task-project" class="form-control" readonly
+                            style="background-color: #f1f5f9; color: #64748b; font-weight: 600;">
                     </div>
 
                     <div class="form-group" style="grid-column: 1 / -1;">
@@ -1639,12 +1672,15 @@
 
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="emp-edit-task-description">Description</label>
-                    <textarea id="emp-edit-task-description" name="description" class="form-control" rows="4" placeholder="Enter status update or task notes..."></textarea>
+                    <textarea id="emp-edit-task-description" name="description" class="form-control" rows="4"
+                        placeholder="Enter status update or task notes..."></textarea>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeEmployeeEditTaskModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update Task</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeEmployeeEditTaskModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Update
+                        Task</button>
                 </div>
             </form>
         </div>
