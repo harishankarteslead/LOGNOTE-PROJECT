@@ -15,7 +15,7 @@
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
-            --sidebar-bg: #0f172a;
+            --sidebar-bg: #0b0e1e;
             --sidebar-hover: #1e293b;
             --sidebar-text: #94a3b8;
             --sidebar-active: #38bdf8;
@@ -548,6 +548,134 @@
             color: #0ce2a5;
         }
 
+        /* Task Table Filter Bar Styles */
+        .table-filter-bar {
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .search-group {
+            position: relative;
+            flex: 1 1 240px;
+            min-width: 200px;
+        }
+
+        .search-group .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .filter-search-input {
+            width: 100%;
+            padding: 8px 12px 8px 34px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+
+        .filter-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-status-select,
+        .filter-date-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            background: #ffffff;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .filter-status-select:focus,
+        .filter-date-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-presets {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: #e0e7ff;
+            color: var(--primary-hover);
+            border-color: #c7d2fe;
+        }
+
+        .preset-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .reset-filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 4px;
+        }
+
+        .reset-filter-btn:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+
+        .empty-filter-row td {
+            text-align: center;
+            color: #94a3b8;
+            padding: 24px !important;
+            font-weight: 500;
+        }
+
         /* Tabs display control */
         .tab-content {
             display: none;
@@ -741,6 +869,36 @@
                         <h2><i class="fa-solid fa-tasks" style="color: var(--primary); margin-right: 8px;"></i>
                             Assigned Tasks & Employee Status</h2>
                     </div>
+                    <!-- Filter Toolbar -->
+                    <div class="table-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                        </div>
+                        <div class="filter-presets">
+                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
+                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -757,11 +915,18 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr>
+                                <tr class="task-row"
+                                    data-task-name="{{ task.task_name|lower }}"
+                                    data-project-name="{{ task.project_name|default:''|lower }}"
+                                    data-description="{{ task.description|default:''|lower }}"
+                                    data-employee-name="{{ task.employee_name|lower }}"
+                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
-                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
+                                    </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
@@ -829,6 +994,36 @@
                         <h2><i class="fa-solid fa-tasks" style="color: var(--primary); margin-right: 8px;"></i>
                             Assigned Tasks & Employee Progress Status</h2>
                     </div>
+                    <!-- Filter Toolbar -->
+                    <div class="table-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                        </div>
+                        <div class="filter-presets">
+                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
+                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -845,17 +1040,24 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr>
+                                <tr class="task-row"
+                                    data-task-name="{{ task.task_name|lower }}"
+                                    data-project-name="{{ task.project_name|default:''|lower }}"
+                                    data-description="{{ task.description|default:''|lower }}"
+                                    data-employee-name="{{ task.employee_name|lower }}"
+                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
-                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
+                                    </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending" }}</span>
+                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -911,7 +1113,8 @@
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
-                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
+                                    </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -1043,6 +1246,36 @@
                             <i class="fa-solid fa-plus"></i> Assign New Task
                         </button>
                     </div>
+                    <!-- Filter Toolbar -->
+                    <div class="table-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                        </div>
+                        <div class="filter-presets">
+                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
+                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -1059,11 +1292,18 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr>
+                                <tr class="task-row"
+                                    data-task-name="{{ task.task_name|lower }}"
+                                    data-project-name="{{ task.project_name|default:''|lower }}"
+                                    data-description="{{ task.description|default:''|lower }}"
+                                    data-employee-name="{{ task.employee_name|lower }}"
+                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
-                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span></td>
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
+                                    </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
@@ -1139,7 +1379,7 @@
                                     </td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
+                                            class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{proj.status|default:"NotWorked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
@@ -1905,6 +2145,133 @@
                     window.location.href = logoutUrl;
                 }
             });
+        }
+
+        /* --- Client-Side Table Filter Functions --- */
+        function triggerFilter(element) {
+            const filterBar = element.closest('.table-filter-bar');
+            if (!filterBar) return;
+
+            const card = filterBar.closest('.card');
+            if (!card) return;
+
+            const tbody = card.querySelector('tbody');
+            if (!tbody) return;
+
+            const searchVal = (filterBar.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
+            const statusVal = (filterBar.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
+            const exactDateVal = filterBar.querySelector('.filter-exact-date')?.value || '';
+
+            const rows = tbody.querySelectorAll('tr.task-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const taskName = row.getAttribute('data-task-name') || '';
+                const projName = row.getAttribute('data-project-name') || '';
+                const desc = row.getAttribute('data-description') || '';
+                const empName = row.getAttribute('data-employee-name') || '';
+                const status = row.getAttribute('data-status') || '';
+                const createdAtRaw = row.getAttribute('data-created-at') || '';
+
+                // Text search matching task name, project, employee, description
+                const matchSearch = !searchVal ||
+                    taskName.includes(searchVal) ||
+                    projName.includes(searchVal) ||
+                    empName.includes(searchVal) ||
+                    desc.includes(searchVal);
+
+                // Status match
+                const matchStatus = (statusVal === 'all') || 
+                    (status === statusVal) || 
+                    (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
+
+                // Exact Date match
+                let matchDate = true;
+                if (exactDateVal && createdAtRaw) {
+                    const dateMatch = createdAtRaw.match(/\d{4}-\d{2}-\d{2}/);
+                    const rowDateStr = dateMatch ? dateMatch[0] : '';
+                    if (rowDateStr !== exactDateVal) {
+                        matchDate = false;
+                    }
+                }
+
+                if (matchSearch && matchStatus && matchDate) {
+                    row.style.display = '';
+                    visibleCount++;
+                    const snoCell = row.querySelector('td strong');
+                    if (snoCell) {
+                        snoCell.innerText = visibleCount;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Handle Empty Filter Row
+            let emptyRow = tbody.querySelector('.empty-filter-row');
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!emptyRow) {
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-filter-row';
+                    const colSpan = card.querySelectorAll('thead th').length || 8;
+                    emptyRow.innerHTML = `<td colspan="${colSpan}" style="text-align: center; color: #94a3b8; padding: 24px;">No tasks matching the selected search or filter criteria.</td>`;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    emptyRow.style.display = '';
+                }
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        }
+
+        function setPresetDate(btn, preset) {
+            const filterBar = btn.closest('.table-filter-bar');
+            if (!filterBar) return;
+
+            const presetBtns = filterBar.querySelectorAll('.preset-btn');
+            presetBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const exactDateInput = filterBar.querySelector('.filter-exact-date');
+
+            const today = new Date();
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            if (preset === 'all') {
+                if (exactDateInput) exactDateInput.value = '';
+            } else if (preset === 'today') {
+                if (exactDateInput) exactDateInput.value = formatDate(today);
+            } else if (preset === 'yesterday') {
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                if (exactDateInput) exactDateInput.value = formatDate(yesterday);
+            }
+
+            triggerFilter(btn);
+        }
+
+        function resetTableFilter(btn) {
+            const filterBar = btn.closest('.table-filter-bar');
+            if (!filterBar) return;
+
+            const searchInput = filterBar.querySelector('.filter-search-input');
+            const statusSelect = filterBar.querySelector('.filter-status-select');
+            const exactDateInput = filterBar.querySelector('.filter-exact-date');
+
+            if (searchInput) searchInput.value = '';
+            if (statusSelect) statusSelect.value = 'all';
+            if (exactDateInput) exactDateInput.value = '';
+
+            const presetBtns = filterBar.querySelectorAll('.preset-btn');
+            presetBtns.forEach(b => b.classList.remove('active'));
+            if (presetBtns.length > 0) presetBtns[0].classList.add('active');
+
+            triggerFilter(btn);
         }
     </script>
 </body>
