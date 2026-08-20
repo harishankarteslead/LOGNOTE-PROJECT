@@ -126,3 +126,34 @@ def update_project(project_id, project_name, project_type, status='Not Worked', 
         return cursor.rowcount
 
 
+def update_project_status(project_id, status):
+    """
+    Update the status of a specific project and automatically handle start_date / actual_complete_date.
+    """
+    create_project_table()
+    today_str = datetime.date.today().isoformat()
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT start_date, actual_complete_date FROM projects WHERE id = %s;", [project_id])
+        row = cursor.fetchone()
+        existing_start = row[0].isoformat() if row and row[0] else None
+        existing_actual = row[1].isoformat() if row and row[1] else None
+
+    final_start = existing_start
+    if (status in ('In Progress', 'Completed')) and not final_start:
+        final_start = today_str
+
+    final_actual = existing_actual
+    if status == 'Completed' and not final_actual:
+        final_actual = today_str
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            UPDATE projects
+            SET status = %s, start_date = %s, actual_complete_date = %s
+            WHERE id = %s;
+        """, [status, final_start, final_actual, project_id])
+        return cursor.rowcount
+
+
+

@@ -1419,8 +1419,17 @@
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                     </td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ proj.status|default:'Not Worked'|slugify }}">{{proj.status|default:"NotWorked" }}</span>
+                                        <form method="POST" action="{% url 'dashboard' %}" style="margin:0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="update_project_status">
+                                            <input type="hidden" name="project_id" value="{{ proj.id }}">
+                                            <select name="status" class="form-control" style="padding: 4px 8px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer;" onchange="this.form.submit()">
+                                                <option value="Not Worked" {% if proj.status == 'Not Worked' or not proj.status %}selected{% endif %}>Not Worked</option>
+                                                <option value="Pending" {% if proj.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                                <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                                <option value="Completed" {% if proj.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                            </select>
+                                        </form>
                                     </td>
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
@@ -1838,7 +1847,16 @@
                         </select>
                     </div>
 
-                    <input type="hidden" id="edit-project-status" name="status">
+                    <div class="form-group">
+                        <label for="edit-project-status">Status</label>
+                        <select id="edit-project-status" name="status" class="form-control"
+                            onchange="handleProjectStatusChange(this, 'edit')">
+                            <option value="Not Worked">Not Worked</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
 
                     <div class="form-group">
                         <label for="edit-project-start-date">Start Date</label>

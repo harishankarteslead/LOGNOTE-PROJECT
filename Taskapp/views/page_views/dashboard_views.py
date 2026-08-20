@@ -168,6 +168,21 @@ def dashboard(request):
                     messages.error(request, f'Failed to delete project: {str(e)}')
             return redirect('/dashboard/?tab=add-project')
 
+        elif action == 'update_project_status':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+            project_id = request.POST.get('project_id', '')
+            new_status = request.POST.get('status', '').strip()
+            if project_id and new_status:
+                try:
+                    project_service.update_project_status(int(project_id), new_status)
+                    messages.success(request, f'Project #{project_id} status updated to "{new_status}".')
+                except Exception as e:
+                    messages.error(request, f'Failed to update project status: {str(e)}')
+            return redirect('/dashboard/?tab=add-project')
+
+
         elif action == 'edit_task':
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
