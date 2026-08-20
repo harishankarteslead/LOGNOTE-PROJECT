@@ -14,7 +14,7 @@ def create_task_table():
                 description TEXT,
                 assigned_to_id INT NOT NULL,
                 employee_name VARCHAR(150) NOT NULL,
-                status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+                status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
                 due_date DATE NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -29,7 +29,7 @@ def create_task_table():
             cursor.execute("ALTER TABLE tasks ADD COLUMN project_name VARCHAR(255) NULL;")
 
 
-def create_task(task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Pending', project_name=None):
+def create_task(task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Not Worked', project_name=None):
     """
     Insert a new task into the tasks table.
     """
@@ -132,7 +132,7 @@ def delete_task(task_id):
         return cursor.rowcount
 
 
-def update_task_details(task_id, task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Pending', project_name=None):
+def update_task_details(task_id, task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Not Worked', project_name=None):
     """
     Update all details of a specific task.
     """

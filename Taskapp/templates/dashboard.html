@@ -921,7 +921,7 @@
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
-                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-status="{{ task.status|default:'Not Worked'|lower }}"
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
@@ -934,7 +934,7 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1047,7 +1047,7 @@
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
-                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-status="{{ task.status|default:'Not Worked'|lower }}"
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
@@ -1060,7 +1060,7 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1147,7 +1147,7 @@
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ user_info.username|default:''|lower }}"
-                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-status="{{ task.status|default:'Not Worked'|lower }}"
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
@@ -1159,7 +1159,7 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                     <td>
@@ -1337,7 +1337,7 @@
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
-                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-status="{{ task.status|default:'Not Worked'|lower }}"
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
@@ -1350,7 +1350,7 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Pending'|slugify }}">{{task.status|default:"Pending"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
@@ -1502,16 +1502,7 @@
                         <input type="date" id="due_date" name="due_date" class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label for="task_status">Status</label>
-                        <select id="task_status" name="status" class="form-control">
-                            <option value="Not Worked" selected>Not Worked</option>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="On Hold">On Hold</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <input type="hidden" name="status" value="Not Worked">
 
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label
@@ -1709,16 +1700,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="project_status">Status</label>
-                        <select id="project_status" name="status" class="form-control"
-                            onchange="handleProjectStatusChange(this, 'add')">
-                            <option value="Not Worked" selected>Not Worked</option>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <input type="hidden" id="project_status" name="status" value="Not Worked">
 
                     <div class="form-group">
                         <label for="start_date"></label>
@@ -1791,16 +1773,7 @@
                         <input type="date" id="edit-task-due-date" name="due_date" class="form-control">
                     </div>
 
-                    <div class="form-group">
-                        <label for="edit-task-status">Status</label>
-                        <select id="edit-task-status" name="status" class="form-control">
-                            <option value="Not Worked">Not Worked</option>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="On Hold">On Hold</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <input type="hidden" id="edit-task-status" name="status">
 
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label
@@ -1865,16 +1838,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="edit-project-status">Status</label>
-                        <select id="edit-project-status" name="status" class="form-control"
-                            onchange="handleProjectStatusChange(this, 'edit')">
-                            <option value="Not Worked">Not Worked</option>
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
+                    <input type="hidden" id="edit-project-status" name="status">
 
                     <div class="form-group">
                         <label for="edit-project-start-date">Start Date</label>

@@ -71,7 +71,7 @@ def dashboard(request):
             description = request.POST.get('description', '').strip()
             assigned_to_ids = request.POST.getlist('assigned_to_ids')
             due_date = request.POST.get('due_date', '').strip() or None
-            status = request.POST.get('status', 'Not Worked').strip()
+            status = request.POST.get('status', '').strip() or 'Not Worked'
 
             if not task_name or not assigned_to_ids:
                 messages.error(request, 'Atleast One Assigned Employee is Required.')
@@ -131,7 +131,7 @@ def dashboard(request):
                 return redirect('dashboard')
             project_name = request.POST.get('project_name', '').strip()
             project_type = request.POST.get('project_type', '').strip()
-            status = request.POST.get('status', 'Not Worked').strip()
+            status = request.POST.get('status', '').strip() or 'Not Worked'
             start_date = request.POST.get('start_date', '').strip() or None
             due_date = request.POST.get('due_date', '').strip() or None
             actual_complete_date = request.POST.get('actual_complete_date', '').strip() or None
@@ -179,7 +179,7 @@ def dashboard(request):
             description = request.POST.get('description', '').strip()
             assigned_to_ids = request.POST.getlist('assigned_to_ids')
             due_date = request.POST.get('due_date', '').strip() or None
-            status = request.POST.get('status', 'Not Worked').strip()
+            status = request.POST.get('status', '').strip() or 'Not Worked'
 
             if not task_id or not task_name or not assigned_to_ids:
                 messages.error(request, 'Task ID, Task Name, and at least one Assigned Employee are required.')
@@ -217,7 +217,7 @@ def dashboard(request):
             project_id = request.POST.get('project_id', '')
             project_name = request.POST.get('project_name', '').strip()
             project_type = request.POST.get('project_type', '').strip()
-            status = request.POST.get('status', 'Not Worked').strip()
+            status = request.POST.get('status', '').strip() or 'Not Worked'
             start_date = request.POST.get('start_date', '').strip() or None
             due_date = request.POST.get('due_date', '').strip() or None
             actual_complete_date = request.POST.get('actual_complete_date', '').strip() or None
