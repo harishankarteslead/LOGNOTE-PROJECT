@@ -137,6 +137,7 @@
             border-radius: 6px;
             background: rgb(236, 3, 3);
             transition: 0.2s;
+            justify-content: center;
         }
 
         .logout-link:hover {
@@ -887,17 +888,17 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
                             <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
                         </div>
-                        <div class="filter-presets">
+                        <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
                             <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
                                 <i class="fa-solid fa-rotate-left"></i> Reset
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -921,6 +922,7 @@
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
                                     data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
@@ -1012,17 +1014,17 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
                             <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
                         </div>
-                        <div class="filter-presets">
+                        <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
                             <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
                                 <i class="fa-solid fa-rotate-left"></i> Reset
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -1046,6 +1048,7 @@
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
                                     data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
@@ -1093,6 +1096,36 @@
                         <h2><i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 8px;"></i>
                             Tasks Assigned To You</h2>
                     </div>
+                    <!-- Filter Toolbar -->
+                    <div class="table-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input" placeholder="Search task, project, description..." oninput="triggerFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                        </div>
+                        <!-- <div class="filter-presets">
+                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
+                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
+                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div> -->
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -1109,7 +1142,14 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr>
+                                <tr class="task-row"
+                                    data-task-name="{{ task.task_name|lower }}"
+                                    data-project-name="{{ task.project_name|default:''|lower }}"
+                                    data-description="{{ task.description|default:''|lower }}"
+                                    data-employee-name="{{ user_info.username|default:''|lower }}"
+                                    data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
+                                    data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
@@ -1264,17 +1304,17 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Date:</label>
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
                             <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
                         </div>
-                        <div class="filter-presets">
+                        <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
                             <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
                             <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
                                 <i class="fa-solid fa-rotate-left"></i> Reset
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -1298,6 +1338,7 @@
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
                                     data-status="{{ task.status|default:'Pending'|lower }}"
+                                    data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
@@ -1680,9 +1721,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="start_date">Start Date</label>
+                        <label for="start_date"></label>
                         <input type="date" id="start_date" name="start_date" class="form-control" readonly
-                            style="background-color: #f1f5f9; cursor: not-allowed;">
+                            style="background-color: #f1f5f9; cursor: not-allowed;display: none;">
                     </div>
 
                     <div class="form-group">
@@ -1691,9 +1732,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="actual_complete_date">Actual Complete Date</label>
+                        <label for="actual_complete_date"></label>
                         <input type="date" id="actual_complete_date" name="actual_complete_date" class="form-control"
-                            readonly style="background-color: #f1f5f9; cursor: not-allowed;">
+                            readonly style="background-color: #f1f5f9; cursor: not-allowed; display: none;">
                     </div>
                 </div>
 
@@ -2171,6 +2212,7 @@
                 const desc = row.getAttribute('data-description') || '';
                 const empName = row.getAttribute('data-employee-name') || '';
                 const status = row.getAttribute('data-status') || '';
+                const dueDateRaw = row.getAttribute('data-due-date') || '';
                 const createdAtRaw = row.getAttribute('data-created-at') || '';
 
                 // Text search matching task name, project, employee, description
@@ -2185,13 +2227,17 @@
                     (status === statusVal) || 
                     (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
 
-                // Exact Date match
+                // Exact Due Date match
                 let matchDate = true;
-                if (exactDateVal && createdAtRaw) {
-                    const dateMatch = createdAtRaw.match(/\d{4}-\d{2}-\d{2}/);
-                    const rowDateStr = dateMatch ? dateMatch[0] : '';
-                    if (rowDateStr !== exactDateVal) {
+                if (exactDateVal) {
+                    if (!dueDateRaw) {
                         matchDate = false;
+                    } else {
+                        const dateMatch = dueDateRaw.match(/\d{4}-\d{2}-\d{2}/);
+                        const rowDateStr = dateMatch ? dateMatch[0] : dueDateRaw.trim();
+                        if (rowDateStr !== exactDateVal) {
+                            matchDate = false;
+                        }
                     }
                 }
 
