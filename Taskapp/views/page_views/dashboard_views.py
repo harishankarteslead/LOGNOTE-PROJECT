@@ -226,19 +226,6 @@ def dashboard(request):
                         employee_names_str = ", ".join([e['username'] for e in emp_list])
                         primary_emp_id = emp_list[0]['id']
 
-                        if status == 'In Progress':
-                            active_task = task_service.get_employee_in_progress_task(
-                                assigned_to_id=primary_emp_id,
-                                employee_name=employee_names_str,
-                                exclude_task_id=int(task_id)
-                            )
-                            if active_task:
-                                messages.error(
-                                    request,
-                                    f'Task #{active_task["id"]} ("{active_task["task_name"]}") is already In Progress for employee ({employee_names_str}). Please set it to On Hold or Completed first.'
-                                )
-                                return redirect('/dashboard/?tab=form-data')
-
                         task_service.update_task_details(
                             task_id=int(task_id),
                             task_name=task_name,

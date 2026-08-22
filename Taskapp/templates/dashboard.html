@@ -823,7 +823,7 @@
             </div>
             {% if 'error' in message.tags or 'danger' in message.tags %}
             <script>
-                document.addEventListener("DOMContentLoaded", function() {
+                document.addEventListener("DOMContentLoaded", function () {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Blocked',
@@ -891,7 +891,9 @@
                     <div class="table-filter-bar">
                         <div class="filter-group search-group">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search task, project, employee, description..."
+                                oninput="triggerFilter(this)">
                         </div>
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
@@ -905,8 +907,10 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
-                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date"
+                                onchange="triggerFilter(this)">
                         </div>
                         <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
@@ -933,8 +937,7 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row"
-                                    data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -951,7 +954,7 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"NotWorked"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1017,7 +1020,9 @@
                     <div class="table-filter-bar">
                         <div class="filter-group search-group">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search task, project, employee, description..."
+                                oninput="triggerFilter(this)">
                         </div>
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
@@ -1031,8 +1036,10 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
-                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date"
+                                onchange="triggerFilter(this)">
                         </div>
                         <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
@@ -1059,8 +1066,7 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row"
-                                    data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -1117,7 +1123,8 @@
                     <div class="table-filter-bar">
                         <div class="filter-group search-group">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" class="filter-search-input" placeholder="Search task, project, description..." oninput="triggerFilter(this)">
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search task, project, description..." oninput="triggerFilter(this)">
                         </div>
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
@@ -1131,8 +1138,10 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
-                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date"
+                                onchange="triggerFilter(this)">
                         </div>
                         <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
@@ -1159,8 +1168,7 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row"
-                                    data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ user_info.username|default:''|lower }}"
@@ -1307,7 +1315,9 @@
                     <div class="table-filter-bar">
                         <div class="filter-group search-group">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" class="filter-search-input" placeholder="Search task, project, employee, description..." oninput="triggerFilter(this)">
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search task, project, employee, description..."
+                                oninput="triggerFilter(this)">
                         </div>
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
@@ -1321,8 +1331,10 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
-                            <input type="date" class="filter-date-input filter-exact-date" onchange="triggerFilter(this)">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date"
+                                onchange="triggerFilter(this)">
                         </div>
                         <!-- <div class="filter-presets">
                             <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
@@ -1349,8 +1361,7 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row"
-                                    data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -1440,7 +1451,9 @@
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="update_project_status">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
-                                            <select name="status" class="form-control" style="padding: 4px 8px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer;" onchange="this.form.submit()">
+                                            <select name="status" class="form-control"
+                                                style="padding: 4px 8px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer;"
+                                                onchange="this.form.submit()">
                                                 <option value="Not Worked" {% if proj.status == 'Not Worked' or not proj.status %}selected{% endif %}>Not Worked</option>
                                                 <option value="Pending" {% if proj.status == 'Pending' %}selected{% endif %}>Pending</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
@@ -1515,7 +1528,8 @@
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td>
-                                        <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span>
+                                        <span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
                                     </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
@@ -1527,8 +1541,10 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
-                                        <i class="fa-solid fa-circle-info" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+                                    <td colspan="8"
+                                        style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
+                                        <i class="fa-solid fa-circle-info"
+                                            style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
                                         No tasks currently in progress by employees.
                                     </td>
                                 </tr>
@@ -2281,8 +2297,8 @@
                     desc.includes(searchVal);
 
                 // Status match
-                const matchStatus = (statusVal === 'all') || 
-                    (status === statusVal) || 
+                const matchStatus = (statusVal === 'all') ||
+                    (status === statusVal) ||
                     (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
 
                 // Exact Due Date match
