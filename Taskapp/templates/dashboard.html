@@ -821,6 +821,19 @@
                 <span>{{ message }} </span>
                 <span class="alert-close" onclick="this.parentElement.remove()">&times;</span>
             </div>
+            {% if 'error' in message.tags or 'danger' in message.tags %}
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Blocked',
+                        text: "{{ message|escapejs }}",
+                        confirmButtonColor: '#4f46e5',
+                        confirmButtonText: 'Got It'
+                    });
+                });
+            </script>
+            {% endif %}
             {% endfor %}
             {% endif %}
 

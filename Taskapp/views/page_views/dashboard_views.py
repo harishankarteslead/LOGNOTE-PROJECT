@@ -106,6 +106,22 @@ def dashboard(request):
             redirect_tab = request.POST.get('active_tab', 'dashboard')
             if task_id and new_status:
                 try:
+                    if new_status == 'In Progress':
+                        target_task = task_service.get_task_by_id(int(task_id))
+                        emp_id = target_task['assigned_to_id'] if target_task else user_id
+                        emp_name = target_task['employee_name'] if target_task else username
+                        active_task = task_service.get_employee_in_progress_task(
+                            assigned_to_id=emp_id,
+                            employee_name=emp_name,
+                            exclude_task_id=int(task_id)
+                        )
+                        if active_task:
+                            messages.error(
+                                request,
+                                f'("{active_task["task_name"]}") is already In Progress. Please set it to On Hold or Completed before starting another task.'
+                            )
+                            return redirect(f'/dashboard/?tab={redirect_tab}')
+
                     task_service.update_task_status(int(task_id), new_status)
                     messages.success(request, f'Task #{task_id} status updated to "{new_status}".')
                 except Exception as e:
@@ -209,6 +225,20 @@ def dashboard(request):
                     if emp_list:
                         employee_names_str = ", ".join([e['username'] for e in emp_list])
                         primary_emp_id = emp_list[0]['id']
+
+                        if status == 'In Progress':
+                            active_task = task_service.get_employee_in_progress_task(
+                                assigned_to_id=primary_emp_id,
+                                employee_name=employee_names_str,
+                                exclude_task_id=int(task_id)
+                            )
+                            if active_task:
+                                messages.error(
+                                    request,
+                                    f'Task #{active_task["id"]} ("{active_task["task_name"]}") is already In Progress for employee ({employee_names_str}). Please set it to On Hold or Completed first.'
+                                )
+                                return redirect('/dashboard/?tab=form-data')
+
                         task_service.update_task_details(
                             task_id=int(task_id),
                             task_name=task_name,
@@ -266,11 +296,25 @@ def dashboard(request):
                 messages.error(request, 'Task ID is required.')
             else:
                 try:
+                    if status == 'In Progress':
+                        active_task = task_service.get_employee_in_progress_task(
+                            assigned_to_id=user_id,
+                            employee_name=username,
+                            exclude_task_id=int(task_id)
+                        )
+                        if active_task:
+                            messages.error(
+                                request,
+                                f'Task ("{active_task["task_name"]}") is already In Progress. Please set it to On Hold or Completed before starting another task.'
+                            )
+                            return redirect('dashboard')
+
                     task_service.update_task_employee_fields(int(task_id), description, status)
                     messages.success(request, f'Task #{task_id} details updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update task: {str(e)}')
             return redirect('dashboard')
+
 
 
 

@@ -163,3 +163,66 @@ def update_task_employee_fields(task_id, description, status):
         return cursor.rowcount
 
 
+def get_task_by_id(task_id):
+    """
+    Retrieve a specific task by ID.
+    """
+    create_task_table()
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            FROM tasks
+            WHERE id = %s;
+        """, [task_id])
+        r = cursor.fetchone()
+        if r:
+            return {
+                'id': r[0],
+                'task_name': r[1],
+                'description': r[2],
+                'assigned_to_id': r[3],
+                'employee_name': r[4],
+                'due_date': r[5],
+                'status': r[6],
+                'created_at': r[7],
+                'project_name': r[8] if len(r) > 8 else None
+            }
+        return None
+
+
+def get_employee_in_progress_task(assigned_to_id=0, employee_name=None, exclude_task_id=None):
+    """
+    Check if an employee currently has an 'In Progress' task assigned.
+    Returns the active task dict if found, or None if no task is currently In Progress.
+    """
+    create_task_table()
+    emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
+    emp_id_val = int(assigned_to_id) if assigned_to_id else 0
+    ex_id_val = int(exclude_task_id) if exclude_task_id else 0
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            FROM tasks
+            WHERE status = 'In Progress'
+              AND (%s = 0 OR id != %s)
+              AND ((%s > 0 AND assigned_to_id = %s) OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s)))
+            LIMIT 1;
+        """, [ex_id_val, ex_id_val, emp_id_val, emp_id_val, employee_name or '', emp_search])
+        r = cursor.fetchone()
+        if r:
+            return {
+                'id': r[0],
+                'task_name': r[1],
+                'description': r[2],
+                'assigned_to_id': r[3],
+                'employee_name': r[4],
+                'due_date': r[5],
+                'status': r[6],
+                'created_at': r[7],
+                'project_name': r[8] if len(r) > 8 else None
+            }
+        return None
+
+
+
