@@ -297,6 +297,7 @@ def dashboard(request):
         context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
         context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])
         context['in_progress_tasks'] = len([t for t in tasks if t.get('status') == 'In Progress'])
+        context['in_progress_tasks_list'] = [t for t in tasks if t.get('status') == 'In Progress']
         context['on_hold_tasks'] = len([t for t in tasks if t.get('status') in ('On Hold', 'Hold')])
         context['completed_tasks'] = len([t for t in tasks if t.get('status') == 'Completed'])
     else:

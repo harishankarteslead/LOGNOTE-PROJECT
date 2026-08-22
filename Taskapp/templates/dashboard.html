@@ -771,6 +771,10 @@
                 <i class="fa-solid fa-folder-plus"></i> Project
             </li>
 
+            <li class="menu-item" onclick="switchTab('in-progress', this)">
+                <i class="fa-solid fa-spinner"></i> Assigned Tasks
+            </li>
+
             {% if role == 'superadmin' %}
             <li class="menu-item" onclick="switchTab('add-members', this)">
                 <i class="fa-solid fa-user-plus"></i> Add Members
@@ -1464,6 +1468,65 @@
             </div>
             {% endif %}
 
+            <!-- TAB 5: IN PROGRESS TASKS (SUPERADMIN / ADMIN ONLY) -->
+            {% if role == 'superadmin' or role == 'admin' %}
+            <div id="tab-in-progress" class="tab-content">
+                <div class="card">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>
+                            <i class="fa-solid fa-spinner" style="color: var(--primary); margin-right: 8px;"></i>
+                            Currently Worked Tasks (In Progress)
+                        </h2>
+                        <!-- <span class="status-badge status-in-progress" style="font-size: 13px; padding: 6px 14px;">
+                            <i class="fa-solid fa-fire"></i> {{ in_progress_tasks_list|length }} Active Task{% if in_progress_tasks_list|length != 1 %}s{% endif %}
+                        </span> -->
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Task Name</th>
+                                    <th>Project Name</th>
+                                    <th>Description</th>
+                                    <th>Assigned Employees</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Assigned Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in in_progress_tasks_list %}
+                                <tr>
+                                    <td><strong>{{ forloop.counter }}</strong></td>
+                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td>
+                                        <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span>
+                                    </td>
+                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td><strong>{{ task.employee_name }}</strong></td>
+                                    <td>{{ task.due_date|default:"-" }}</td>
+                                    <td>
+                                        <span class="status-badge status-in-progress">In Progress</span>
+                                    </td>
+                                    <td>{{ task.created_at }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
+                                        <i class="fa-solid fa-circle-info" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+                                        No tasks currently in progress by employees.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
     </div>
 
@@ -1858,7 +1921,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label for="edit-project-start-date">Start Date</label>
                         <input type="date" id="edit-project-start-date" name="start_date" class="form-control" readonly
                             style="background-color: #f1f5f9; cursor: not-allowed;">
@@ -1869,7 +1932,7 @@
                         <input type="date" id="edit-project-due-date" name="due_date" class="form-control">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label for="edit-project-actual-complete-date">Actual Complete Date</label>
                         <input type="date" id="edit-project-actual-complete-date" name="actual_complete_date"
                             class="form-control" readonly style="background-color: #f1f5f9; cursor: not-allowed;">
