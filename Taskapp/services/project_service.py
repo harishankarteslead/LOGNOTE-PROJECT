@@ -35,14 +35,18 @@ def create_project(project_name, project_type, status='Not Worked', start_date=N
     """
     create_project_table()
     today_str = datetime.date.today().isoformat()
-    if status == 'In Progress' and not start_date:
-        start_date = today_str
-    if status == 'Completed' and not actual_complete_date:
-        actual_complete_date = today_str
 
-    start_val = start_date if start_date else None
+    if status == 'In Progress':
+        start_val = start_date if start_date else today_str
+        actual_val = None
+    elif status == 'Completed':
+        start_val = start_date if start_date else today_str
+        actual_val = actual_complete_date if actual_complete_date else today_str
+    else:  # 'Not Worked', 'Pending'
+        start_val = None
+        actual_val = None
+
     due_val = due_date if due_date else None
-    actual_val = actual_complete_date if actual_complete_date else None
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -96,7 +100,7 @@ def delete_project(project_id):
 def update_project(project_id, project_name, project_type, status='Not Worked', start_date=None, due_date=None, actual_complete_date=None, description=''):
     """
     Update an existing project record in the projects table.
-    Preserves start_date and actual_complete_date if they already exist in database or if status changes.
+    Resets start_date & actual_complete_date appropriately when status changes.
     """
     create_project_table()
     today_str = datetime.date.today().isoformat()
@@ -105,15 +109,16 @@ def update_project(project_id, project_name, project_type, status='Not Worked', 
         cursor.execute("SELECT start_date, actual_complete_date FROM projects WHERE id = %s;", [project_id])
         row = cursor.fetchone()
         existing_start = row[0].isoformat() if row and row[0] else None
-        existing_actual = row[1].isoformat() if row and row[1] else None
 
-    final_start = start_date if start_date else existing_start
-    if (status in ('In Progress', 'Completed')) and not final_start:
-        final_start = today_str
-
-    final_actual = actual_complete_date if actual_complete_date else existing_actual
-    if status == 'Completed' and not final_actual:
-        final_actual = today_str
+    if status == 'In Progress':
+        final_start = start_date if start_date else (existing_start or today_str)
+        final_actual = None
+    elif status == 'Completed':
+        final_start = start_date if start_date else (existing_start or today_str)
+        final_actual = actual_complete_date if actual_complete_date else today_str
+    else:  # 'Not Worked', 'Pending'
+        final_start = None
+        final_actual = None
 
     due_val = due_date if due_date else None
 
@@ -137,15 +142,16 @@ def update_project_status(project_id, status):
         cursor.execute("SELECT start_date, actual_complete_date FROM projects WHERE id = %s;", [project_id])
         row = cursor.fetchone()
         existing_start = row[0].isoformat() if row and row[0] else None
-        existing_actual = row[1].isoformat() if row and row[1] else None
 
-    final_start = existing_start
-    if (status in ('In Progress', 'Completed')) and not final_start:
-        final_start = today_str
-
-    final_actual = existing_actual
-    if status == 'Completed' and not final_actual:
+    if status == 'In Progress':
+        final_start = existing_start if existing_start else today_str
+        final_actual = None
+    elif status == 'Completed':
+        final_start = existing_start if existing_start else today_str
         final_actual = today_str
+    else:  # 'Not Worked', 'Pending'
+        final_start = None
+        final_actual = None
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -154,6 +160,7 @@ def update_project_status(project_id, status):
             WHERE id = %s;
         """, [status, final_start, final_actual, project_id])
         return cursor.rowcount
+
 
 
 
