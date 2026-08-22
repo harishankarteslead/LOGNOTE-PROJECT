@@ -43,26 +43,27 @@ def seed_default_users():
 
 def authenticate_user(username, password):
     """
-    Raw SQL query to authenticate a user by matching username and password.
+    Raw SQL query to authenticate a user by matching username and case-sensitive password.
     Returns user details dictionary if found, otherwise None.
     """
     # create_employee_table()
     # seed_default_users()
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, username, email, role 
+            SELECT id, username, email, role, password 
             FROM employees
-            WHERE (LOWER(username) = LOWER(%s) OR (LOWER(%s) = 'employee' AND LOWER(username) = 'emp1'))
-              AND password = %s;
-        """, [username, username, password])
-        row = cursor.fetchone()
-        if row:
-            return {
-                'id': row[0],
-                'username': row[1],
-                'email': row[2],
-                'role': row[3]
-            }
+            WHERE LOWER(username) = LOWER(%s) OR (LOWER(%s) = 'employee' AND LOWER(username) = 'emp1');
+        """, [username, username])
+        rows = cursor.fetchall()
+        for row in rows:
+            db_id, db_username, db_email, db_role, db_password = row
+            if db_password == password:
+                return {
+                    'id': db_id,
+                    'username': db_username,
+                    'email': db_email,
+                    'role': db_role
+                }
         return None
 
 

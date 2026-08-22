@@ -195,6 +195,24 @@
             color: #ffffff !important;
         }
 
+        .btn-danger-swal {
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            padding: 10px 22px !important;
+            transition: all 0.2s ease !important;
+            border: none !important;
+            cursor: pointer !important;
+            margin-right: 10px !important;
+        }
+
+        .btn-danger-swal:hover {
+            background-color: #dc2626 !important;
+            transform: translateY(-1px);
+        }
+
         /* Main Area */
         .main-wrapper {
             margin-left: 260px;
@@ -331,6 +349,11 @@
         .icon-green {
             background: #dcfce7;
             color: #16a34a;
+        }
+
+        .icon-amber {
+            background: #fef3c7;
+            color: #d97706;
         }
 
         /* Card Section */
@@ -791,29 +814,29 @@
             <img src="{% static 'images/image.png' %}" alt="LOGNOTE Logo" class="brand-logo">
         </div>
         <ul class="sidebar-menu">
-            <li class="menu-item active" onclick="switchTab('dashboard', this)">
+            <li class="menu-item {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}" onclick="switchTab('dashboard', this)">
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </li>
 
             {% if role == 'superadmin' or role == 'admin' %}
-            <li class="menu-item" onclick="switchTab('form-data', this)">
+            <li class="menu-item {% if active_tab == 'form-data' %}active{% endif %}" onclick="switchTab('form-data', this)">
                 <i class="fa-solid fa-clipboard-list"></i> Task
             </li>
 
-            <li class="menu-item" onclick="switchTab('add-project', this)">
+            <li class="menu-item {% if active_tab == 'add-project' %}active{% endif %}" onclick="switchTab('add-project', this)">
                 <i class="fa-solid fa-folder-plus"></i> Project
             </li>
 
-            <li class="menu-item" onclick="switchTab('in-progress', this)">
+            <li class="menu-item {% if active_tab == 'in-progress' %}active{% endif %}" onclick="switchTab('in-progress', this)">
                 <i class="fa-solid fa-spinner"></i> Assigned Tasks
             </li>
 
             {% if role == 'superadmin' %}
-            <li class="menu-item" onclick="switchTab('add-members', this)">
+            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}" onclick="switchTab('add-members', this)">
                 <i class="fa-solid fa-user-plus"></i> Add Members
             </li>
             {% elif role == 'admin' %}
-            <li class="menu-item" onclick="switchTab('add-members', this)">
+            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}" onclick="switchTab('add-members', this)">
                 <i class="fa-solid fa-user-plus"></i> Add Employees
             </li>
             {% endif %}
@@ -854,24 +877,59 @@
                 <span>{{ message }} </span>
                 <span class="alert-close" onclick="this.parentElement.remove()">&times;</span>
             </div>
-            {% if 'error' in message.tags or 'danger' in message.tags %}
             <script>
                 document.addEventListener("DOMContentLoaded", function () {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Blocked',
-                        text: "{{ message|escapejs }}",
-                        confirmButtonColor: '#4f46e5',
-                        confirmButtonText: 'Got It'
-                    });
+                    if (typeof Swal !== 'undefined') {
+                        {% if 'success' in message.tags %}
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: "{{ message|escapejs }}",
+                            timer: 2500,
+                            timerProgressBar: true,
+                            customClass: {
+                                popup: 'swal-dark-glass',
+                                title: 'swal-dark-title',
+                                htmlContainer: 'swal-dark-text',
+                                confirmButton: 'swal-dark-confirm-btn'
+                            },
+                            buttonsStyling: false
+                        });
+                        {% elif 'error' in message.tags or 'danger' in message.tags or 'warning' in message.tags %}
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Attention Required',
+                            text: "{{ message|escapejs }}",
+                            customClass: {
+                                popup: 'swal-dark-glass',
+                                title: 'swal-dark-title',
+                                htmlContainer: 'swal-dark-text',
+                                confirmButton: 'swal-dark-confirm-btn'
+                            },
+                            buttonsStyling: false
+                        });
+                        {% else %}
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Notification',
+                            text: "{{ message|escapejs }}",
+                            customClass: {
+                                popup: 'swal-dark-glass',
+                                title: 'swal-dark-title',
+                                htmlContainer: 'swal-dark-text',
+                                confirmButton: 'swal-dark-confirm-btn'
+                            },
+                            buttonsStyling: false
+                        });
+                        {% endif %}
+                    }
                 });
             </script>
-            {% endif %}
             {% endfor %}
             {% endif %}
 
             <!-- TAB 1: OVERVIEW DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content active">
+            <div id="tab-dashboard" class="tab-content {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}">
 
                 {% if role == 'superadmin' %}
                 <!-- Superadmin Overview Stats -->
@@ -911,6 +969,90 @@
                         <div class="stat-icon icon-blue">
                             <i class="fa-solid fa-list-check"></i>
                         </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <p>Total Projects</p>
+                            <h3>{{ total_projects }}</h3>
+                        </div>
+                        <div class="stat-icon icon-amber">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Superadmin Total Projects Overview Container -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>
+                            <i class="fa-solid fa-folder" style="color: var(--primary); margin-right: 8px;"></i>
+                            Total Projects Overview
+                        </h2>
+                        <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
+                            Total: {{ total_projects }}
+                        </span>
+                    </div>
+                    <!-- Filter Toolbar -->
+                    <div class="table-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search project name, type, description..."
+                                oninput="triggerProjectFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerProjectFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Project Name</th>
+                                    <th>Project Type</th>
+                                    <th>Status</th>
+                                    <th>Start Date</th>
+                                    <th>Due Date</th>
+                                    <th>Actual Complete Date</th>
+                                    <th>Description</th>
+                                    <th>Created Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for proj in projects %}
+                                <tr class="project-row" data-project-name="{{ proj.project_name|lower }}"
+                                    data-project-type="{{ proj.project_type|lower }}"
+                                    data-description="{{ proj.description|default:''|lower }}"
+                                    data-status="{{ proj.status|default:'Not Worked'|lower }}">
+                                    <td><strong>{{ forloop.counter }}</strong></td>
+                                    <td><strong>{{ proj.project_name }}</strong></td>
+                                    <td>
+                                        <span class="role-tag role-employee">{{ proj.project_type }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
+                                    </td>
+                                    <td>{{ proj.start_date|default:"-" }}</td>
+                                    <td>{{ proj.due_date|default:"-" }}</td>
+                                    <td>{{ proj.actual_complete_date|default:"-" }}</td>
+                                    <td>{{ proj.description|default:"-" }}</td>
+                                    <td>{{ proj.created_at|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No projects available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -1131,10 +1273,12 @@
                     </div>
                 </div>
 
+                
                 {% elif role == 'employee' %}
                 <!-- Employee Personal Dashboard -->
                 <div class="card" style="margin-bottom: 24px;">
-                    <div class="card-header">
+                    <h2>LOGNOTE</h2>
+                    <!-- <div class="card-header">
                         <h2>WELCOME TO LOGNOTE</h2>
                     </div>
                     <div style="padding: 10px 0; line-height: 1.8;">
@@ -1143,7 +1287,7 @@
                         <p><strong>Assigned Role:</strong> <span
                                 class="role-tag role-employee">{{user_info.role}}</span></p>
                         <p><strong>Account Created:</strong> {{ user_info.created_at }}</p>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Employee Assigned Tasks Quick View -->
@@ -1243,7 +1387,7 @@
 
             <!-- TAB 2: MANAGE MEMBERS (SUPERADMIN / ADMIN) -->
             {% if role == 'superadmin' or role == 'admin' %}
-            <div id="tab-add-members" class="tab-content">
+            <div id="tab-add-members" class="tab-content {% if active_tab == 'add-members' %}active{% endif %}">
                 <div class="card">
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
@@ -1331,7 +1475,7 @@
 
             <!-- TAB 3: FORM DATA / TASK ASSIGNMENT (SUPERADMIN / ADMIN ONLY) -->
             {% if role == 'superadmin' or role == 'admin' %}
-            <div id="tab-form-data" class="tab-content">
+            <div id="tab-form-data" class="tab-content {% if active_tab == 'form-data' %}active{% endif %}">
                 <!-- Saved Tasks Table Card -->
                 <div class="card">
                     <div class="card-header"
@@ -1415,11 +1559,11 @@
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}')">
+                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|date:"Y-m-d"|default:task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}', '{{ task.employee_name|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
-                                            onsubmit="return confirm('Are you sure you want to delete this task?');">
+                                            onsubmit="return confirmDeleteForm(event, 'Are you sure you want to delete this task?');">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_task">
                                             <input type="hidden" name="task_id" value="{{ task.id }}">
@@ -1444,7 +1588,7 @@
 
             <!-- TAB 4: ADD PROJECT (SUPERADMIN / ADMIN ONLY) -->
             {% if role == 'superadmin' or role == 'admin' %}
-            <div id="tab-add-project" class="tab-content">
+            <div id="tab-add-project" class="tab-content {% if active_tab == 'add-project' %}active{% endif %}">
                 <div class="card">
                     <div class="card-header"
                         style="display: flex; justify-content: space-between; align-items: center;">
@@ -1466,7 +1610,7 @@
                                     <th>Status</th>
                                     <th>Start Date</th>
                                     <th>Due Date</th>
-                                    <th>Actual Complete Date</th>
+                                    <th>Actual Completion Date</th>
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
@@ -1476,20 +1620,16 @@
                                 <tr>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
+                                    <td><span class="role-tag role-employee">{{ proj.project_type }}</span></td>
                                     <td>
-                                        <span class="role-tag role-employee">{{ proj.project_type }}</span>
-                                    </td>
-                                    <td>
-                                        <form method="POST" action="{% url 'dashboard' %}" style="margin:0;">
+                                        <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="update_project_status">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
-                                            <select name="status" class="form-control status-badge status-{{ proj.status|default:'not-worked'|slugify }}"
-                                                style="padding: 6px 12px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; text-align: center;"
-                                                onchange="updateSelectStatusClass(this); this.form.submit();">
-                                                <option value="Not Worked" {% if proj.status == 'Not Worked' or not proj.status %}selected{% endif %}>Not Worked</option>
-                                                <option value="Pending" {% if proj.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                            <select name="status" class="status-select status-{{ proj.status|default:'Not Worked'|slugify }}" onchange="this.form.submit()">
+                                                <option value="Not Worked" {% if proj.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                                <option value="On Hold" {% if proj.status == 'On Hold' or proj.status == 'Hold' %}selected{% endif %}>On Hold</option>
                                                 <option value="Completed" {% if proj.status == 'Completed' %}selected{% endif %}>Completed</option>
                                             </select>
                                         </form>
@@ -1500,11 +1640,11 @@
                                     <td>{{ proj.description|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|default:"" }}', '{{ proj.due_date|default:"" }}', '{{ proj.actual_complete_date|default:"" }}', '{{ proj.description|escapejs }}')">
+                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|date:"Y-m-d"|default:proj.start_date|default:"" }}', '{{ proj.due_date|date:"Y-m-d"|default:proj.due_date|default:"" }}', '{{ proj.actual_complete_date|date:"Y-m-d"|default:proj.actual_complete_date|default:"" }}', '{{ proj.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
-                                            onsubmit="return confirm('Are you sure you want to delete this project?');">
+                                            onsubmit="return confirmDeleteForm(event, 'Are you sure you want to delete this project?');">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_project">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
@@ -1516,8 +1656,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No
-                                        projects created yet.</td>
+                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 24px;">No projects recorded yet. Click "Add New Project" to create one.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1529,7 +1668,7 @@
 
             <!-- TAB 5: IN PROGRESS TASKS & PROJECTS (SUPERADMIN / ADMIN ONLY) -->
             {% if role == 'superadmin' or role == 'admin' %}
-            <div id="tab-in-progress" class="tab-content">
+            <div id="tab-in-progress" class="tab-content {% if active_tab == 'in-progress' %}active{% endif %}">
 
                 <!-- Top Sub-Tab Navigation Buttons -->
                 <div class="assigned-subtabs-nav" style="display: flex; gap: 12px; margin-bottom: 20px;">
@@ -1750,17 +1889,17 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-username">Username</label>
                     <input type="text" id="add-username" name="username" class="form-control"
-                        placeholder="Enter username" required>
+                        placeholder="Enter username" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-email">Email Address</label>
                     <input type="email" id="add-email" name="email" class="form-control"
-                        placeholder="Enter email address" required>
+                        placeholder="Enter email address (e.g. user@example.com)" title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed." required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-password">Password</label>
                     <input type="password" id="add-password" name="password" class="form-control"
-                        placeholder="Enter password" required>
+                        placeholder="Enter password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
                 </div>
 
                 {% if role == 'superadmin' %}
@@ -1805,16 +1944,16 @@
 
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-username">Username</label>
-                    <input type="text" id="edit-username" name="username" class="form-control" required>
+                    <input type="text" id="edit-username" name="username" class="form-control" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-email">Email Address</label>
-                    <input type="email" id="edit-email" name="email" class="form-control" required>
+                    <input type="email" id="edit-email" name="email" class="form-control" title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed." required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-password">Password</label>
                     <input type="text" id="edit-password" name="password" class="form-control"
-                        placeholder="Enter updated password" required>
+                        placeholder="Enter updated password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
                 </div>
 
                 {% if role == 'superadmin' %}
@@ -2164,13 +2303,19 @@
             if (modal) modal.classList.remove('active');
         }
 
-        function openEditTaskModal(id, name, project, dueDate, status, description) {
+        function openEditTaskModal(id, name, project, dueDate, status, description, assignedEmpNames) {
             document.getElementById('edit-task-id').value = id;
             document.getElementById('edit-task-name').value = name;
             document.getElementById('edit-task-project').value = project;
             document.getElementById('edit-task-due-date').value = dueDate;
             document.getElementById('edit-task-status').value = status;
             document.getElementById('edit-task-description').value = description;
+
+            const empNamesArray = (assignedEmpNames || '').split(',').map(n => n.trim().toLowerCase());
+            document.querySelectorAll('.edit-emp-checkbox').forEach(cb => {
+                const labelText = (cb.nextElementSibling?.textContent || '').trim().toLowerCase();
+                cb.checked = empNamesArray.includes(labelText);
+            });
 
             const modal = document.getElementById('editTaskModal');
             if (modal) modal.classList.add('active');
@@ -2260,17 +2405,53 @@
                 'dashboard': role === 'superadmin' ? 'Superadmin Overview' : (role === 'admin' ? 'Admin Overview' : 'Employee Overview'),
                 'add-members': role === 'superadmin' ? 'Manage Members' : 'Manage Employees',
                 'form-data': 'Form Data & Task Assignment',
-                'add-project': 'Projects Management'
+                'add-project': 'Projects Management',
+                'in-progress': 'Assigned Tasks & Projects'
             };
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
                 pageTitle.innerText = titles[tabName] || 'Dashboard';
             }
+
+            // Sync Cookie, URL parameter, and sessionStorage
+            try {
+                document.cookie = "active_tab=" + tabName + "; path=/; max-age=2592000";
+                sessionStorage.setItem('active_tab', tabName);
+                if (window.history && window.history.replaceState) {
+                    const newUrl = window.location.pathname + '?tab=' + tabName;
+                    window.history.replaceState(null, '', newUrl);
+                }
+            } catch (e) {}
+
+            // Dynamically update hidden active_tab inputs in all forms
+            document.querySelectorAll('form').forEach(form => {
+                let tabInput = form.querySelector('input[name="active_tab"]');
+                if (!tabInput) {
+                    tabInput = document.createElement('input');
+                    tabInput.type = 'hidden';
+                    tabInput.name = 'active_tab';
+                    form.appendChild(tabInput);
+                }
+                tabInput.value = tabName;
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Set min attribute to today's local date (YYYY-MM-DD) on all calendar date fields
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.setAttribute('min', todayStr);
+            });
+
             const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || "{{ active_tab|default:'dashboard' }}";
+            const savedTab = sessionStorage.getItem('active_tab');
+            const serverTab = "{{ active_tab|default:'' }}";
+            const activeTab = urlParams.get('tab') || savedTab || serverTab || 'dashboard';
             if (activeTab) {
                 switchTab(activeTab);
             }
@@ -2513,6 +2694,114 @@
                 if (btnProjects) btnProjects.classList.add('active');
                 if (btnTasks) btnTasks.classList.remove('active');
             }
+        }
+
+        function triggerProjectFilter(element) {
+            const filterBar = element.closest('.table-filter-bar');
+            if (!filterBar) return;
+
+            const card = filterBar.closest('.card');
+            if (!card) return;
+
+            const tbody = card.querySelector('tbody');
+            if (!tbody) return;
+
+            const searchVal = (filterBar.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
+            const statusVal = (filterBar.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
+
+            const rows = tbody.querySelectorAll('tr.project-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const projName = row.getAttribute('data-project-name') || '';
+                const projType = row.getAttribute('data-project-type') || '';
+                const desc = row.getAttribute('data-description') || '';
+                const status = row.getAttribute('data-status') || '';
+
+                const matchSearch = !searchVal ||
+                    projName.includes(searchVal) ||
+                    projType.includes(searchVal) ||
+                    desc.includes(searchVal);
+
+                const matchStatus = (statusVal === 'all') || (status === statusVal);
+
+                if (matchSearch && matchStatus) {
+                    row.style.display = '';
+                    visibleCount++;
+                    const snoCell = row.querySelector('td strong');
+                    if (snoCell) {
+                        snoCell.innerText = visibleCount;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            let emptyRow = tbody.querySelector('.empty-filter-row');
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!emptyRow) {
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-filter-row';
+                    emptyRow.innerHTML = `<td colspan="9" style="text-align: center; color: #94a3b8; padding: 24px;">No projects matching the selected search or filter criteria.</td>`;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    emptyRow.style.display = '';
+                }
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        }
+
+        function confirmDeleteForm(event, messageText) {
+            event.preventDefault();
+            const form = event.target;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: messageText || 'You are about to delete this record. This action cannot be undone!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-trash"></i> Yes, Delete It',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal-dark-glass',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-text',
+                    confirmButton: 'btn-danger-swal',
+                    cancelButton: 'swal-dark-cancel-btn'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
+        function confirmLogout(event) {
+            event.preventDefault();
+            const logoutUrl = event.currentTarget.href;
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: 'Are you sure you want to log out of your session?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-right-from-bracket"></i> Yes, Logout',
+                cancelButtonText: 'Stay Logged In',
+                customClass: {
+                    popup: 'swal-dark-glass',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-text',
+                    confirmButton: 'btn-danger-swal',
+                    cancelButton: 'swal-dark-cancel-btn'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = logoutUrl;
+                }
+            });
+            return false;
         }
     </script>
 </body>

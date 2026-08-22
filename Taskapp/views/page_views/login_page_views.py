@@ -19,7 +19,9 @@ def login(request):
 
             return redirect('dashboard')
         else:
-            messages.error(request, 'Invalid username or password. Please try again.')
-            return render(request, 'login.html')
+            return render(request, 'login.html', {
+                'error': 'Invalid username or password.',
+                'username': username_input
+            })
 
     return render(request, 'login.html')

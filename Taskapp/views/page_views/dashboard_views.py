@@ -1,6 +1,45 @@
+import re
+from datetime import datetime, date
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from Taskapp.services import employee_service, task_service, project_service
+
+
+def is_valid_email(email):
+    """
+    Validate email to ensure proper format and disallow multiple @ symbols or duplicate TLD extensions (.com.com).
+    """
+    if not email or email.count('@') != 1:
+        return False
+
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, email):
+        return False
+
+    parts = email.split('@')
+    domain = parts[1].lower()
+
+    domain_parts = domain.split('.')
+    if len(domain_parts) > 2:
+        exts = ['com', 'org', 'net', 'edu', 'gov', 'co', 'in', 'uk', 'io', 'info', 'biz']
+        found_tlds = [p for p in domain_parts if p in exts]
+        if len(found_tlds) > 1:
+            return False
+
+    return True
+
+
+def is_past_date(date_str):
+    """
+    Check if a date string (YYYY-MM-DD) is earlier than today's date.
+    """
+    if not date_str:
+        return False
+    try:
+        parsed_date = datetime.strptime(date_str.strip(), '%Y-%m-%d').date()
+        return parsed_date < date.today()
+    except (ValueError, TypeError):
+        return False
 
 
 def dashboard(request):
@@ -14,6 +53,8 @@ def dashboard(request):
 
     if request.method == 'POST':
         action = request.POST.get('action', '')
+        active_tab_post = request.POST.get('active_tab', '').strip()
+
         if action == 'add':
             new_username = request.POST.get('username', '').strip()
             new_password = request.POST.get('password', '').strip()
@@ -26,13 +67,18 @@ def dashboard(request):
 
             if not new_username or not new_password or not new_email:
                 messages.error(request, 'All fields (Username, Password, Email) are required.')
+            elif not re.match(r'^[a-zA-Z0-9]+$', new_username) or not re.match(r'^[a-zA-Z0-9]+$', new_password):
+                messages.error(request, 'Username and Password must contain only letters (A-Z, a-z) and numbers (0-9). Special characters and spaces are not allowed.')
+            elif not is_valid_email(new_email):
+                messages.error(request, 'Invalid Email address format.')
             else:
                 try:
                     employee_service.insert_user(new_username, new_password, new_email, role)
                     messages.success(request, f'{role.capitalize()} "{new_username}" created successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to create user: {str(e)}')
-            return redirect('/dashboard/?tab=add-members')
+            dest_tab = active_tab_post or 'add-members'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'edit':
             target_user_id = request.POST.get('user_id', '')
@@ -43,13 +89,18 @@ def dashboard(request):
 
             if not target_user_id or not new_username or not new_email:
                 messages.error(request, 'Username and Email are required.')
+            elif not re.match(r'^[a-zA-Z0-9]+$', new_username) or (new_password and not re.match(r'^[a-zA-Z0-9]+$', new_password)):
+                messages.error(request, 'Username and Password must contain only letters (A-Z, a-z) and numbers (0-9). Special characters and spaces are not allowed.')
+            elif not is_valid_email(new_email):
+                messages.error(request, 'Invalid Email address format.')
             else:
                 try:
                     employee_service.update_user(int(target_user_id), new_username, new_email, new_password, role)
                     messages.success(request, f'User "{new_username}" updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update user: {str(e)}')
-            return redirect('/dashboard/?tab=add-members')
+            dest_tab = active_tab_post or 'add-members'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'delete':
             target_user_id = request.POST.get('user_id', '')
@@ -59,7 +110,8 @@ def dashboard(request):
                     messages.success(request, 'User deleted successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to delete user: {str(e)}')
-            return redirect('/dashboard/?tab=add-members')
+            dest_tab = active_tab_post or 'add-members'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'assign_task':
             if user_role not in ('superadmin', 'admin'):
@@ -75,6 +127,8 @@ def dashboard(request):
 
             if not task_name or not assigned_to_ids:
                 messages.error(request, 'Atleast One Assigned Employee is Required.')
+            elif due_date and is_past_date(due_date):
+                messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
                 try:
                     emp_list = []
@@ -98,12 +152,13 @@ def dashboard(request):
                         messages.success(request, f'Task #{new_task_id} ("{task_name}") assigned to {employee_names_str} successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to assign task: {str(e)}')
-            return redirect('/dashboard/?tab=form-data')
+            dest_tab = active_tab_post or 'form-data'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'update_task_status':
             task_id = request.POST.get('task_id', '')
             new_status = request.POST.get('status', '').strip()
-            redirect_tab = request.POST.get('active_tab', 'dashboard')
+            redirect_tab = active_tab_post or 'dashboard'
             if task_id and new_status:
                 try:
                     if new_status == 'In Progress':
@@ -139,7 +194,8 @@ def dashboard(request):
                     messages.success(request, f'Task #{task_id} deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to delete task: {str(e)}')
-            return redirect('/dashboard/?tab=form-data')
+            dest_tab = active_tab_post or 'form-data'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'add_project':
             if user_role not in ('superadmin', 'admin'):
@@ -155,6 +211,8 @@ def dashboard(request):
 
             if not project_name or not project_type:
                 messages.error(request, 'Project Name and Project Type are required fields.')
+            elif (start_date and is_past_date(start_date)) or (due_date and is_past_date(due_date)) or (actual_complete_date and is_past_date(actual_complete_date)):
+                messages.error(request, 'Past dates are not allowed in date fields.')
             else:
                 try:
                     new_proj_id = project_service.create_project(
@@ -169,7 +227,8 @@ def dashboard(request):
                     messages.success(request, f'Project "{project_name}" (#{new_proj_id}) created successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to create project: {str(e)}')
-            return redirect('/dashboard/?tab=add-project')
+            dest_tab = active_tab_post or 'add-project'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'delete_project':
             if user_role not in ('superadmin', 'admin'):
@@ -182,7 +241,8 @@ def dashboard(request):
                     messages.success(request, f'Project #{project_id} deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to delete project: {str(e)}')
-            return redirect('/dashboard/?tab=add-project')
+            dest_tab = active_tab_post or 'add-project'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'update_project_status':
             if user_role not in ('superadmin', 'admin'):
@@ -196,8 +256,8 @@ def dashboard(request):
                     messages.success(request, f'Project #{project_id} status updated to "{new_status}".')
                 except Exception as e:
                     messages.error(request, f'Failed to update project status: {str(e)}')
-            return redirect('/dashboard/?tab=add-project')
-
+            dest_tab = active_tab_post or 'add-project'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'edit_task':
             if user_role not in ('superadmin', 'admin'):
@@ -214,6 +274,8 @@ def dashboard(request):
 
             if not task_id or not task_name or not assigned_to_ids:
                 messages.error(request, 'Task ID, Task Name, and at least one Assigned Employee are required.')
+            elif due_date and is_past_date(due_date):
+                messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
                 try:
                     emp_list = []
@@ -239,7 +301,8 @@ def dashboard(request):
                         messages.success(request, f'Task #{task_id} updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update task: {str(e)}')
-            return redirect('/dashboard/?tab=form-data')
+            dest_tab = active_tab_post or 'form-data'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'edit_project':
             if user_role not in ('superadmin', 'admin'):
@@ -257,6 +320,8 @@ def dashboard(request):
 
             if not project_id or not project_name or not project_type:
                 messages.error(request, 'Project ID, Project Name, and Project Type are required.')
+            elif (start_date and is_past_date(start_date)) or (due_date and is_past_date(due_date)) or (actual_complete_date and is_past_date(actual_complete_date)):
+                messages.error(request, 'Past dates are not allowed in date fields.')
             else:
                 try:
                     project_service.update_project(
@@ -272,12 +337,14 @@ def dashboard(request):
                     messages.success(request, f'Project #{project_id} ("{project_name}") updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update project: {str(e)}')
-            return redirect('/dashboard/?tab=add-project')
+            dest_tab = active_tab_post or 'add-project'
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'employee_edit_task':
             task_id = request.POST.get('task_id', '')
             description = request.POST.get('description', '').strip()
             status = request.POST.get('status', 'Not Worked').strip()
+            dest_tab = active_tab_post or 'dashboard'
 
             if not task_id:
                 messages.error(request, 'Task ID is required.')
@@ -294,19 +361,19 @@ def dashboard(request):
                                 request,
                                 f'Task ("{active_task["task_name"]}") is already In Progress. Please set it to On Hold or Completed before starting another task.'
                             )
-                            return redirect('dashboard')
+                            return redirect(f'/dashboard/?tab={dest_tab}')
 
                     task_service.update_task_employee_fields(int(task_id), description, status)
-                    messages.success(request, f'Task #{task_id} details updated successfully!')
+                    messages.success(request, f'Task details updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update task: {str(e)}')
-            return redirect('dashboard')
+            return redirect(f'/dashboard/?tab={dest_tab}')
 
 
 
 
     # Fetch data based on role
-    active_tab = request.GET.get('tab', 'dashboard').strip()
+    active_tab = request.GET.get('tab', '').strip() or request.COOKIES.get('active_tab', '').strip() or 'dashboard'
     context = {
         'username': username,
         'role': user_role,
@@ -367,4 +434,6 @@ def dashboard(request):
             'user_info': user_info,
         })
 
-    return render(request, 'dashboard.html', context)
+    response = render(request, 'dashboard.html', context)
+    response.set_cookie('active_tab', active_tab, max_age=86400 * 30)
+    return response

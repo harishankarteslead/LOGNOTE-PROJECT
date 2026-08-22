@@ -16,20 +16,26 @@ document.addEventListener("DOMContentLoaded", function () {
             const username = usernameInput ? usernameInput.value.trim() : "";
             const password = passwordInput ? passwordInput.value.trim() : "";
 
+            const usernameErr = document.getElementById("username-error");
+            const passwordErr = document.getElementById("password-error");
+
+            if (usernameErr) usernameErr.innerText = "";
+            if (passwordErr) passwordErr.innerText = "";
+
             // Check if username is empty
             if (username === "") {
-                alert("Please enter your username."); // Show error message to user
-                if (usernameInput) usernameInput.focus(); // Move cursor to username box
-                event.preventDefault(); // Stop form from submitting
-                return; // Stop further execution
+                if (usernameErr) usernameErr.innerText = "Please enter your username.";
+                if (usernameInput) usernameInput.focus();
+                event.preventDefault();
+                return;
             }
 
             // Check if password is empty
             if (password === "") {
-                alert("Please enter your password."); // Show error message to user
-                if (passwordInput) passwordInput.focus(); // Move cursor to password box
-                event.preventDefault(); // Stop form from submitting
-                return; // Stop further execution
+                if (passwordErr) passwordErr.innerText = "Please enter your password.";
+                if (passwordInput) passwordInput.focus();
+                event.preventDefault();
+                return;
             }
         });
     }
