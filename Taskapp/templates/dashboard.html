@@ -529,24 +529,28 @@
         }
 
         .status-pending {
-            background: #fef3c7;
-            color: #4b2106;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
 
         .status-in-progress {
             background: #dbeafe;
-            color: #4e71e4;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
         }
 
         .status-on-hold,
         .status-hold {
-            background: #fee2e2;
-            color: #e84e4e;
+            background: #fef3c7;
+            color: #78350f;
+            border: 1px solid #fde68a;
         }
 
         .status-completed {
-            background: #d1fae5;
-            color: #0ce2a5;
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
         }
 
         /* Task Table Filter Bar Styles */
@@ -647,6 +651,35 @@
             background: var(--primary);
             color: #ffffff;
             border-color: var(--primary);
+        }
+
+        /* Assigned Tasks Subtab Toggle Buttons */
+        .subtab-toggle-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .subtab-toggle-btn:hover {
+            background: #f8fafc;
+            color: var(--primary);
+            border-color: #cbd5e1;
+        }
+
+        .subtab-toggle-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
         }
 
         .reset-filter-btn {
@@ -1451,9 +1484,9 @@
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="update_project_status">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
-                                            <select name="status" class="form-control"
-                                                style="padding: 4px 8px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer;"
-                                                onchange="this.form.submit()">
+                                            <select name="status" class="form-control status-badge status-{{ proj.status|default:'not-worked'|slugify }}"
+                                                style="padding: 6px 12px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; text-align: center;"
+                                                onchange="updateSelectStatusClass(this); this.form.submit();">
                                                 <option value="Not Worked" {% if proj.status == 'Not Worked' or not proj.status %}selected{% endif %}>Not Worked</option>
                                                 <option value="Pending" {% if proj.status == 'Pending' %}selected{% endif %}>Pending</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
@@ -1494,65 +1527,123 @@
             </div>
             {% endif %}
 
-            <!-- TAB 5: IN PROGRESS TASKS (SUPERADMIN / ADMIN ONLY) -->
+            <!-- TAB 5: IN PROGRESS TASKS & PROJECTS (SUPERADMIN / ADMIN ONLY) -->
             {% if role == 'superadmin' or role == 'admin' %}
             <div id="tab-in-progress" class="tab-content">
-                <div class="card">
-                    <div class="card-header"
-                        style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2>
-                            <i class="fa-solid fa-spinner" style="color: var(--primary); margin-right: 8px;"></i>
-                            Currently Worked Tasks (In Progress)
-                        </h2>
-                        <!-- <span class="status-badge status-in-progress" style="font-size: 13px; padding: 6px 14px;">
-                            <i class="fa-solid fa-fire"></i> {{ in_progress_tasks_list|length }} Active Task{% if in_progress_tasks_list|length != 1 %}s{% endif %}
-                        </span> -->
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>S.No</th>
-                                    <th>Task Name</th>
-                                    <th>Project Name</th>
-                                    <th>Description</th>
-                                    <th>Assigned Employees</th>
-                                    <th>Due Date</th>
-                                    <th>Status</th>
-                                    <th>Assigned Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for task in in_progress_tasks_list %}
-                                <tr>
-                                    <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
-                                    <td>
-                                        <span
-                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
-                                    </td>
-                                    <td>{{ task.description|default:"-" }}</td>
-                                    <td><strong>{{ task.employee_name }}</strong></td>
-                                    <td>{{ task.due_date|default:"-" }}</td>
-                                    <td>
-                                        <span class="status-badge status-in-progress">In Progress</span>
-                                    </td>
-                                    <td>{{ task.created_at }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="8"
-                                        style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
-                                        <i class="fa-solid fa-circle-info"
-                                            style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
-                                        No tasks currently in progress by employees.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+
+                <!-- Top Sub-Tab Navigation Buttons -->
+                <div class="assigned-subtabs-nav" style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <button type="button" class="subtab-toggle-btn active" id="btn-subtab-tasks" onclick="switchAssignedSubTab('tasks')">
+                        <i class="fa-solid fa-spinner" style="margin-right: 8px;"></i>
+                        Currently Worked Tasks
+                    </button>
+                    <button type="button" class="subtab-toggle-btn" id="btn-subtab-projects" onclick="switchAssignedSubTab('projects')">
+                        <i class="fa-solid fa-diagram-project" style="margin-right: 8px;"></i>
+                        Currently Worked Projects
+                    </button>
+                </div>
+
+                <!-- Container 1: Currently Worked Tasks -->
+                <div id="subtab-tasks-container">
+                    <div class="card">
+                        <div class="card-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>
+                                <i class="fa-solid fa-spinner" style="color: var(--primary); margin-right: 8px;"></i>
+                                Currently Worked Tasks (In Progress)
+                            </h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Task Name</th>
+                                        <th>Project Name</th>
+                                        <th>Assigned Employees</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in in_progress_tasks_list %}
+                                    <tr>
+                                        <td><strong>{{ forloop.counter }}</strong></td>
+                                        <td><strong>{{ task.task_name }}</strong></td>
+                                        <td>
+                                            <span
+                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span>
+                                        </td>
+                                        <td><strong>{{ task.employee_name }}</strong></td>
+                                        <td>
+                                            <span class="status-badge status-in-progress">In Progress</span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
+                                            <i class="fa-solid fa-circle-info"
+                                                style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+                                            No tasks currently in progress by employees.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Container 2: Currently Worked Projects -->
+                <div id="subtab-projects-container" style="display: none;">
+                    <div class="card">
+                        <div class="card-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>
+                                <i class="fa-solid fa-diagram-project" style="color: var(--primary); margin-right: 8px;"></i>
+                                Currently Worked Projects (In Progress)
+                            </h2>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Project Name</th>
+                                        <th>Project Type</th>
+                                        <th>Status</th>
+                                        <th>Start Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for proj in in_progress_projects_list %}
+                                    <tr>
+                                        <td><strong>{{ forloop.counter }}</strong></td>
+                                        <td><strong>{{ proj.project_name }}</strong></td>
+                                        <td>
+                                            <span class="role-tag role-employee">{{ proj.project_type }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-in-progress">In Progress</span>
+                                        </td>
+                                        <td>{{ proj.start_date|default:"-" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align: center; color: #94a3b8; padding: 25px; font-size: 15px;">
+                                            <i class="fa-solid fa-circle-info"
+                                                style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+                                            No projects currently in progress.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             {% endif %}
 
@@ -2114,7 +2205,11 @@
             document.getElementById('edit-project-id').value = id;
             document.getElementById('edit-project-name').value = name;
             document.getElementById('edit-project-type').value = type;
-            document.getElementById('edit-project-status').value = status || 'Not Worked';
+            const statusSelectEl = document.getElementById('edit-project-status');
+            if (statusSelectEl) {
+                statusSelectEl.value = status || 'Not Worked';
+                updateSelectStatusClass(statusSelectEl);
+            }
             document.getElementById('edit-project-start-date').value = startDate;
             document.getElementById('edit-project-due-date').value = dueDate;
             document.getElementById('edit-project-actual-complete-date').value = actualCompleteDate;
@@ -2392,6 +2487,32 @@
             if (presetBtns.length > 0) presetBtns[0].classList.add('active');
 
             triggerFilter(btn);
+        }
+
+        function updateSelectStatusClass(selectEl) {
+            if (!selectEl) return;
+            const valSlug = (selectEl.value || 'not-worked').toLowerCase().replace(/\s+/g, '-');
+            selectEl.className = selectEl.className.replace(/\bstatus-[a-z-]+\b/g, '').trim();
+            selectEl.classList.add('status-' + valSlug);
+        }
+
+        function switchAssignedSubTab(tabName) {
+            const tasksContainer = document.getElementById('subtab-tasks-container');
+            const projectsContainer = document.getElementById('subtab-projects-container');
+            const btnTasks = document.getElementById('btn-subtab-tasks');
+            const btnProjects = document.getElementById('btn-subtab-projects');
+
+            if (tabName === 'tasks') {
+                if (tasksContainer) tasksContainer.style.display = 'block';
+                if (projectsContainer) projectsContainer.style.display = 'none';
+                if (btnTasks) btnTasks.classList.add('active');
+                if (btnProjects) btnProjects.classList.remove('active');
+            } else if (tabName === 'projects') {
+                if (tasksContainer) tasksContainer.style.display = 'none';
+                if (projectsContainer) projectsContainer.style.display = 'block';
+                if (btnProjects) btnProjects.classList.add('active');
+                if (btnTasks) btnTasks.classList.remove('active');
+            }
         }
     </script>
 </body>
