@@ -3,9 +3,6 @@ from django.contrib import messages
 from Taskapp.services import employee_service
 
 def login(request):
-    if request.method == 'GET' and request.session.get('role'):
-        return redirect('dashboard')
-
     if request.method == 'POST':
         username_input = request.POST.get('username', '').strip()
         password_input = request.POST.get('password', '').strip()

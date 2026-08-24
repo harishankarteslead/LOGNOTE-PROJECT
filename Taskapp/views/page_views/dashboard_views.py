@@ -42,6 +42,71 @@ def is_past_date(date_str):
         return False
 
 
+def check_task_due_date_exceeds_project(project_name, task_due_date_str):
+    """
+    Check if task_due_date_str is after the project's due_date (task_due_date > project_due_date).
+    Returns (exceeded, project_due_date_str) tuple.
+    """
+    if not project_name or not task_due_date_str:
+        return False, None
+
+    projects = project_service.get_all_projects()
+    matched_proj = None
+    for p in projects:
+        if p.get('project_name', '').strip().lower() == project_name.strip().lower():
+            matched_proj = p
+            break
+
+    if not matched_proj or not matched_proj.get('due_date'):
+        return False, None
+
+    p_due = matched_proj['due_date']
+    if isinstance(p_due, (datetime, date)):
+        proj_due_str = p_due.strftime('%Y-%m-%d')
+    else:
+        proj_due_str = str(p_due).strip()
+
+    try:
+        task_date = datetime.strptime(task_due_date_str.strip(), '%Y-%m-%d').date()
+        proj_date = datetime.strptime(proj_due_str, '%Y-%m-%d').date()
+        if task_date > proj_date:
+            return True, proj_due_str
+    except (ValueError, TypeError):
+        pass
+
+    return False, proj_due_str
+
+
+def check_project_is_expired(project_name):
+    """
+    Check if the given project's due_date has already passed (due_date < today).
+    Returns (is_expired, project_due_date_str) tuple.
+    """
+    if not project_name:
+        return False, None
+
+    projects = project_service.get_all_projects()
+    matched_proj = None
+    for p in projects:
+        if p.get('project_name', '').strip().lower() == project_name.strip().lower():
+            matched_proj = p
+            break
+
+    if not matched_proj or not matched_proj.get('due_date'):
+        return False, None
+
+    p_due = matched_proj['due_date']
+    if isinstance(p_due, (datetime, date)):
+        proj_due_str = p_due.strftime('%Y-%m-%d')
+    else:
+        proj_due_str = str(p_due).strip()
+
+    if is_past_date(proj_due_str):
+        return True, proj_due_str
+
+    return False, proj_due_str
+
+
 def dashboard(request):
     user_role = request.session.get('role')
     user_id = request.session.get('user_id')
@@ -125,8 +190,21 @@ def dashboard(request):
             due_date = request.POST.get('due_date', '').strip() or None
             status = request.POST.get('status', '').strip() or 'Not Worked'
 
+            is_proj_expired, proj_due_str = check_project_is_expired(project_name)
+            exceeded, proj_due_str = check_task_due_date_exceeds_project(project_name, due_date)
+
             if not task_name or not assigned_to_ids:
                 messages.error(request, 'Atleast One Assigned Employee is Required.')
+            elif is_proj_expired:
+                messages.error(
+                    request,
+                    f'Cannot assign task: Project "{project_name}" due date ({proj_due_str}) has expired.'
+                )
+            elif exceeded:
+                messages.error(
+                    request,
+                    f'Project due date exceeded! Task Due Date ({due_date}) cannot be after Project Due Date ({proj_due_str}) for project "{project_name}".'
+                )
             elif due_date and is_past_date(due_date):
                 messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
@@ -305,8 +383,21 @@ def dashboard(request):
             due_date = request.POST.get('due_date', '').strip() or None
             status = request.POST.get('status', '').strip() or 'Not Worked'
 
+            is_proj_expired, proj_due_str = check_project_is_expired(project_name)
+            exceeded, proj_due_str = check_task_due_date_exceeds_project(project_name, due_date)
+
             if not task_id or not task_name or not assigned_to_ids:
                 messages.error(request, 'Task ID, Task Name, and at least one Assigned Employee are required.')
+            elif is_proj_expired:
+                messages.error(
+                    request,
+                    f'Cannot assign task: Project "{project_name}" due date ({proj_due_str}) has expired.'
+                )
+            elif exceeded:
+                messages.error(
+                    request,
+                    f'Project due date exceeded! Task Due Date ({due_date}) cannot be after Project Due Date ({proj_due_str}) for project "{project_name}".'
+                )
             elif due_date and is_past_date(due_date):
                 messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
@@ -419,6 +510,16 @@ def dashboard(request):
     if user_role in ('superadmin', 'admin'):
         tasks = task_service.get_all_tasks()
         projects = project_service.get_all_projects()
+
+        for p in projects:
+            p_due = p.get('due_date')
+            if p_due:
+                p_due_str = p_due.strftime('%Y-%m-%d') if isinstance(p_due, (datetime, date)) else str(p_due).strip()
+                p['is_expired'] = is_past_date(p_due_str)
+                p['due_date_str'] = p_due_str
+            else:
+                p['is_expired'] = False
+                p['due_date_str'] = ''
 
         context['tasks'] = tasks
         context['projects'] = projects
