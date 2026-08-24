@@ -920,29 +920,35 @@
             <img src="{% static 'images/image.png' %}" alt="LOGNOTE Logo" class="brand-logo">
         </div>
         <ul class="sidebar-menu">
-            <li class="menu-item {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}" onclick="switchTab('dashboard', this)">
+            <li class="menu-item {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}"
+                onclick="switchTab('dashboard', this)">
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </li>
 
             {% if role == 'superadmin' or role == 'admin' %}
-            <li class="menu-item {% if active_tab == 'form-data' %}active{% endif %}" onclick="switchTab('form-data', this)">
+            <li class="menu-item {% if active_tab == 'form-data' %}active{% endif %}"
+                onclick="switchTab('form-data', this)">
                 <i class="fa-solid fa-clipboard-list"></i> Task
             </li>
 
-            <li class="menu-item {% if active_tab == 'add-project' %}active{% endif %}" onclick="switchTab('add-project', this)">
+            <li class="menu-item {% if active_tab == 'add-project' %}active{% endif %}"
+                onclick="switchTab('add-project', this)">
                 <i class="fa-solid fa-folder-plus"></i> Project
             </li>
 
-            <li class="menu-item {% if active_tab == 'in-progress' %}active{% endif %}" onclick="switchTab('in-progress', this)">
+            <li class="menu-item {% if active_tab == 'in-progress' %}active{% endif %}"
+                onclick="switchTab('in-progress', this)">
                 <i class="fa-solid fa-spinner"></i> Assigned Tasks
             </li>
 
             {% if role == 'superadmin' %}
-            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}" onclick="switchTab('add-members', this)">
+            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}"
+                onclick="switchTab('add-members', this)">
                 <i class="fa-solid fa-user-plus"></i> Add Members
             </li>
             {% elif role == 'admin' %}
-            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}" onclick="switchTab('add-members', this)">
+            <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}"
+                onclick="switchTab('add-members', this)">
                 <i class="fa-solid fa-user-plus"></i> Add Employees
             </li>
             {% endif %}
@@ -1035,7 +1041,8 @@
             {% endif %}
 
             <!-- TAB 1: OVERVIEW DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}">
+            <div id="tab-dashboard"
+                class="tab-content {% if active_tab == 'dashboard' or not active_tab %}active{% endif %}">
 
                 {% if role == 'superadmin' %}
                 <!-- Superadmin Overview Stats -->
@@ -1089,12 +1096,14 @@
 
                 <!-- Superadmin Total Projects Overview Container -->
                 <div class="card" style="margin-bottom: 30px;">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h2>
                             <i class="fa-solid fa-folder" style="color: var(--primary); margin-right: 8px;"></i>
                             Total Projects Overview
                         </h2>
-                        <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
+                        <span
+                            style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
                             Total: {{ total_projects }}
                         </span>
                     </div>
@@ -1144,7 +1153,8 @@
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
+                                        <span
+                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
@@ -1154,7 +1164,8 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No projects available.</td>
+                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No
+                                        projects available.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1379,7 +1390,7 @@
                     </div>
                 </div>
 
-                
+
                 {% elif role == 'employee' %}
                 <!-- Employee Personal Dashboard -->
                 <div class="card" style="margin-bottom: 24px;">
@@ -1591,8 +1602,10 @@
                             Saved Tasks Records
                         </h2>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <button type="button" id="btn-bulk-delete-tasks" class="btn btn-danger" style="display: none;" onclick="triggerBulkDeleteTasks()">
-                                <i class="fa-solid fa-trash"></i> Delete Selected (<span id="selected-tasks-count">0</span>)
+                            <button type="button" id="btn-bulk-delete-tasks" class="btn btn-danger"
+                                style="display: none;" onclick="triggerBulkDeleteTasks()">
+                                <i class="fa-solid fa-trash"></i> Delete Selected (<span
+                                    id="selected-tasks-count">0</span>)
                             </button>
                             <button type="button" class="btn btn-primary" onclick="openAssignTaskModal()">
                                 <i class="fa-solid fa-plus"></i> Assign New Task
@@ -1630,7 +1643,8 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40px; text-align: center;">
-                                        <input type="checkbox" id="select-all-tasks" onchange="toggleSelectAllTasks(this)" title="Select All Tasks">
+                                        <input type="checkbox" id="select-all-tasks"
+                                            onchange="toggleSelectAllTasks(this)" title="Select All Tasks">
                                     </th>
                                     <th>S.No</th>
                                     <th>Task Name</th>
@@ -1652,7 +1666,8 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td style="text-align: center;">
-                                        <input type="checkbox" class="task-select-cb" value="{{ task.id }}" onchange="updateTaskBulkDeleteState()">
+                                        <input type="checkbox" class="task-select-cb" value="{{ task.id }}"
+                                            onchange="updateTaskBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
@@ -1668,7 +1683,7 @@
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|date:"Y-m-d"|default:task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}', '{{ task.employee_name|escapejs }}')">
+                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|date:"Y-m-d"|default:task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}' , '{{ task.employee_name|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1711,8 +1726,10 @@
                             Projects Records
                         </h2>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <button type="button" id="btn-bulk-delete-projects" class="btn btn-danger" style="display: none;" onclick="triggerBulkDeleteProjects()">
-                                <i class="fa-solid fa-trash"></i> Delete Selected (<span id="selected-projects-count">0</span>)
+                            <button type="button" id="btn-bulk-delete-projects" class="btn btn-danger"
+                                style="display: none;" onclick="triggerBulkDeleteProjects()">
+                                <i class="fa-solid fa-trash"></i> Delete Selected (<span
+                                    id="selected-projects-count">0</span>)
                             </button>
                             <button type="button" class="btn btn-primary" onclick="openAddProjectModal()">
                                 <i class="fa-solid fa-plus"></i> Add New Project
@@ -1724,7 +1741,8 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40px; text-align: center;">
-                                        <input type="checkbox" id="select-all-projects" onchange="toggleSelectAllProjects(this)" title="Select All Projects">
+                                        <input type="checkbox" id="select-all-projects"
+                                            onchange="toggleSelectAllProjects(this)" title="Select All Projects">
                                     </th>
                                     <th>S.No</th>
                                     <th>Project Name</th>
@@ -1741,7 +1759,8 @@
                                 {% for proj in projects %}
                                 <tr>
                                     <td style="text-align: center;">
-                                        <input type="checkbox" class="project-select-cb" value="{{ proj.id }}" onchange="updateProjectBulkDeleteState()">
+                                        <input type="checkbox" class="project-select-cb" value="{{ proj.id }}"
+                                            onchange="updateProjectBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
@@ -1751,7 +1770,9 @@
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="update_project_status">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
-                                            <select name="status" class="status-select status-{{ proj.status|default:'Not Worked'|slugify }}" onchange="this.form.submit()">
+                                            <select name="status"
+                                                class="status-select status-{{ proj.status|default:'Not Worked'|slugify }}"
+                                                onchange="this.form.submit()">
                                                 <option value="Not Worked" {% if proj.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
                                                 <option value="On Hold" {% if proj.status == 'On Hold' or proj.status == 'Hold' %}selected{% endif %}>On Hold</option>
@@ -1765,7 +1786,7 @@
                                     <td>{{ proj.description|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|date:"Y-m-d"|default:proj.start_date|default:"" }}', '{{ proj.due_date|date:"Y-m-d"|default:proj.due_date|default:"" }}', '{{ proj.actual_complete_date|date:"Y-m-d"|default:proj.actual_complete_date|default:"" }}', '{{ proj.description|escapejs }}')">
+                                            onclick="openEditProjectModal({{ proj.id }}, '{{ proj.project_name|escapejs }}', '{{ proj.project_type|escapejs }}', '{{ proj.status|escapejs }}', '{{ proj.start_date|date:'Y-m-d'|default:proj.start_date|default:'' }}', '{{ proj.due_date|date:'Y-m-d'|default:proj.due_date|default:'' }}', '{{ proj.actual_complete_date|date:'Y-m-d'|default:proj.actual_complete_date|default:'' }}', '{{ proj.description|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1781,7 +1802,8 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="10" style="text-align: center; color: #94a3b8; padding: 24px;">No projects recorded yet. Click "Add New Project" to create one.</td>
+                                    <td colspan="10" style="text-align: center; color: #94a3b8; padding: 24px;">No
+                                        projects recorded yet. Click "Add New Project" to create one.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1802,11 +1824,13 @@
 
                 <!-- Top Sub-Tab Navigation Buttons -->
                 <div class="assigned-subtabs-nav" style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <button type="button" class="subtab-toggle-btn active" id="btn-subtab-tasks" onclick="switchAssignedSubTab('tasks')">
+                    <button type="button" class="subtab-toggle-btn active" id="btn-subtab-tasks"
+                        onclick="switchAssignedSubTab('tasks')">
                         <i class="fa-solid fa-spinner" style="margin-right: 8px;"></i>
                         Currently Worked Tasks
                     </button>
-                    <button type="button" class="subtab-toggle-btn" id="btn-subtab-projects" onclick="switchAssignedSubTab('projects')">
+                    <button type="button" class="subtab-toggle-btn" id="btn-subtab-projects"
+                        onclick="switchAssignedSubTab('projects')">
                         <i class="fa-solid fa-diagram-project" style="margin-right: 8px;"></i>
                         Currently Worked Projects
                     </button>
@@ -1840,7 +1864,7 @@
                                         <td><strong>{{ task.task_name }}</strong></td>
                                         <td>
                                             <span
-                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ task.project_name|default:"-" }}</span>
+                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
                                         </td>
                                         <td><strong>{{ task.employee_name }}</strong></td>
                                         <td>
@@ -1869,7 +1893,8 @@
                         <div class="card-header"
                             style="display: flex; justify-content: space-between; align-items: center;">
                             <h2>
-                                <i class="fa-solid fa-diagram-project" style="color: var(--primary); margin-right: 8px;"></i>
+                                <i class="fa-solid fa-diagram-project"
+                                    style="color: var(--primary); margin-right: 8px;"></i>
                                 Currently Worked Projects (In Progress)
                             </h2>
                         </div>
@@ -2019,17 +2044,23 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-username">Username</label>
                     <input type="text" id="add-username" name="username" class="form-control"
-                        placeholder="Enter username" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
+                        placeholder="Enter username" pattern="[a-zA-Z0-9]+"
+                        title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
+                        required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-email">Email Address</label>
                     <input type="email" id="add-email" name="email" class="form-control"
-                        placeholder="Enter email address (e.g. user@example.com)" title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed." required>
+                        placeholder="Enter email address (e.g. user@example.com)"
+                        title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed."
+                        required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-password">Password</label>
                     <input type="password" id="add-password" name="password" class="form-control"
-                        placeholder="Enter password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
+                        placeholder="Enter password" pattern="[a-zA-Z0-9]+"
+                        title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
+                        required>
                 </div>
 
                 {% if role == 'superadmin' %}
@@ -2074,18 +2105,24 @@
 
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-username">Username</label>
-                    <input type="text" id="edit-username" name="username" class="form-control" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
+                    <input type="text" id="edit-username" name="username" class="form-control" pattern="[a-zA-Z0-9]+"
+                        title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
+                        required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-email">Email Address</label>
-                    <input type="email" id="edit-email" name="email" class="form-control" title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed." required>
+                    <input type="email" id="edit-email" name="email" class="form-control"
+                        title="Enter a valid email address. Multiple .com or duplicate domain extensions are not allowed."
+                        required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-password">Password</label>
                     <div class="password-toggle-wrapper">
                         <input type="password" id="edit-password" name="password" class="form-control"
-                            placeholder="Enter new password (optional)" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters.">
-                        <i class="fa-solid fa-eye-slash toggle-password-icon" onclick="togglePasswordVisibility('edit-password', this)" title="Show/Hide Password"></i>
+                            placeholder="Enter new password (optional)" pattern="[a-zA-Z0-9]+"
+                            title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters.">
+                        <i class="fa-solid fa-eye-slash toggle-password-icon"
+                            onclick="togglePasswordVisibility('edit-password', this)" title="Show/Hide Password"></i>
                     </div>
                 </div>
 
@@ -2482,7 +2519,7 @@
         function openEditProjectModal(id, name, type, status, startDate, dueDate, actualCompleteDate, description) {
             document.getElementById('edit-project-id').value = id;
             document.getElementById('edit-project-name').value = name;
-            
+
             const typeSelect = document.getElementById('edit-project-type');
             if (typeSelect && type) {
                 typeSelect.value = type;
@@ -2567,7 +2604,7 @@
                     const newUrl = window.location.pathname + '?tab=' + tabName;
                     window.history.replaceState(null, '', newUrl);
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             // Dynamically update hidden active_tab inputs in all forms
             document.querySelectorAll('form').forEach(form => {

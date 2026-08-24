@@ -68,7 +68,7 @@ def dashboard(request):
             if not new_username or not new_password or not new_email:
                 messages.error(request, 'All fields (Username, Password, Email) are required.')
             elif not re.match(r'^[a-zA-Z0-9]+$', new_username) or not re.match(r'^[a-zA-Z0-9]+$', new_password):
-                messages.error(request, 'Username and Password must contain only letters.')
+                messages.error(request, 'Username and Password must contain only letters (A-Z, a-z) and numbers (0-9). Special characters and spaces are not allowed.')
             elif not is_valid_email(new_email):
                 messages.error(request, 'Invalid Email address format.')
             else:
