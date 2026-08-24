@@ -937,7 +937,7 @@
             </li>
 
             <li class="menu-item {% if active_tab == 'in-progress' %}active{% endif %}"
-                onclick="switchTab('in-progress', this)">
+                onclick="window.location.href='{% url 'assigned_tasks' %}'">
                 <i class="fa-solid fa-spinner"></i> Assigned Tasks
             </li>
 
@@ -1074,7 +1074,8 @@
                             <i class="fa-solid fa-id-badge"></i>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="cursor: pointer;"
+                        onclick="window.location.href='{% url 'assigned_tasks' %}'">
                         <div class="stat-info">
                             <p>Total Assigned Tasks</p>
                             <h3>{{ total_tasks }}</h3>
@@ -1679,11 +1680,10 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"No Worked"}}</span>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"
-                                            onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|date:"Y-m-d"|default:task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}' , '{{ task.employee_name|escapejs }}')">
+                                        <button type="button" class="btn btn-sm btn-edit" style="margin-right: 4px;"onclick="openEditTaskModal({{ task.id }}, '{{ task.task_name|escapejs }}', '{{ task.project_name|default:""|escapejs }}', '{{ task.due_date|date:"Y-m-d"|default:task.due_date|default:"" }}', '{{ task.status|escapejs }}', '{{ task.description|escapejs }}' , '{{ task.employee_name|escapejs }}')">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"

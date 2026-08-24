@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Taskapp.urls.page_urls.login_page_urls')),
     path('', include('Taskapp.urls.page_urls.dashboard_urls')),
+    path('', include('Taskapp.urls.page_urls.assigned_tasks_urls')),
     path('', include('Taskapp.urls.page_urls.logout_urls')),
 ]
 

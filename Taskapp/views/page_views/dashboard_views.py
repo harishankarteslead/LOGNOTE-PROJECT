@@ -131,20 +131,21 @@ def dashboard(request):
                 messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
                 try:
-                    emp_list = []
+                    emp_ids = []
+                    emp_names = []
                     for emp_id in assigned_to_ids:
                         emp = employee_service.get_user_by_id(int(emp_id))
                         if emp:
-                            emp_list.append(emp)
+                            emp_ids.append(emp['id'])
+                            emp_names.append(emp['username'])
 
-                    if emp_list:
-                        employee_names_str = ", ".join([e['username'] for e in emp_list])
-                        primary_emp_id = emp_list[0]['id']
+                    if emp_names:
+                        employee_names_str = ", ".join(emp_names)
                         new_task_id = task_service.create_task(
                             task_name=task_name,
                             description=description,
-                            assigned_to_id=primary_emp_id,
-                            employee_name=employee_names_str,
+                            assigned_to_ids=emp_ids,
+                            employee_names=emp_names,
                             due_date=due_date,
                             status=status,
                             project_name=project_name
@@ -156,15 +157,15 @@ def dashboard(request):
             return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'update_task_status':
-            task_id = request.POST.get('task_id', '')
+            task_id = request.POST.get('task_id', '') or request.POST.get('assignment_id', '')
             new_status = request.POST.get('status', '').strip()
             redirect_tab = active_tab_post or 'dashboard'
             if task_id and new_status:
                 try:
-                    if new_status == 'In Progress':
-                        target_task = task_service.get_task_by_id(int(task_id))
-                        emp_id = target_task['assigned_to_id'] if target_task else user_id
-                        emp_name = target_task['employee_name'] if target_task else username
+                    target_task = task_service.get_task_by_id(int(task_id))
+                    if target_task and new_status == 'In Progress':
+                        emp_id = target_task['assigned_to_id']
+                        emp_name = target_task['employee_name']
                         active_task = task_service.get_employee_in_progress_task(
                             assigned_to_id=emp_id,
                             employee_name=emp_name,
@@ -173,12 +174,12 @@ def dashboard(request):
                         if active_task:
                             messages.error(
                                 request,
-                                f'("{active_task["task_name"]}") is already In Progress. Please set it to On Hold or Completed before starting another task.'
+                                f'Employee {emp_name} already has task ("{active_task["task_name"]}") In Progress. Please set it to On Hold or Completed first.'
                             )
                             return redirect(f'/dashboard/?tab={redirect_tab}')
 
                     task_service.update_task_status(int(task_id), new_status)
-                    messages.success(request, f'Task #{task_id} status updated to "{new_status}".')
+                    messages.success(request, f'Task status updated to "{new_status}".')
                 except Exception as e:
                     messages.error(request, f'Failed to update task status: {str(e)}')
             return redirect(f'/dashboard/?tab={redirect_tab}')
@@ -187,7 +188,7 @@ def dashboard(request):
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
                 return redirect('dashboard')
-            task_id = request.POST.get('task_id', '')
+            task_id = request.POST.get('task_id', '') or request.POST.get('assignment_id', '')
             if task_id:
                 try:
                     task_service.delete_task(int(task_id))
@@ -201,7 +202,7 @@ def dashboard(request):
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
                 return redirect('dashboard')
-            task_ids = request.POST.getlist('task_ids')
+            task_ids = request.POST.getlist('task_ids') or request.POST.getlist('assignment_ids')
             if task_ids:
                 try:
                     deleted_count = task_service.delete_tasks_bulk([int(tid) for tid in task_ids if str(tid).isdigit()])
@@ -276,7 +277,6 @@ def dashboard(request):
             dest_tab = active_tab_post or 'add-project'
             return redirect(f'/dashboard/?tab={dest_tab}')
 
-
         elif action == 'update_project_status':
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
@@ -311,15 +311,17 @@ def dashboard(request):
                 messages.error(request, 'Past dates are not allowed for Due Date.')
             else:
                 try:
-                    emp_list = []
+                    emp_ids = []
+                    emp_names = []
                     for emp_id in assigned_to_ids:
                         emp = employee_service.get_user_by_id(int(emp_id))
                         if emp:
-                            emp_list.append(emp)
+                            emp_ids.append(emp['id'])
+                            emp_names.append(emp['username'])
 
-                    if emp_list:
-                        employee_names_str = ", ".join([e['username'] for e in emp_list])
-                        primary_emp_id = emp_list[0]['id']
+                    if emp_names:
+                        employee_names_str = ", ".join(emp_names)
+                        primary_emp_id = emp_ids[0]
 
                         task_service.update_task_details(
                             task_id=int(task_id),
@@ -374,8 +376,7 @@ def dashboard(request):
             return redirect(f'/dashboard/?tab={dest_tab}')
 
         elif action == 'employee_edit_task':
-            task_id = request.POST.get('task_id', '')
-            description = request.POST.get('description', '').strip()
+            task_id = request.POST.get('task_id', '') or request.POST.get('assignment_id', '')
             status = request.POST.get('status', 'Not Worked').strip()
             dest_tab = active_tab_post or 'dashboard'
 
@@ -383,7 +384,8 @@ def dashboard(request):
                 messages.error(request, 'Task ID is required.')
             else:
                 try:
-                    if status == 'In Progress':
+                    target_task = task_service.get_task_by_id(int(task_id))
+                    if target_task and status == 'In Progress':
                         active_task = task_service.get_employee_in_progress_task(
                             assigned_to_id=user_id,
                             employee_name=username,
@@ -396,14 +398,11 @@ def dashboard(request):
                             )
                             return redirect(f'/dashboard/?tab={dest_tab}')
 
-                    task_service.update_task_employee_fields(int(task_id), description, status)
-                    messages.success(request, f'Task details updated successfully!')
+                    task_service.update_task_status(int(task_id), status)
+                    messages.success(request, f'Task status updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update task: {str(e)}')
             return redirect(f'/dashboard/?tab={dest_tab}')
-
-
-
 
     # Fetch data based on role
     active_tab = request.GET.get('tab', '').strip() or request.COOKIES.get('active_tab', '').strip() or 'dashboard'
@@ -414,13 +413,13 @@ def dashboard(request):
         'active_tab': active_tab,
     }
 
-    # Retrieve tasks & employees lists
     all_assignable_employees = employee_service.get_users_by_role('employee')
     context['all_assignable_employees'] = all_assignable_employees
 
     if user_role in ('superadmin', 'admin'):
         tasks = task_service.get_all_tasks()
         projects = project_service.get_all_projects()
+
         context['tasks'] = tasks
         context['projects'] = projects
         context['total_tasks'] = len(tasks)

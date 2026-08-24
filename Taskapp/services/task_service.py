@@ -3,8 +3,8 @@ from django.db import connection
 
 def create_task_table():
     """
-    Raw SQL query to create or update the tasks database table if it doesn't exist.
-    Compatible with MySQL backend.
+    Raw SQL query to create or update the tasks database table.
+    Compatible with MySQL and SQLite backends.
     """
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -12,8 +12,8 @@ def create_task_table():
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 task_name VARCHAR(255) NOT NULL,
                 description TEXT,
-                assigned_to_id INT NOT NULL,
-                employee_name VARCHAR(150) NOT NULL,
+                assigned_to_id INT NOT NULL DEFAULT 0,
+                employee_name VARCHAR(150) NOT NULL DEFAULT '',
                 status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
                 due_date DATE NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -28,26 +28,57 @@ def create_task_table():
         if 'project_name' not in existing_cols:
             cursor.execute("ALTER TABLE tasks ADD COLUMN project_name VARCHAR(255) NULL;")
 
+        # Drop task_assignments table if it exists to keep database clean
+        try:
+            cursor.execute("DROP TABLE IF EXISTS task_assignments;")
+        except Exception:
+            pass
 
-def create_task(task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Not Worked', project_name=None):
+
+def create_task(task_name, description, assigned_to_ids=None, employee_names=None, due_date=None, status='Not Worked', project_name=None):
     """
-    Insert a new task into the tasks table.
+    Insert task records directly into the tasks table.
+    If assigned to multiple employees, creates a separate row in tasks table for each employee.
     """
     create_task_table()
     due_val = due_date if due_date else None
     proj_val = project_name if project_name else None
-    emp_id_val = int(assigned_to_id) if assigned_to_id else 0
+
+    # Handle assigned_to_ids argument
+    if isinstance(assigned_to_ids, (int, str)):
+        assigned_to_ids = [assigned_to_ids] if str(assigned_to_ids).isdigit() else []
+    assigned_to_ids = [int(i) for i in (assigned_to_ids or []) if str(i).isdigit()]
+
+    # Handle employee_names argument
+    if isinstance(employee_names, str):
+        employee_names = [n.strip() for n in employee_names.split(',') if n.strip()]
+    employee_names = employee_names or []
+
+    created_task_ids = []
     with connection.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
-        """, [task_name, description, emp_id_val, employee_name, due_val, status, proj_val])
-        return cursor.lastrowid
+        if employee_names:
+            for idx, emp_name in enumerate(employee_names):
+                emp_id = assigned_to_ids[idx] if idx < len(assigned_to_ids) else 0
+                cursor.execute("""
+                    INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """, [task_name, description, emp_id, emp_name, due_val, status, proj_val])
+                created_task_ids.append(cursor.lastrowid)
+        else:
+            primary_emp_id = assigned_to_ids[0] if assigned_to_ids else 0
+            cursor.execute("""
+                INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+            """, [task_name, description, primary_emp_id, '', due_val, status, proj_val])
+            created_task_ids.append(cursor.lastrowid)
+
+    return created_task_ids[0] if created_task_ids else None
 
 
 def get_all_tasks():
     """
-    Retrieve all assigned tasks from the database ordered by id DESC.
+    Retrieve all assigned tasks from the tasks table ordered by id DESC.
+    Each row represents a specific task assigned to an employee with their individual status.
     """
     create_task_table()
     with connection.cursor() as cursor:
@@ -75,8 +106,7 @@ def get_all_tasks():
 
 def get_tasks_by_employee(assigned_to_id=0, employee_name=None):
     """
-    Retrieve tasks assigned specifically to a given employee by ID or username.
-    Supports comma-separated employee names.
+    Retrieve tasks assigned specifically to a given employee by ID or username from the tasks table.
     """
     create_task_table()
     emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
@@ -85,7 +115,8 @@ def get_tasks_by_employee(assigned_to_id=0, employee_name=None):
         cursor.execute("""
             SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
             FROM tasks
-            WHERE (%s > 0 AND assigned_to_id = %s) OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s))
+            WHERE (%s > 0 AND assigned_to_id = %s) 
+               OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s))
             ORDER BY id DESC;
         """, [emp_id_val, emp_id_val, employee_name or '', emp_search])
         rows = cursor.fetchall()
@@ -107,7 +138,7 @@ def get_tasks_by_employee(assigned_to_id=0, employee_name=None):
 
 def update_task_status(task_id, status):
     """
-    Update the status of a specific task.
+    Update status of a specific task row in the tasks table.
     """
     create_task_table()
     with connection.cursor() as cursor:
@@ -121,14 +152,11 @@ def update_task_status(task_id, status):
 
 def delete_task(task_id):
     """
-    Delete a task record from the tasks table.
+    Delete a task record from the tasks table by ID.
     """
     create_task_table()
     with connection.cursor() as cursor:
-        cursor.execute("""
-            DELETE FROM tasks
-            WHERE id = %s;
-        """, [task_id])
+        cursor.execute("DELETE FROM tasks WHERE id = %s;", [task_id])
         return cursor.rowcount
 
 
@@ -141,17 +169,13 @@ def delete_tasks_bulk(task_ids):
     create_task_table()
     placeholders = ', '.join(['%s'] * len(task_ids))
     with connection.cursor() as cursor:
-        cursor.execute(f"""
-            DELETE FROM tasks
-            WHERE id IN ({placeholders});
-        """, list(task_ids))
+        cursor.execute(f"DELETE FROM tasks WHERE id IN ({placeholders});", list(task_ids))
         return cursor.rowcount
-
 
 
 def update_task_details(task_id, task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Not Worked', project_name=None):
     """
-    Update all details of a specific task.
+    Update all details of a specific task row in the tasks table.
     """
     create_task_table()
     due_val = due_date if due_date else None
@@ -168,21 +192,21 @@ def update_task_details(task_id, task_name, description, assigned_to_id=0, emplo
 
 def update_task_employee_fields(task_id, description, status):
     """
-    Update description and status of a task (for Employee role).
+    Update description and status of a task for employee role.
     """
     create_task_table()
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tasks
-            SET description = %s, status = %s
+            SET status = %s
             WHERE id = %s;
-        """, [description, status, task_id])
+        """, [status, task_id])
         return cursor.rowcount
 
 
 def get_task_by_id(task_id):
     """
-    Retrieve a specific task by ID.
+    Retrieve a specific task by ID from the tasks table.
     """
     create_task_table()
     with connection.cursor() as cursor:
@@ -209,8 +233,8 @@ def get_task_by_id(task_id):
 
 def get_employee_in_progress_task(assigned_to_id=0, employee_name=None, exclude_task_id=None):
     """
-    Check if an employee currently has an 'In Progress' task assigned.
-    Returns the active task dict if found, or None if no task is currently In Progress.
+    Check if an employee currently has an 'In Progress' task in the tasks table.
+    Returns the active task dict if found, or None.
     """
     create_task_table()
     emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
@@ -240,6 +264,8 @@ def get_employee_in_progress_task(assigned_to_id=0, employee_name=None, exclude_
                 'project_name': r[8] if len(r) > 8 else None
             }
         return None
+
+
 
 
 
