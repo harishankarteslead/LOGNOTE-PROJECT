@@ -1,4 +1,5 @@
 from django.db import connection
+from django.contrib.auth.hashers import make_password, check_password
 
 
 def create_employee_table():
@@ -11,12 +12,40 @@ def create_employee_table():
             CREATE TABLE IF NOT EXISTS employees (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 username VARCHAR(150) NOT NULL UNIQUE,
-                password VARCHAR(128) NOT NULL,
+                password VARCHAR(255) NOT NULL,
                 email VARCHAR(254) NOT NULL,
                 role VARCHAR(20) NOT NULL CHECK (role IN ('superadmin', 'admin', 'employee')),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+        # Ensure password column fits long hashes
+        try:
+            cursor.execute("ALTER TABLE employees MODIFY COLUMN password VARCHAR(255) NOT NULL;")
+        except Exception:
+            pass
+
+
+def is_hashed(password_str):
+    """
+    Check if password is already hashed using standard Django hasher formats.
+    """
+    if not password_str:
+        return False
+    return password_str.startswith(('pbkdf2_sha256$', 'pbkdf2_sha1$', 'bcrypt$', 'argon2$', 'crypt$', 'md5$', 'sha1$'))
+
+
+def migrate_existing_passwords():
+    """
+    Scans all rows in the employees table and converts plain-text passwords into PBKDF2 hashes.
+    """
+    create_employee_table()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT id, password FROM employees;")
+        rows = cursor.fetchall()
+        for user_id, raw_pass in rows:
+            if raw_pass and not is_hashed(raw_pass):
+                hashed_pass = make_password(raw_pass)
+                cursor.execute("UPDATE employees SET password = %s WHERE id = %s;", [hashed_pass, user_id])
 
 
 def seed_default_users():
@@ -24,16 +53,15 @@ def seed_default_users():
     Seed initial default user accounts if the employees table is empty.
     Allows immediate testing for all 3 role types.
     """
-    # create_employee_table()
     with connection.cursor() as cursor:
         cursor.execute("SELECT COUNT(*) FROM employees;")
         count = cursor.fetchone()[0]
         if count == 0:
             default_users = [
-                ('superadmin', 'super123', 'superadmin@gmail.com', 'superadmin'),
-                ('admin', 'admin123', 'admin@gmail.com', 'admin'),
-                ('employee', 'emp123', 'employee@gmail.com', 'employee'),
-                ('emp1', 'emp123', 'emp1@gmail.com', 'employee')
+                ('superadmin', make_password('super123'), 'superadmin@gmail.com', 'superadmin'),
+                ('admin', make_password('admin123'), 'admin@gmail.com', 'admin'),
+                ('employee', make_password('emp123'), 'employee@gmail.com', 'employee'),
+                ('emp1', make_password('emp123'), 'emp1@gmail.com', 'employee')
             ]
             cursor.executemany("""
                 INSERT INTO employees (username, password, email, role)
@@ -46,8 +74,7 @@ def authenticate_user(username, password):
     Raw SQL query to authenticate a user by matching username and case-sensitive password.
     Returns user details dictionary if found, otherwise None.
     """
-    # create_employee_table()
-    # seed_default_users()
+    migrate_existing_passwords()
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT id, username, email, role, password 
@@ -57,32 +84,44 @@ def authenticate_user(username, password):
         rows = cursor.fetchall()
         for row in rows:
             db_id, db_username, db_email, db_role, db_password = row
-            if db_password == password:
-                return {
-                    'id': db_id,
-                    'username': db_username,
-                    'email': db_email,
-                    'role': db_role
-                }
+            if is_hashed(db_password):
+                if check_password(password, db_password):
+                    return {
+                        'id': db_id,
+                        'username': db_username,
+                        'email': db_email,
+                        'role': db_role
+                    }
+            else:
+                if db_password == password:
+                    new_hash = make_password(password)
+                    with connection.cursor() as update_cursor:
+                        update_cursor.execute("UPDATE employees SET password = %s WHERE id = %s;", [new_hash, db_id])
+                    return {
+                        'id': db_id,
+                        'username': db_username,
+                        'email': db_email,
+                        'role': db_role
+                    }
         return None
-
-
 
 
 def insert_user(username, password, email, role):
     """
-    Raw SQL query to insert a new user record.
+    Raw SQL query to insert a new user record with password hashed using PBKDF2.
     Ensures role enum value is valid before executing.
     """
     create_employee_table()
     if role not in ('superadmin', 'admin', 'employee'):
         raise ValueError("Invalid role enum value. Must be 'superadmin', 'admin', or 'employee'.")
     
+    hashed_password = make_password(password) if password else make_password('')
+    
     with connection.cursor() as cursor:
         cursor.execute("""
             INSERT INTO employees (username, password, email, role)
             VALUES (%s, %s, %s, %s);
-        """, [username, password, email, role])
+        """, [username, hashed_password, email, role])
         return cursor.lastrowid
 
 
@@ -161,17 +200,26 @@ def get_users_by_role(role):
 def update_user(user_id, username, email, password, role):
     """
     Raw SQL query to update user details in the employees table.
+    If password is provided, hashes and updates it. Otherwise retains current password.
     """
     create_employee_table()
     if role not in ('superadmin', 'admin', 'employee'):
         raise ValueError("Invalid role enum value. Must be 'superadmin', 'admin', or 'employee'.")
     
     with connection.cursor() as cursor:
-        cursor.execute("""
-            UPDATE employees
-            SET username = %s, email = %s, password = %s, role = %s
-            WHERE id = %s;
-        """, [username, email, password, role, user_id])
+        if password and len(password.strip()) > 0:
+            hashed_password = make_password(password.strip())
+            cursor.execute("""
+                UPDATE employees
+                SET username = %s, email = %s, password = %s, role = %s
+                WHERE id = %s;
+            """, [username, email, hashed_password, role, user_id])
+        else:
+            cursor.execute("""
+                UPDATE employees
+                SET username = %s, email = %s, role = %s
+                WHERE id = %s;
+            """, [username, email, role, user_id])
         return cursor.rowcount
 
 
@@ -186,4 +234,5 @@ def delete_user(user_id):
             WHERE id = %s;
         """, [user_id])
         return cursor.rowcount
+
 

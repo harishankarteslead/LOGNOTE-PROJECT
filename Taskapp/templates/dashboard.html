@@ -898,7 +898,7 @@
                         {% elif 'error' in message.tags or 'danger' in message.tags or 'warning' in message.tags %}
                         Swal.fire({
                             icon: 'warning',
-                            title: 'Attention Required',
+                            title: 'Invalid',
                             text: "{{ message|escapejs }}",
                             customClass: {
                                 popup: 'swal-dark-glass',
@@ -1953,7 +1953,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-password">Password</label>
                     <input type="text" id="edit-password" name="password" class="form-control"
-                        placeholder="Enter updated password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters." required>
+                        placeholder="Enter the password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters.">
                 </div>
 
                 {% if role == 'superadmin' %}
