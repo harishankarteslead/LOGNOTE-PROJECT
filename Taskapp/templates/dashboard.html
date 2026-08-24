@@ -576,6 +576,28 @@
             border: 1px solid #bbf7d0;
         }
 
+        /* Status Select Pill Styling */
+        .status-select {
+            padding: 6px 28px 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+        }
+
+        .status-select:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
         /* Task Table Filter Bar Styles */
         .table-filter-bar {
             padding: 14px 20px;
@@ -731,6 +753,90 @@
             color: #94a3b8;
             padding: 24px !important;
             font-weight: 500;
+        }
+
+        /* Password Eye Toggle Input Wrapper */
+        .password-toggle-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-toggle-wrapper .form-control {
+            padding-right: 40px !important;
+        }
+
+        .toggle-password-icon {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 15px;
+            transition: color 0.2s ease;
+            z-index: 5;
+        }
+
+        .toggle-password-icon:hover {
+            color: var(--primary);
+        }
+
+        /* Table Pagination Footer Styles */
+        .table-pagination-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .pagination-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #ffffff;
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #e0e7ff;
+            color: var(--primary-hover);
+            border-color: #c7d2fe;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Tabs display control */
@@ -1585,6 +1691,11 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Task Table Pagination Footer -->
+                    <div class="table-pagination-footer" id="task-pagination-footer">
+                        <div class="pagination-info" id="task-pagination-info">Showing 0 to 0 of 0 entries</div>
+                        <div class="pagination-controls" id="task-pagination-controls"></div>
+                    </div>
                 </div>
             </div>
             {% endif %}
@@ -1675,6 +1786,11 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Project Table Pagination Footer -->
+                    <div class="table-pagination-footer" id="project-pagination-footer">
+                        <div class="pagination-info" id="project-pagination-info">Showing 0 to 0 of 0 entries</div>
+                        <div class="pagination-controls" id="project-pagination-controls"></div>
                     </div>
                 </div>
             </div>
@@ -1966,8 +2082,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-password">Password</label>
-                    <input type="text" id="edit-password" name="password" class="form-control"
-                        placeholder="Enter the password" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters.">
+                    <div class="password-toggle-wrapper">
+                        <input type="password" id="edit-password" name="password" class="form-control"
+                            placeholder="Enter new password (optional)" pattern="[a-zA-Z0-9]+" title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters.">
+                        <i class="fa-solid fa-eye-slash toggle-password-icon" onclick="togglePasswordVisibility('edit-password', this)" title="Show/Hide Password"></i>
+                    </div>
                 </div>
 
                 {% if role == 'superadmin' %}
@@ -2178,12 +2297,12 @@
                     <div class="form-group">
                         <label for="edit-project-type">Project Type</label>
                         <select id="edit-project-type" name="project_type" class="form-control" required>
-                            <option value="Data logger">Data Logger</option>
-                            <option value="Internal project">Internal project</option>
+                            <option value="Data Logger">Data Logger</option>
+                            <option value="Internal Project">Internal Project</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="edit-project-status">Status</label>
                         <select id="edit-project-status" name="status" class="form-control"
                             onchange="handleProjectStatusChange(this, 'edit')">
@@ -2192,7 +2311,7 @@
                             <option value="In Progress">In Progress</option>
                             <option value="Completed">Completed</option>
                         </select>
-                    </div>
+                    </div> -->
 
                     <div class="form-group" style="display: none;">
                         <label for="edit-project-start-date">Start Date</label>
@@ -2363,7 +2482,20 @@
         function openEditProjectModal(id, name, type, status, startDate, dueDate, actualCompleteDate, description) {
             document.getElementById('edit-project-id').value = id;
             document.getElementById('edit-project-name').value = name;
-            document.getElementById('edit-project-type').value = type;
+            
+            const typeSelect = document.getElementById('edit-project-type');
+            if (typeSelect && type) {
+                typeSelect.value = type;
+                if (!typeSelect.value || typeSelect.selectedIndex === -1) {
+                    for (let opt of typeSelect.options) {
+                        if (opt.value.toLowerCase().trim() === type.toLowerCase().trim() || opt.text.toLowerCase().trim() === type.toLowerCase().trim()) {
+                            opt.selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             const statusSelectEl = document.getElementById('edit-project-status');
             if (statusSelectEl) {
                 statusSelectEl.value = status || 'Not Worked';
@@ -2471,17 +2603,51 @@
             }
         });
 
+        function togglePasswordVisibility(inputId, iconEl) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconEl.classList.remove('fa-eye-slash');
+                iconEl.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                iconEl.classList.remove('fa-eye');
+                iconEl.classList.add('fa-eye-slash');
+            }
+        }
+
+        function resetPasswordToggleField(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.type = 'password';
+            const wrapper = input.closest('.password-toggle-wrapper');
+            if (wrapper) {
+                const icon = wrapper.querySelector('.toggle-password-icon');
+                if (icon) {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            }
+        }
+
         function openAddModal() {
+            resetPasswordToggleField('add-password');
+            const passField = document.getElementById('add-password');
+            if (passField) passField.value = '';
+
             const modal = document.getElementById('addMemberModal');
             if (modal) modal.classList.add('active');
         }
 
         function closeAddModal() {
+            resetPasswordToggleField('add-password');
             const modal = document.getElementById('addMemberModal');
             if (modal) modal.classList.remove('active');
         }
 
         function openEditModal(id, username, email, role) {
+            resetPasswordToggleField('edit-password');
             const idField = document.getElementById('edit-user-id');
             if (idField) idField.value = id;
 
@@ -2502,6 +2668,7 @@
         }
 
         function closeEditModal() {
+            resetPasswordToggleField('edit-password');
             const modal = document.getElementById('editModal');
             if (modal) modal.classList.remove('active');
         }
@@ -2552,23 +2719,29 @@
             });
         }
 
-        /* --- Client-Side Table Filter Functions --- */
-        function triggerFilter(element) {
-            const filterBar = element.closest('.table-filter-bar');
-            if (!filterBar) return;
+        /* --- Client-Side Table Filter & Pagination Functions --- */
+        let currentTaskPage = 1;
+        let lastMatchingTaskRows = [];
 
-            const card = filterBar.closest('.card');
+        function triggerFilter(element, page = 1) {
+            let card;
+            if (element && element.closest) {
+                card = element.closest('.card');
+            } else {
+                card = document.querySelector('#tab-form-data .card');
+            }
             if (!card) return;
 
             const tbody = card.querySelector('tbody');
             if (!tbody) return;
 
-            const searchVal = (filterBar.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
-            const statusVal = (filterBar.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
-            const exactDateVal = filterBar.querySelector('.filter-exact-date')?.value || '';
+            const filterBar = card.querySelector('.table-filter-bar');
+            const searchVal = (filterBar?.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
+            const statusVal = (filterBar?.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
+            const exactDateVal = filterBar?.querySelector('.filter-exact-date')?.value || '';
 
-            const rows = tbody.querySelectorAll('tr.task-row');
-            let visibleCount = 0;
+            const rows = Array.from(tbody.querySelectorAll('tr.task-row'));
+            const matchingRows = [];
 
             rows.forEach(row => {
                 const taskName = row.getAttribute('data-task-name') || '';
@@ -2577,7 +2750,6 @@
                 const empName = row.getAttribute('data-employee-name') || '';
                 const status = row.getAttribute('data-status') || '';
                 const dueDateRaw = row.getAttribute('data-due-date') || '';
-                const createdAtRaw = row.getAttribute('data-created-at') || '';
 
                 // Text search matching task name, project, employee, description
                 const matchSearch = !searchVal ||
@@ -2606,12 +2778,7 @@
                 }
 
                 if (matchSearch && matchStatus && matchDate) {
-                    row.style.display = '';
-                    visibleCount++;
-                    const snoCell = row.querySelector('td strong');
-                    if (snoCell) {
-                        snoCell.innerText = visibleCount;
-                    }
+                    matchingRows.push(row);
                 } else {
                     row.style.display = 'none';
                 }
@@ -2619,11 +2786,11 @@
 
             // Handle Empty Filter Row
             let emptyRow = tbody.querySelector('.empty-filter-row');
-            if (visibleCount === 0 && rows.length > 0) {
+            if (matchingRows.length === 0 && rows.length > 0) {
                 if (!emptyRow) {
                     emptyRow = document.createElement('tr');
                     emptyRow.className = 'empty-filter-row';
-                    const colSpan = card.querySelectorAll('thead th').length || 8;
+                    const colSpan = card.querySelectorAll('thead th').length || 9;
                     emptyRow.innerHTML = `<td colspan="${colSpan}" style="text-align: center; color: #94a3b8; padding: 24px;">No tasks matching the selected search or filter criteria.</td>`;
                     tbody.appendChild(emptyRow);
                 } else {
@@ -2631,6 +2798,76 @@
                 }
             } else if (emptyRow) {
                 emptyRow.style.display = 'none';
+            }
+
+            if (card.querySelector('#task-pagination-footer')) {
+                applyTaskPagination(card, matchingRows, page);
+            } else {
+                matchingRows.forEach((row, idx) => {
+                    row.style.display = '';
+                    const snoCell = row.children[1]?.querySelector('strong') || row.querySelector('td strong');
+                    if (snoCell) snoCell.innerText = idx + 1;
+                });
+            }
+        }
+
+        function applyTaskPagination(card, matchingRows, page = 1) {
+            lastMatchingTaskRows = matchingRows;
+            const pageSize = 10;
+            const totalRows = matchingRows.length;
+            const totalPages = Math.ceil(totalRows / pageSize) || 1;
+
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+            currentTaskPage = page;
+
+            const startIndex = (currentTaskPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, totalRows);
+
+            matchingRows.forEach((row, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = '';
+                    const snoCell = row.children[1]?.querySelector('strong') || row.querySelector('td strong');
+                    if (snoCell) {
+                        snoCell.innerText = index + 1;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const infoEl = document.getElementById('task-pagination-info');
+            if (infoEl) {
+                if (totalRows === 0) {
+                    infoEl.innerText = 'Showing 0 to 0 of 0 entries';
+                } else {
+                    infoEl.innerText = `Showing ${startIndex + 1} to ${endIndex} of ${totalRows} entries`;
+                }
+            }
+
+            const controlsEl = document.getElementById('task-pagination-controls');
+            if (controlsEl) {
+                let html = '';
+                html += `<button type="button" class="pagination-btn" ${currentTaskPage === 1 ? 'disabled' : ''} onclick="goToTaskPage(${currentTaskPage - 1})"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentTaskPage) {
+                        html += `<button type="button" class="pagination-btn active">${i}</button>`;
+                    } else {
+                        html += `<button type="button" class="pagination-btn" onclick="goToTaskPage(${i})">${i}</button>`;
+                    }
+                }
+
+                html += `<button type="button" class="pagination-btn" ${currentTaskPage === totalPages || totalPages === 0 ? 'disabled' : ''} onclick="goToTaskPage(${currentTaskPage + 1})">Next <i class="fa-solid fa-chevron-right"></i></button>`;
+
+                controlsEl.innerHTML = html;
+            }
+        }
+
+        function goToTaskPage(page) {
+            const card = document.querySelector('#tab-form-data .card');
+            if (card) {
+                applyTaskPagination(card, lastMatchingTaskRows, page);
             }
         }
 
@@ -2710,25 +2947,31 @@
             }
         }
 
-        function triggerProjectFilter(element) {
-            const filterBar = element.closest('.table-filter-bar');
-            if (!filterBar) return;
+        let currentProjectPage = 1;
+        let lastMatchingProjectRows = [];
 
-            const card = filterBar.closest('.card');
+        function triggerProjectFilter(element, page = 1) {
+            let card;
+            if (element && element.closest) {
+                card = element.closest('.card');
+            } else {
+                card = document.querySelector('#tab-add-project .card');
+            }
             if (!card) return;
 
             const tbody = card.querySelector('tbody');
             if (!tbody) return;
 
-            const searchVal = (filterBar.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
-            const statusVal = (filterBar.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
+            const filterBar = card.querySelector('.table-filter-bar');
+            const searchVal = (filterBar?.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
+            const statusVal = (filterBar?.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
 
-            const rows = tbody.querySelectorAll('tr.project-row');
-            let visibleCount = 0;
+            const rows = Array.from(tbody.querySelectorAll('tr.project-row, #tab-add-project tbody tr:not(.empty-filter-row)'));
+            const matchingRows = [];
 
             rows.forEach(row => {
-                const projName = row.getAttribute('data-project-name') || '';
-                const projType = row.getAttribute('data-project-type') || '';
+                const projName = row.getAttribute('data-project-name') || row.children[2]?.innerText.toLowerCase() || '';
+                const projType = row.getAttribute('data-project-type') || row.children[3]?.innerText.toLowerCase() || '';
                 const desc = row.getAttribute('data-description') || '';
                 const status = row.getAttribute('data-status') || '';
 
@@ -2740,23 +2983,19 @@
                 const matchStatus = (statusVal === 'all') || (status === statusVal);
 
                 if (matchSearch && matchStatus) {
-                    row.style.display = '';
-                    visibleCount++;
-                    const snoCell = row.querySelector('td strong');
-                    if (snoCell) {
-                        snoCell.innerText = visibleCount;
-                    }
+                    matchingRows.push(row);
                 } else {
                     row.style.display = 'none';
                 }
             });
 
             let emptyRow = tbody.querySelector('.empty-filter-row');
-            if (visibleCount === 0 && rows.length > 0) {
+            if (matchingRows.length === 0 && rows.length > 0) {
                 if (!emptyRow) {
                     emptyRow = document.createElement('tr');
                     emptyRow.className = 'empty-filter-row';
-                    emptyRow.innerHTML = `<td colspan="9" style="text-align: center; color: #94a3b8; padding: 24px;">No projects matching the selected search or filter criteria.</td>`;
+                    const colSpan = card.querySelectorAll('thead th').length || 10;
+                    emptyRow.innerHTML = `<td colspan="${colSpan}" style="text-align: center; color: #94a3b8; padding: 24px;">No projects matching the selected search or filter criteria.</td>`;
                     tbody.appendChild(emptyRow);
                 } else {
                     emptyRow.style.display = '';
@@ -2764,7 +3003,88 @@
             } else if (emptyRow) {
                 emptyRow.style.display = 'none';
             }
+
+            if (card.querySelector('#project-pagination-footer')) {
+                applyProjectPagination(card, matchingRows, page);
+            } else {
+                matchingRows.forEach((row, idx) => {
+                    row.style.display = '';
+                    const snoCell = row.children[1]?.querySelector('strong') || row.querySelector('td strong');
+                    if (snoCell) snoCell.innerText = idx + 1;
+                });
+            }
         }
+
+        function applyProjectPagination(card, matchingRows, page = 1) {
+            lastMatchingProjectRows = matchingRows;
+            const pageSize = 10;
+            const totalRows = matchingRows.length;
+            const totalPages = Math.ceil(totalRows / pageSize) || 1;
+
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+            currentProjectPage = page;
+
+            const startIndex = (currentProjectPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, totalRows);
+
+            matchingRows.forEach((row, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = '';
+                    const snoCell = row.children[1]?.querySelector('strong') || row.querySelector('td strong');
+                    if (snoCell) {
+                        snoCell.innerText = index + 1;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const infoEl = document.getElementById('project-pagination-info');
+            if (infoEl) {
+                if (totalRows === 0) {
+                    infoEl.innerText = 'Showing 0 to 0 of 0 entries';
+                } else {
+                    infoEl.innerText = `Showing ${startIndex + 1} to ${endIndex} of ${totalRows} entries`;
+                }
+            }
+
+            const controlsEl = document.getElementById('project-pagination-controls');
+            if (controlsEl) {
+                let html = '';
+                html += `<button type="button" class="pagination-btn" ${currentProjectPage === 1 ? 'disabled' : ''} onclick="goToProjectPage(${currentProjectPage - 1})"><i class="fa-solid fa-chevron-left"></i> Previous</button>`;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentProjectPage) {
+                        html += `<button type="button" class="pagination-btn active">${i}</button>`;
+                    } else {
+                        html += `<button type="button" class="pagination-btn" onclick="goToProjectPage(${i})">${i}</button>`;
+                    }
+                }
+
+                html += `<button type="button" class="pagination-btn" ${currentProjectPage === totalPages || totalPages === 0 ? 'disabled' : ''} onclick="goToProjectPage(${currentProjectPage + 1})">Next <i class="fa-solid fa-chevron-right"></i></button>`;
+
+                controlsEl.innerHTML = html;
+            }
+        }
+
+        function goToProjectPage(page) {
+            const card = document.querySelector('#tab-add-project .card');
+            if (card) {
+                applyProjectPagination(card, lastMatchingProjectRows, page);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const taskCard = document.querySelector('#tab-form-data .card');
+            if (taskCard) {
+                triggerFilter(taskCard);
+            }
+            const projectCard = document.querySelector('#tab-add-project .card');
+            if (projectCard) {
+                triggerProjectFilter(projectCard);
+            }
+        });
 
         function confirmDeleteForm(event, messageText) {
             event.preventDefault();
