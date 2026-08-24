@@ -132,6 +132,23 @@ def delete_task(task_id):
         return cursor.rowcount
 
 
+def delete_tasks_bulk(task_ids):
+    """
+    Delete multiple task records from the tasks table by their IDs.
+    """
+    if not task_ids:
+        return 0
+    create_task_table()
+    placeholders = ', '.join(['%s'] * len(task_ids))
+    with connection.cursor() as cursor:
+        cursor.execute(f"""
+            DELETE FROM tasks
+            WHERE id IN ({placeholders});
+        """, list(task_ids))
+        return cursor.rowcount
+
+
+
 def update_task_details(task_id, task_name, description, assigned_to_id=0, employee_name='', due_date=None, status='Not Worked', project_name=None):
     """
     Update all details of a specific task.

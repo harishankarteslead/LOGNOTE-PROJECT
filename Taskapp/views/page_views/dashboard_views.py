@@ -197,6 +197,22 @@ def dashboard(request):
             dest_tab = active_tab_post or 'form-data'
             return redirect(f'/dashboard/?tab={dest_tab}')
 
+        elif action == 'bulk_delete_tasks':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+            task_ids = request.POST.getlist('task_ids')
+            if task_ids:
+                try:
+                    deleted_count = task_service.delete_tasks_bulk([int(tid) for tid in task_ids if str(tid).isdigit()])
+                    messages.success(request, f'{deleted_count} task(s) deleted successfully.')
+                except Exception as e:
+                    messages.error(request, f'Failed to bulk delete tasks: {str(e)}')
+            else:
+                messages.warning(request, 'No tasks were selected for deletion.')
+            dest_tab = active_tab_post or 'form-data'
+            return redirect(f'/dashboard/?tab={dest_tab}')
+
         elif action == 'add_project':
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
@@ -243,6 +259,23 @@ def dashboard(request):
                     messages.error(request, f'Failed to delete project: {str(e)}')
             dest_tab = active_tab_post or 'add-project'
             return redirect(f'/dashboard/?tab={dest_tab}')
+
+        elif action == 'bulk_delete_projects':
+            if user_role not in ('superadmin', 'admin'):
+                messages.error(request, 'Permission denied.')
+                return redirect('dashboard')
+            project_ids = request.POST.getlist('project_ids')
+            if project_ids:
+                try:
+                    deleted_count = project_service.delete_projects_bulk([int(pid) for pid in project_ids if str(pid).isdigit()])
+                    messages.success(request, f'{deleted_count} project(s) deleted successfully.')
+                except Exception as e:
+                    messages.error(request, f'Failed to bulk delete projects: {str(e)}')
+            else:
+                messages.warning(request, 'No projects were selected for deletion.')
+            dest_tab = active_tab_post or 'add-project'
+            return redirect(f'/dashboard/?tab={dest_tab}')
+
 
         elif action == 'update_project_status':
             if user_role not in ('superadmin', 'admin'):

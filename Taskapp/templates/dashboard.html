@@ -1484,9 +1484,14 @@
                             <i class="fa-solid fa-table-list" style="color: var(--primary); margin-right: 8px;"></i>
                             Saved Tasks Records
                         </h2>
-                        <button type="button" class="btn btn-primary" onclick="openAssignTaskModal()">
-                            <i class="fa-solid fa-plus"></i> Assign New Task
-                        </button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button type="button" id="btn-bulk-delete-tasks" class="btn btn-danger" style="display: none;" onclick="triggerBulkDeleteTasks()">
+                                <i class="fa-solid fa-trash"></i> Delete Selected (<span id="selected-tasks-count">0</span>)
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="openAssignTaskModal()">
+                                <i class="fa-solid fa-plus"></i> Assign New Task
+                            </button>
+                        </div>
                     </div>
                     <!-- Filter Toolbar -->
                     <div class="table-filter-bar">
@@ -1513,19 +1518,14 @@
                             <input type="date" class="filter-date-input filter-exact-date"
                                 onchange="triggerFilter(this)">
                         </div>
-                        <!-- <div class="filter-presets">
-                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
-                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
-                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
-                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
-                                <i class="fa-solid fa-rotate-left"></i> Reset
-                            </button>
-                        </div> -->
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;">
+                                        <input type="checkbox" id="select-all-tasks" onchange="toggleSelectAllTasks(this)" title="Select All Tasks">
+                                    </th>
                                     <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
@@ -1545,6 +1545,9 @@
                                     data-status="{{ task.status|default:'Not Worked'|lower }}"
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" class="task-select-cb" value="{{ task.id }}" onchange="updateTaskBulkDeleteState()">
+                                    </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td><span
@@ -1575,7 +1578,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">No tasks
+                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 20px;">No tasks
                                         assigned yet.</td>
                                 </tr>
                                 {% endfor %}
@@ -1596,14 +1599,22 @@
                             <i class="fa-solid fa-folder-plus" style="color: var(--primary); margin-right: 8px;"></i>
                             Projects Records
                         </h2>
-                        <button type="button" class="btn btn-primary" onclick="openAddProjectModal()">
-                            <i class="fa-solid fa-plus"></i> Add New Project
-                        </button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button type="button" id="btn-bulk-delete-projects" class="btn btn-danger" style="display: none;" onclick="triggerBulkDeleteProjects()">
+                                <i class="fa-solid fa-trash"></i> Delete Selected (<span id="selected-projects-count">0</span>)
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="openAddProjectModal()">
+                                <i class="fa-solid fa-plus"></i> Add New Project
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
+                                    <th style="width: 40px; text-align: center;">
+                                        <input type="checkbox" id="select-all-projects" onchange="toggleSelectAllProjects(this)" title="Select All Projects">
+                                    </th>
                                     <th>S.No</th>
                                     <th>Project Name</th>
                                     <th>Project Type</th>
@@ -1618,6 +1629,9 @@
                             <tbody>
                                 {% for proj in projects %}
                                 <tr>
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" class="project-select-cb" value="{{ proj.id }}" onchange="updateProjectBulkDeleteState()">
+                                    </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
                                     <td><span class="role-tag role-employee">{{ proj.project_type }}</span></td>
@@ -1656,7 +1670,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 24px;">No projects recorded yet. Click "Add New Project" to create one.</td>
+                                    <td colspan="10" style="text-align: center; color: #94a3b8; padding: 24px;">No projects recorded yet. Click "Add New Project" to create one.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1820,7 +1834,7 @@
 
                     <div class="form-group">
                         <label for="project_name">Project</label>
-                        <select id="project_name" name="project_name" class="form-control">
+                        <select id="project_name" name="project_name" class="form-control" required>
                             <option value="" selected>-- Select Project --</option>
                             {% for proj in projects %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
@@ -2802,6 +2816,192 @@
                 }
             });
             return false;
+        }
+
+        // Bulk Delete Functions for Tasks
+        function toggleSelectAllTasks(masterCb) {
+            const taskCbs = document.querySelectorAll('.task-select-cb');
+            taskCbs.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr && tr.style.display !== 'none') {
+                    cb.checked = masterCb.checked;
+                }
+            });
+            updateTaskBulkDeleteState();
+        }
+
+        function updateTaskBulkDeleteState() {
+            const taskCbs = Array.from(document.querySelectorAll('.task-select-cb'));
+            const checkedCbs = taskCbs.filter(cb => cb.checked);
+            const btn = document.getElementById('btn-bulk-delete-tasks');
+            const countSpan = document.getElementById('selected-tasks-count');
+            const masterCb = document.getElementById('select-all-tasks');
+
+            if (countSpan) countSpan.innerText = checkedCbs.length;
+
+            if (btn) {
+                if (checkedCbs.length > 0) {
+                    btn.style.display = 'inline-flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            }
+
+            if (masterCb && taskCbs.length > 0) {
+                masterCb.checked = checkedCbs.length === taskCbs.length;
+                masterCb.indeterminate = checkedCbs.length > 0 && checkedCbs.length < taskCbs.length;
+            }
+        }
+
+        function triggerBulkDeleteTasks() {
+            const checkedCbs = Array.from(document.querySelectorAll('.task-select-cb:checked'));
+            if (checkedCbs.length === 0) return;
+
+            const selectedCount = checkedCbs.length;
+            Swal.fire({
+                title: 'Bulk Delete Tasks',
+                text: `Are you sure you want to delete all`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `<i class="fa-solid fa-trash"></i> Yes, Delete ${selectedCount} Task(s)`,
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal-dark-glass',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-text',
+                    confirmButton: 'btn-danger-swal',
+                    cancelButton: 'swal-dark-cancel-btn'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = "{% url 'dashboard' %}";
+
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = '{{ csrf_token }}';
+                    form.appendChild(csrfInput);
+
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = 'bulk_delete_tasks';
+                    form.appendChild(actionInput);
+
+                    const tabInput = document.createElement('input');
+                    tabInput.type = 'hidden';
+                    tabInput.name = 'active_tab';
+                    tabInput.value = 'form-data';
+                    form.appendChild(tabInput);
+
+                    checkedCbs.forEach(cb => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'task_ids';
+                        input.value = cb.value;
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Bulk Delete Functions for Projects
+        function toggleSelectAllProjects(masterCb) {
+            const projectCbs = document.querySelectorAll('.project-select-cb');
+            projectCbs.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr && tr.style.display !== 'none') {
+                    cb.checked = masterCb.checked;
+                }
+            });
+            updateProjectBulkDeleteState();
+        }
+
+        function updateProjectBulkDeleteState() {
+            const projectCbs = Array.from(document.querySelectorAll('.project-select-cb'));
+            const checkedCbs = projectCbs.filter(cb => cb.checked);
+            const btn = document.getElementById('btn-bulk-delete-projects');
+            const countSpan = document.getElementById('selected-projects-count');
+            const masterCb = document.getElementById('select-all-projects');
+
+            if (countSpan) countSpan.innerText = checkedCbs.length;
+
+            if (btn) {
+                if (checkedCbs.length > 0) {
+                    btn.style.display = 'inline-flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            }
+
+            if (masterCb && projectCbs.length > 0) {
+                masterCb.checked = checkedCbs.length === projectCbs.length;
+                masterCb.indeterminate = checkedCbs.length > 0 && checkedCbs.length < projectCbs.length;
+            }
+        }
+
+        function triggerBulkDeleteProjects() {
+            const checkedCbs = Array.from(document.querySelectorAll('.project-select-cb:checked'));
+            if (checkedCbs.length === 0) return;
+
+            const selectedCount = checkedCbs.length;
+            Swal.fire({
+                title: 'Bulk Delete Projects',
+                text: `Are you sure you want to delete all`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `<i class="fa-solid fa-trash"></i> Yes, Delete ${selectedCount} Project(s)`,
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal-dark-glass',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-text',
+                    confirmButton: 'btn-danger-swal',
+                    cancelButton: 'swal-dark-cancel-btn'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = "{% url 'dashboard' %}";
+
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = '{{ csrf_token }}';
+                    form.appendChild(csrfInput);
+
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = 'bulk_delete_projects';
+                    form.appendChild(actionInput);
+
+                    const tabInput = document.createElement('input');
+                    tabInput.type = 'hidden';
+                    tabInput.name = 'active_tab';
+                    tabInput.value = 'add-project';
+                    form.appendChild(tabInput);
+
+                    checkedCbs.forEach(cb => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'project_ids';
+                        input.value = cb.value;
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
     </script>
 </body>

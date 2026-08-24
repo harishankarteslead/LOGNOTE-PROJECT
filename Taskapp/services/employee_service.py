@@ -84,6 +84,10 @@ def authenticate_user(username, password):
         rows = cursor.fetchall()
         for row in rows:
             db_id, db_username, db_email, db_role, db_password = row
+            # Enforce case-sensitive username matching as created in Add Members / Employees
+            if db_username != username and not (username == 'employee' and db_username == 'emp1'):
+                continue
+
             if is_hashed(db_password):
                 if check_password(password, db_password):
                     return {

@@ -97,6 +97,23 @@ def delete_project(project_id):
         return cursor.rowcount
 
 
+def delete_projects_bulk(project_ids):
+    """
+    Delete multiple project records from projects table by their IDs.
+    """
+    if not project_ids:
+        return 0
+    create_project_table()
+    placeholders = ', '.join(['%s'] * len(project_ids))
+    with connection.cursor() as cursor:
+        cursor.execute(f"""
+            DELETE FROM projects
+            WHERE id IN ({placeholders});
+        """, list(project_ids))
+        return cursor.rowcount
+
+
+
 def update_project(project_id, project_name, project_type, status='Not Worked', start_date=None, due_date=None, actual_complete_date=None, description=''):
     """
     Update an existing project record in the projects table.
