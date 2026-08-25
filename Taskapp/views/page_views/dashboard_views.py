@@ -535,8 +535,11 @@ def dashboard(request):
     else:
         # Employee role
         tasks = task_service.get_tasks_by_employee(user_id, username)
+        projects = project_service.get_all_projects()
         context['tasks'] = tasks
+        context['projects'] = projects
         context['total_tasks'] = len(tasks)
+        context['total_projects'] = len(projects)
         context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
         context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])
         context['in_progress_tasks'] = len([t for t in tasks if t.get('status') == 'In Progress'])

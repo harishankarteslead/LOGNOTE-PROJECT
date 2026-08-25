@@ -196,12 +196,20 @@ def update_task_employee_fields(task_id, description, status):
     """
     create_task_table()
     with connection.cursor() as cursor:
-        cursor.execute("""
-            UPDATE tasks
-            SET status = %s
-            WHERE id = %s;
-        """, [status, task_id])
+        if description is not None:
+            cursor.execute("""
+                UPDATE tasks
+                SET status = %s, description = %s
+                WHERE id = %s;
+            """, [status, description, task_id])
+        else:
+            cursor.execute("""
+                UPDATE tasks
+                SET status = %s
+                WHERE id = %s;
+            """, [status, task_id])
         return cursor.rowcount
+
 
 
 def get_task_by_id(task_id):

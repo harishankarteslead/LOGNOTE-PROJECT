@@ -68,7 +68,7 @@ def api_get_tasks(request):
 
     in_progress_tasks_list = [t for t in formatted_tasks if t['status'] == 'In Progress']
 
-    # Build per-employee task status list (all employees)
+    # Build per-employee task status list (only for employees with In Progress tasks)
     all_employees = employee_service.get_users_by_role('employee')
     if not all_employees:
         all_employees = [u for u in employee_service.get_all_users() if u.get('role') == 'employee']
@@ -79,56 +79,56 @@ def api_get_tasks(request):
         emp_id = emp['id']
         emp_username = emp['username']
 
-        emp_assigned_tasks = []
+        emp_all_tasks = []
+        emp_in_progress_tasks = []
         for t in all_tasks:
             emp_name_str = t.get('employee_name') or ''
             emp_list = [e.strip().lower() for e in emp_name_str.split(',') if e.strip()]
-            if t.get('assigned_to_id') == emp_id or emp_username.lower() in emp_list:
-                emp_assigned_tasks.append(t)
-
-        selected_task = None
-        for t in emp_assigned_tasks:
-            if t.get('status') == 'In Progress':
-                selected_task = t
-                break
-        if not selected_task and emp_assigned_tasks:
-            selected_task = emp_assigned_tasks[0]
+            if t.get('assigned_to_id') == emp_id or emp_username.lower() in emp_list or emp_username.lower() in emp_name_str.lower():
+                emp_all_tasks.append(t)
+                if t.get('status') == 'In Progress':
+                    emp_in_progress_tasks.append(t)
 
         all_tasks_list = []
-        for t in emp_assigned_tasks:
+        for t in emp_all_tasks:
             due_str = format_date(t.get('due_date'))
+            raw_status = (t.get('status') or '').strip()
+            st_val = 'In Progress' if raw_status == 'In Progress' else ''
             all_tasks_list.append({
                 'id': t['id'],
                 'task_name': t.get('task_name', '-'),
                 'project_name': t.get('project_name', '-'),
                 'description': t.get('description', '-'),
                 'due_date': due_str,
-                'status': t.get('status', 'Not Worked')
+                'status': st_val
             })
 
-        if selected_task:
-            status_val = selected_task.get('status') or 'Not Worked'
-            employee_tasks.append({
-                'employee_id': emp_id,
-                'employee_name': emp_username,
-                'project_name': selected_task.get('project_name') or '-',
-                'task_name': selected_task.get('task_name') or '-',
-                'status': status_val,
-                'total_tasks_count': len(emp_assigned_tasks),
-                'all_tasks': all_tasks_list,
-                'is_assigned': True
-            })
+        if emp_in_progress_tasks:
+            selected_task = emp_in_progress_tasks[0]
+            proj_name = selected_task.get('project_name') or '-'
+            task_name = selected_task.get('task_name') or '-'
+            status_val = 'In Progress'
+        elif emp_all_tasks:
+            selected_task = emp_all_tasks[0]
+            proj_name = selected_task.get('project_name') or '-'
+            task_name = selected_task.get('task_name') or '-'
+            raw_status = (selected_task.get('status') or '').strip()
+            status_val = 'In Progress' if raw_status == 'In Progress' else ''
         else:
-            employee_tasks.append({
-                'employee_id': emp_id,
-                'employee_name': emp_username,
-                'project_name': '-',
-                'task_name': 'No Task Assigned',
-                'status': 'Not Worked',
-                'total_tasks_count': 0,
-                'all_tasks': [],
-                'is_assigned': False
-            })
+            proj_name = '-'
+            task_name = '-'
+            status_val = ''
+
+        employee_tasks.append({
+            'employee_id': emp_id,
+            'employee_name': emp_username,
+            'project_name': proj_name,
+            'task_name': task_name,
+            'status': status_val,
+            'total_tasks_count': len(emp_all_tasks),
+            'all_tasks': all_tasks_list,
+            'is_assigned': bool(emp_all_tasks)
+        })
 
     return JsonResponse({
         'status': 'success',
@@ -165,9 +165,11 @@ def api_update_task_status(request):
             body_data = json.loads(request.body)
             task_id = body_data.get('task_id') or body_data.get('assignment_id')
             new_status = (body_data.get('status') or '').strip()
+            description = body_data.get('description')
         else:
             task_id = request.POST.get('task_id') or request.POST.get('assignment_id')
             new_status = (request.POST.get('status') or '').strip()
+            description = request.POST.get('description')
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Invalid payload: {str(e)}'}, status=400)
 
@@ -202,12 +204,13 @@ def api_update_task_status(request):
                     'message': f'Employee {target_emp_name} already has task ("{active_task["task_name"]}") In Progress. Please set it to On Hold or Completed first.'
                 }, status=400)
 
-        task_service.update_task_status(task_id_int, new_status)
+        task_service.update_task_employee_fields(task_id_int, description, new_status)
         return JsonResponse({
             'status': 'success',
             'message': f'Task status updated to "{new_status}" successfully.',
             'task_id': task_id_int,
-            'new_status': new_status
+            'new_status': new_status,
+            'description': description
         })
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Failed to update status: {str(e)}'}, status=500)
@@ -300,3 +303,103 @@ def api_assign_task(request):
         })
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Failed to assign task: {str(e)}'}, status=500)
+
+
+@require_http_methods(["POST"])
+def api_add_project(request):
+    """
+    REST API endpoint for Superadmin and Admin to create projects asynchronously without page refresh.
+    """
+    user_role = request.session.get('role')
+    user_id = request.session.get('user_id')
+
+    if not user_role or not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized. Please log in.'}, status=401)
+
+    if user_role not in ('superadmin', 'admin'):
+        return JsonResponse({'status': 'error', 'message': 'Permission denied. Only Admin and Superadmin can add projects.'}, status=403)
+
+    try:
+        if request.content_type == 'application/json':
+            body_data = json.loads(request.body)
+            project_name = (body_data.get('project_name') or '').strip()
+            project_type = (body_data.get('project_type') or '').strip()
+            status = (body_data.get('status') or '').strip() or 'Not Worked'
+            start_date = (body_data.get('start_date') or '').strip() or None
+            due_date = (body_data.get('due_date') or '').strip() or None
+            actual_complete_date = (body_data.get('actual_complete_date') or '').strip() or None
+            description = (body_data.get('description') or '').strip()
+        else:
+            project_name = (request.POST.get('project_name') or '').strip()
+            project_type = (request.POST.get('project_type') or '').strip()
+            status = (request.POST.get('status') or '').strip() or 'Not Worked'
+            start_date = (request.POST.get('start_date') or '').strip() or None
+            due_date = (request.POST.get('due_date') or '').strip() or None
+            actual_complete_date = (request.POST.get('actual_complete_date') or '').strip() or None
+            description = (request.POST.get('description') or '').strip()
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Invalid payload: {str(e)}'}, status=400)
+
+    if not project_name or not project_type:
+        return JsonResponse({'status': 'error', 'message': 'Project Name and Project Type are required fields.'}, status=400)
+
+    if (start_date and is_past_date(start_date)) or (due_date and is_past_date(due_date)) or (actual_complete_date and is_past_date(actual_complete_date)):
+        return JsonResponse({'status': 'error', 'message': 'Past dates are not allowed in date fields.'}, status=400)
+
+    try:
+        new_proj_id = project_service.create_project(
+            project_name=project_name,
+            project_type=project_type,
+            status=status,
+            start_date=start_date,
+            due_date=due_date,
+            actual_complete_date=actual_complete_date,
+            description=description
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Project "{project_name}" (#{new_proj_id}) created successfully!',
+            'project_id': new_proj_id
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Failed to create project: {str(e)}'}, status=500)
+
+
+@require_http_methods(["GET"])
+def api_get_projects(request):
+    """
+    REST API endpoint to fetch current projects and formatted options for select dropdowns.
+    """
+    user_role = request.session.get('role')
+    user_id = request.session.get('user_id')
+
+    if not user_role or not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized. Please log in.'}, status=401)
+
+    projects = project_service.get_all_projects()
+    formatted_projects = []
+    for p in projects:
+        p_due = p.get('due_date')
+        due_str = format_date(p_due)
+        p_start = p.get('start_date')
+        start_str = format_date(p_start)
+        p_act = p.get('actual_complete_date')
+        act_str = format_date(p_act)
+        is_expired = is_past_date(due_str)
+
+        formatted_projects.append({
+            'id': p['id'],
+            'project_name': p.get('project_name', ''),
+            'project_type': p.get('project_type', ''),
+            'status': p.get('status', 'Not Worked'),
+            'start_date': start_str,
+            'due_date': due_str,
+            'actual_complete_date': act_str,
+            'description': p.get('description', ''),
+            'is_expired': is_expired
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'projects': formatted_projects
+    })
