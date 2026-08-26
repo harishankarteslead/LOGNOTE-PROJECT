@@ -9,6 +9,7 @@ def create_task_table():
     """
     Raw SQL query to create or update the tasks database table.
     Compatible with MySQL and SQLite backends.
+    Column order: id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
     """
     global _task_table_created
     if _task_table_created:
@@ -21,22 +22,36 @@ def create_task_table():
                 CREATE TABLE IF NOT EXISTS tasks (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     task_name VARCHAR(255) NOT NULL,
+                    project_name VARCHAR(255) NULL,
                     description TEXT,
-                    assigned_to_id INT NOT NULL DEFAULT 0,
                     employee_name VARCHAR(150) NOT NULL DEFAULT '',
-                    status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
                     due_date DATE NULL,
+                    status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
+                    assigned_to_id INT NOT NULL DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
             
-            # Ensure due_date & project_name columns exist if table was created earlier without them
-            cursor.execute("SHOW COLUMNS FROM tasks;")
-            existing_cols = [col[0] for col in cursor.fetchall()]
-            if 'due_date' not in existing_cols:
-                cursor.execute("ALTER TABLE tasks ADD COLUMN due_date DATE NULL;")
-            if 'project_name' not in existing_cols:
-                cursor.execute("ALTER TABLE tasks ADD COLUMN project_name VARCHAR(255) NULL;")
+            # Ensure columns exist and are ordered if table was created previously with older schema
+            try:
+                cursor.execute("SHOW COLUMNS FROM tasks;")
+                existing_cols = [col[0] for col in cursor.fetchall()]
+                if 'due_date' not in existing_cols:
+                    cursor.execute("ALTER TABLE tasks ADD COLUMN due_date DATE NULL;")
+                if 'project_name' not in existing_cols:
+                    cursor.execute("ALTER TABLE tasks ADD COLUMN project_name VARCHAR(255) NULL;")
+                
+                # Reorder columns in MySQL table schema if supported
+                if connection.vendor == 'mysql':
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN project_name VARCHAR(255) NULL AFTER task_name;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN description TEXT AFTER project_name;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN employee_name VARCHAR(150) NOT NULL DEFAULT '' AFTER description;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN due_date DATE NULL AFTER employee_name;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Not Worked' AFTER due_date;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN assigned_to_id INT NOT NULL DEFAULT 0 AFTER status;")
+                    cursor.execute("ALTER TABLE tasks MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER assigned_to_id;")
+            except Exception:
+                pass
 
             # Drop task_assignments table if it exists to keep database clean
             try:
@@ -106,9 +121,9 @@ def create_task(task_name, description, assigned_to_ids=None, employee_names=Non
                     continue
 
                 cursor.execute("""
-                    INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
+                    INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
                     VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """, [task_name, description, emp_id, emp_name, due_val, status, proj_val])
+                """, [task_name, proj_val, description, emp_name, due_val, status, emp_id])
                 created_task_ids.append(cursor.lastrowid)
         else:
             primary_emp_id = assigned_to_ids[0] if assigned_to_ids else 0
@@ -124,9 +139,9 @@ def create_task(task_name, description, assigned_to_ids=None, employee_names=Non
                 created_task_ids.append(existing_row[0])
             else:
                 cursor.execute("""
-                    INSERT INTO tasks (task_name, description, assigned_to_id, employee_name, due_date, status, project_name)
+                    INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
                     VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """, [task_name, description, primary_emp_id, '', due_val, status, proj_val])
+                """, [task_name, proj_val, description, '', due_val, status, primary_emp_id])
                 created_task_ids.append(cursor.lastrowid)
 
     return created_task_ids[0] if created_task_ids else None
@@ -136,11 +151,12 @@ def get_all_tasks():
     """
     Retrieve all assigned tasks from the tasks table ordered by id DESC.
     Each row represents a specific task assigned to an employee with their individual status.
+    Columns returned in dictionary: id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
     """
     create_task_table()
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            SELECT id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
             FROM tasks
             ORDER BY id DESC;
         """)
@@ -150,13 +166,13 @@ def get_all_tasks():
             tasks.append({
                 'id': r[0],
                 'task_name': r[1],
-                'description': r[2],
-                'assigned_to_id': r[3],
+                'project_name': r[2],
+                'description': r[3],
                 'employee_name': r[4],
                 'due_date': r[5],
                 'status': r[6],
-                'created_at': r[7],
-                'project_name': r[8] if len(r) > 8 else None
+                'assigned_to_id': r[7],
+                'created_at': r[8]
             })
         return tasks
 
@@ -171,14 +187,14 @@ def get_tasks_by_employee(assigned_to_id=0, employee_name=None):
 
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            SELECT id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
             FROM tasks
             ORDER BY id DESC;
         """)
         rows = cursor.fetchall()
         tasks = []
         for r in rows:
-            t_emp_id = r[3]
+            t_emp_id = r[7]
             t_emp_str = (r[4] or '').lower()
             emp_list = [e.strip().lower() for e in t_emp_str.split(',') if e.strip()]
 
@@ -186,13 +202,13 @@ def get_tasks_by_employee(assigned_to_id=0, employee_name=None):
                 tasks.append({
                     'id': r[0],
                     'task_name': r[1],
-                    'description': r[2],
-                    'assigned_to_id': r[3],
+                    'project_name': r[2],
+                    'description': r[3],
                     'employee_name': r[4],
                     'due_date': r[5],
                     'status': r[6],
-                    'created_at': r[7],
-                    'project_name': r[8] if len(r) > 8 else None
+                    'assigned_to_id': r[7],
+                    'created_at': r[8]
                 })
         return tasks
 
@@ -245,9 +261,9 @@ def update_task_details(task_id, task_name, description, assigned_to_id=0, emplo
     with connection.cursor() as cursor:
         cursor.execute("""
             UPDATE tasks
-            SET task_name = %s, description = %s, assigned_to_id = %s, employee_name = %s, due_date = %s, status = %s, project_name = %s
+            SET task_name = %s, project_name = %s, description = %s, employee_name = %s, due_date = %s, status = %s, assigned_to_id = %s
             WHERE id = %s;
-        """, [task_name, description, emp_id_val, employee_name, due_val, status, proj_val, task_id])
+        """, [task_name, proj_val, description, employee_name, due_val, status, emp_id_val, task_id])
         return cursor.rowcount
 
 
@@ -272,7 +288,7 @@ def get_task_by_id(task_id):
     create_task_table()
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            SELECT id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
             FROM tasks
             WHERE id = %s;
         """, [task_id])
@@ -281,13 +297,13 @@ def get_task_by_id(task_id):
             return {
                 'id': r[0],
                 'task_name': r[1],
-                'description': r[2],
-                'assigned_to_id': r[3],
+                'project_name': r[2],
+                'description': r[3],
                 'employee_name': r[4],
                 'due_date': r[5],
                 'status': r[6],
-                'created_at': r[7],
-                'project_name': r[8] if len(r) > 8 else None
+                'assigned_to_id': r[7],
+                'created_at': r[8]
             }
         return None
 
@@ -296,33 +312,39 @@ def get_employee_in_progress_task(assigned_to_id=0, employee_name=None, exclude_
     """
     Check if an employee currently has an 'In Progress' task in the tasks table.
     Returns the active task dict if found, or None.
+    Uses exact element matching on employee names to prevent false collisions (e.g., 'SHANKAR' vs 'HARISHANKAR').
     """
     create_task_table()
-    emp_search = f"%{employee_name.strip()}%" if employee_name and employee_name.strip() else ""
+    emp_clean = (employee_name or '').strip().lower()
     emp_id_val = int(assigned_to_id) if assigned_to_id else 0
     ex_id_val = int(exclude_task_id) if exclude_task_id else 0
 
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, task_name, description, assigned_to_id, employee_name, due_date, status, created_at, project_name
+            SELECT id, task_name, project_name, description, employee_name, due_date, status, assigned_to_id, created_at
             FROM tasks
             WHERE status = 'In Progress'
               AND (%s = 0 OR id != %s)
-              AND ((%s > 0 AND assigned_to_id = %s) OR (LOWER(%s) != '' AND LOWER(employee_name) LIKE LOWER(%s)))
-            LIMIT 1;
-        """, [ex_id_val, ex_id_val, emp_id_val, emp_id_val, employee_name or '', emp_search])
-        r = cursor.fetchone()
-        if r:
-            return {
-                'id': r[0],
-                'task_name': r[1],
-                'description': r[2],
-                'assigned_to_id': r[3],
-                'employee_name': r[4],
-                'due_date': r[5],
-                'status': r[6],
-                'created_at': r[7],
-                'project_name': r[8] if len(r) > 8 else None
-            }
+            ORDER BY id DESC;
+        """, [ex_id_val, ex_id_val])
+        rows = cursor.fetchall()
+        for r in rows:
+            t_emp_id = r[7]
+            t_emp_str = (r[4] or '').lower()
+            emp_list = [e.strip().lower() for e in t_emp_str.split(',') if e.strip()]
+
+            if (emp_id_val > 0 and t_emp_id == emp_id_val) or (emp_clean and emp_clean in emp_list):
+                return {
+                    'id': r[0],
+                    'task_name': r[1],
+                    'project_name': r[2],
+                    'description': r[3],
+                    'employee_name': r[4],
+                    'due_date': r[5],
+                    'status': r[6],
+                    'assigned_to_id': r[7],
+                    'created_at': r[8]
+                }
         return None
+
 

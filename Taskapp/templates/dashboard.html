@@ -544,7 +544,7 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         }
 
         .status-not-worked {
@@ -939,8 +939,7 @@
             </li>
 
             <li class="menu-item {% if active_tab == 'in-progress' %}active{% endif %}"
-                data-url="{% url 'assigned_tasks' %}"
-                onclick="window.location.href=this.dataset.url">
+                data-url="{% url 'assigned_tasks' %}" onclick="window.location.href=this.dataset.url">
                 <i class="fa-solid fa-spinner"></i> Assigned Tasks
             </li>
 
@@ -1057,8 +1056,7 @@
                             <i class="fa-solid fa-id-badge"></i>
                         </div>
                     </div>
-                    <div class="stat-card" style="cursor: pointer;"
-                        data-url="{% url 'assigned_tasks' %}"
+                    <div class="stat-card" style="cursor: pointer;" data-url="{% url 'assigned_tasks' %}"
                         onclick="window.location.href=this.dataset.url">
                         <div class="stat-info">
                             <p>Total Assigned Tasks</p>
@@ -1139,7 +1137,8 @@
                                     </td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
+                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not
+                                            Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
@@ -1214,7 +1213,8 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row" data-task-id="{{ task.id }}" data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-id="{{ task.id }}"
+                                    data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -1343,7 +1343,8 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row" data-task-id="{{ task.id }}" data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-id="{{ task.id }}"
+                                    data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -1447,7 +1448,8 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row" data-task-id="{{ task.id }}" data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-id="{{ task.id }}"
+                                    data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ user_info.username|default:''|lower }}"
@@ -1463,16 +1465,15 @@
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not
+                                            Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
-                                            data-id="{{ task.id }}"
-                                            data-name="{{ task.task_name }}"
+                                            data-id="{{ task.id }}" data-name="{{ task.task_name }}"
                                             data-project="{{ task.project_name|default:'' }}"
-                                            data-status="{{ task.status }}"
-                                            data-description="{{ task.description }}"
+                                            data-status="{{ task.status }}" data-description="{{ task.description }}"
                                             onclick="openEmployeeEditTaskModalFromBtn(this)">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
@@ -1648,7 +1649,8 @@
                             </thead>
                             <tbody>
                                 {% for task in tasks %}
-                                <tr class="task-row" data-task-id="{{ task.id }}" data-task-name="{{ task.task_name|lower }}"
+                                <tr class="task-row" data-task-id="{{ task.id }}"
+                                    data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
                                     data-description="{{ task.description|default:''|lower }}"
                                     data-employee-name="{{ task.employee_name|lower }}"
@@ -1669,18 +1671,18 @@
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not
+                                            Worked"}}</span>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-edit" title="Edit" style="margin-right: 4px;"
-                                             data-id="{{ task.id }}"
-                                             data-name="{{ task.task_name }}"
-                                             data-project="{{ task.project_name|default:'' }}"
-                                             data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
-                                             data-status="{{ task.status }}"
-                                             data-description="{{ task.description }}"
-                                             data-employee-name="{{ task.employee_name }}"
-                                             onclick="openEditTaskModalFromBtn(this)">
+                                        <button type="button" class="btn btn-sm btn-edit" title="Edit"
+                                            style="margin-right: 4px;" data-id="{{ task.id }}"
+                                            data-name="{{ task.task_name }}"
+                                            data-project="{{ task.project_name|default:'' }}"
+                                            data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
+                                            data-status="{{ task.status }}" data-description="{{ task.description }}"
+                                            data-employee-name="{{ task.employee_name }}"
+                                            onclick="openEditTaskModalFromBtn(this)">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1782,16 +1784,15 @@
                                     <td>{{ proj.actual_complete_date|default:"-" }}</td>
                                     <td>{{ proj.description|default:"-" }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-edit" title="Edit" style="margin-right: 4px;"
-                                             data-id="{{ proj.id }}"
-                                             data-name="{{ proj.project_name }}"
-                                             data-type="{{ proj.project_type }}"
-                                             data-status="{{ proj.status }}"
-                                             data-start-date="{{ proj.start_date|date:'Y-m-d'|default:proj.start_date|default:'' }}"
-                                             data-due-date="{{ proj.due_date|date:'Y-m-d'|default:proj.due_date|default:'' }}"
-                                             data-actual-complete-date="{{ proj.actual_complete_date|date:'Y-m-d'|default:proj.actual_complete_date|default:'' }}"
-                                             data-description="{{ proj.description }}"
-                                             onclick="openEditProjectModalFromBtn(this)">
+                                        <button type="button" class="btn btn-sm btn-edit" title="Edit"
+                                            style="margin-right: 4px;" data-id="{{ proj.id }}"
+                                            data-name="{{ proj.project_name }}" data-type="{{ proj.project_type }}"
+                                            data-status="{{ proj.status }}"
+                                            data-start-date="{{ proj.start_date|date:'Y-m-d'|default:proj.start_date|default:'' }}"
+                                            data-due-date="{{ proj.due_date|date:'Y-m-d'|default:proj.due_date|default:'' }}"
+                                            data-actual-complete-date="{{ proj.actual_complete_date|date:'Y-m-d'|default:proj.actual_complete_date|default:'' }}"
+                                            data-description="{{ proj.description }}"
+                                            onclick="openEditProjectModalFromBtn(this)">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
@@ -1869,7 +1870,8 @@
                                         <td><strong>{{ task.task_name }}</strong></td>
                                         <td>
                                             <span
-                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
+                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"
+                                                }}</span>
                                         </td>
                                         <td><strong>{{ task.employee_name }}</strong></td>
                                         <td>
@@ -1960,7 +1962,8 @@
                 </h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeAssignTaskModal()">&times;</span>
             </div>
-            <form id="assignTaskForm" method="POST" action="{% url 'dashboard' %}" onsubmit="return submitAssignTaskApi(event);">
+            <form id="assignTaskForm" method="POST" action="{% url 'dashboard' %}"
+                onsubmit="return submitAssignTaskApi(event);">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="assign_task">
 
@@ -1984,7 +1987,9 @@
                             <option value="" selected>-- Select Project --</option>
                             {% for proj in projects %}
                             {% if proj.is_expired %}
-                            <option value="{{ proj.project_name }}" disabled style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
+                            <option value="{{ proj.project_name }}" disabled
+                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired -
+                                Due: {{ proj.due_date_str }})</option>
                             {% else %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
@@ -2274,7 +2279,8 @@
                             <option value="">-- Select Project</option>
                             {% for proj in projects %}
                             {% if proj.is_expired %}
-                            <option value="{{ proj.project_name }}" disabled style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
+                            <option value="{{ proj.project_name }}" disabled
+                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
                             {% else %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
@@ -2407,7 +2413,8 @@
                 </h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeEmployeeEditTaskModal()">&times;</span>
             </div>
-            <form id="employeeEditTaskForm" method="POST" action="{% url 'dashboard' %}" onsubmit="return submitEmployeeTaskStatusApi(event);">
+            <form id="employeeEditTaskForm" method="POST" action="{% url 'dashboard' %}"
+                onsubmit="return submitEmployeeTaskStatusApi(event);">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="employee_edit_task">
                 <input type="hidden" id="emp-edit-task-id" name="task_id">
@@ -3201,97 +3208,97 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(res => {
-                if (!res.ok) return null;
-                return res.json();
-            })
-            .then(data => {
-                if (!data || data.status !== 'success') return;
+                .then(res => {
+                    if (!res.ok) return null;
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data || data.status !== 'success') return;
 
-                updateMetricCounters(data);
+                    updateMetricCounters(data);
 
-                const tasks = data.tasks || [];
-                const apiTaskIds = new Set(tasks.map(t => t.id));
-                const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
-                const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+                    const tasks = data.tasks || [];
+                    const apiTaskIds = new Set(tasks.map(t => t.id));
+                    const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+                    const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
 
-                // 1. Superadmin / Admin Task Table (#tab-form-data or #tab-dashboard Overview Table)
-                const adminTaskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(card => card.querySelector('h2') && card.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
-                if (adminTaskCard) {
-                    const tbody = adminTaskCard.querySelector('tbody');
-                    if (tbody) {
-                        // Remove empty row if tasks exist
-                        const emptyRow = Array.from(tbody.children).find(tr => !tr.classList.contains('task-row') && !tr.classList.contains('empty-filter-row'));
-                        if (emptyRow && tasks.length > 0) {
-                            emptyRow.remove();
-                        }
-
-                        // Remove rows deleted from database
-                        tbody.querySelectorAll('tr.task-row').forEach(row => {
-                            const rowId = parseInt(row.getAttribute('data-task-id'), 10);
-                            if (!apiTaskIds.has(rowId)) {
-                                row.remove();
+                    // 1. Superadmin / Admin Task Table (#tab-form-data or #tab-dashboard Overview Table)
+                    const adminTaskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(card => card.querySelector('h2') && card.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
+                    if (adminTaskCard) {
+                        const tbody = adminTaskCard.querySelector('tbody');
+                        if (tbody) {
+                            // Remove empty row if tasks exist
+                            const emptyRow = Array.from(tbody.children).find(tr => !tr.classList.contains('task-row') && !tr.classList.contains('empty-filter-row'));
+                            if (emptyRow && tasks.length > 0) {
+                                emptyRow.remove();
                             }
-                        });
 
-                        const hasCb = !!(tbody.querySelector('tr.task-row td input[type="checkbox"]') || adminTaskCard.querySelector('thead th input[type="checkbox"]'));
-                        const offset = hasCb ? 1 : 0;
+                            // Remove rows deleted from database
+                            tbody.querySelectorAll('tr.task-row').forEach(row => {
+                                const rowId = parseInt(row.getAttribute('data-task-id'), 10);
+                                if (!apiTaskIds.has(rowId)) {
+                                    row.remove();
+                                }
+                            });
 
-                        // Add or update task rows
-                        tasks.forEach(task => {
-                            const taskId = task.id;
-                            const newStatus = task.status || 'Not Worked';
-                            const slugStatus = newStatus.toLowerCase().replace(/\s+/g, '-');
-                            let row = tbody.querySelector(`tr.task-row[data-task-id="${taskId}"]`);
+                            const hasCb = !!(tbody.querySelector('tr.task-row td input[type="checkbox"]') || adminTaskCard.querySelector('thead th input[type="checkbox"]'));
+                            const offset = hasCb ? 1 : 0;
 
-                            if (row) {
-                                row.setAttribute('data-status', newStatus.toLowerCase());
-                                row.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
-                                row.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
-                                row.setAttribute('data-description', (task.description || '').toLowerCase());
-                                row.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
-                                row.setAttribute('data-due-date', task.due_date || '');
+                            // Add or update task rows
+                            tasks.forEach(task => {
+                                const taskId = task.id;
+                                const newStatus = task.status || 'Not Worked';
+                                const slugStatus = newStatus.toLowerCase().replace(/\s+/g, '-');
+                                let row = tbody.querySelector(`tr.task-row[data-task-id="${taskId}"]`);
 
-                                const cells = row.children;
-                                if (cells.length >= 7 + offset) {
-                                    cells[1 + offset].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
-                                    cells[2 + offset].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
-                                    cells[3 + offset].innerText = task.description || '-';
-                                    cells[4 + offset].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
-                                    cells[5 + offset].innerText = task.due_date || '-';
+                                if (row) {
+                                    row.setAttribute('data-status', newStatus.toLowerCase());
+                                    row.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
+                                    row.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
+                                    row.setAttribute('data-description', (task.description || '').toLowerCase());
+                                    row.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
+                                    row.setAttribute('data-due-date', task.due_date || '');
 
-                                    const badge = cells[6 + offset].querySelector('.status-badge');
-                                    if (badge) {
-                                        badge.className = `status-badge status-${slugStatus}`;
-                                        badge.innerText = newStatus;
-                                    }
+                                    const cells = row.children;
+                                    if (cells.length >= 7 + offset) {
+                                        cells[1 + offset].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                        cells[2 + offset].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
+                                        cells[3 + offset].innerText = task.description || '-';
+                                        cells[4 + offset].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
+                                        cells[5 + offset].innerText = task.due_date || '-';
 
-                                    if (hasCb && cells.length >= 9) {
-                                        const editBtn = cells[8].querySelector('.btn-edit');
-                                        if (editBtn) {
-                                            editBtn.setAttribute('data-name', task.task_name || '');
-                                            editBtn.setAttribute('data-project', task.project_name || '');
-                                            editBtn.setAttribute('data-due-date', task.due_date || '');
-                                            editBtn.setAttribute('data-status', newStatus);
-                                            editBtn.setAttribute('data-description', task.description || '');
-                                            editBtn.setAttribute('data-employee-name', task.employee_name || '');
+                                        const badge = cells[6 + offset].querySelector('.status-badge');
+                                        if (badge) {
+                                            badge.className = `status-badge status-${slugStatus}`;
+                                            badge.innerText = newStatus;
+                                        }
+
+                                        if (hasCb && cells.length >= 9) {
+                                            const editBtn = cells[8].querySelector('.btn-edit');
+                                            if (editBtn) {
+                                                editBtn.setAttribute('data-name', task.task_name || '');
+                                                editBtn.setAttribute('data-project', task.project_name || '');
+                                                editBtn.setAttribute('data-due-date', task.due_date || '');
+                                                editBtn.setAttribute('data-status', newStatus);
+                                                editBtn.setAttribute('data-description', task.description || '');
+                                                editBtn.setAttribute('data-employee-name', task.employee_name || '');
+                                            }
                                         }
                                     }
-                                }
-                            } else {
-                                const newTr = document.createElement('tr');
-                                newTr.className = 'task-row';
-                                newTr.setAttribute('data-task-id', task.id);
-                                newTr.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
-                                newTr.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
-                                newTr.setAttribute('data-description', (task.description || '').toLowerCase());
-                                newTr.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
-                                newTr.setAttribute('data-status', newStatus.toLowerCase());
-                                newTr.setAttribute('data-due-date', task.due_date || '');
-                                newTr.setAttribute('data-created-at', task.created_at || '');
+                                } else {
+                                    const newTr = document.createElement('tr');
+                                    newTr.className = 'task-row';
+                                    newTr.setAttribute('data-task-id', task.id);
+                                    newTr.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
+                                    newTr.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
+                                    newTr.setAttribute('data-description', (task.description || '').toLowerCase());
+                                    newTr.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
+                                    newTr.setAttribute('data-status', newStatus.toLowerCase());
+                                    newTr.setAttribute('data-due-date', task.due_date || '');
+                                    newTr.setAttribute('data-created-at', task.created_at || '');
 
-                                if (hasCb) {
-                                    newTr.innerHTML = `
+                                    if (hasCb) {
+                                        newTr.innerHTML = `
                                         <td style="text-align: center;">
                                             <input type="checkbox" class="task-select-cb" value="${task.id}" onchange="updateTaskBulkDeleteState()">
                                         </td>
@@ -3326,8 +3333,8 @@
                                             </form>
                                         </td>
                                     `;
-                                } else {
-                                    newTr.innerHTML = `
+                                    } else {
+                                        newTr.innerHTML = `
                                         <td><strong>1</strong></td>
                                         <td><strong>${escapeHtml(task.task_name)}</strong></td>
                                         <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
@@ -3339,83 +3346,83 @@
                                         </td>
                                         <td>${escapeHtml(task.created_at || '-')}</td>
                                     `;
+                                    }
+                                    tbody.prepend(newTr);
                                 }
-                                tbody.prepend(newTr);
-                            }
-                        });
+                            });
 
-                        if (typeof triggerFilter === 'function') {
-                            triggerFilter(adminTaskCard);
+                            if (typeof triggerFilter === 'function') {
+                                triggerFilter(adminTaskCard);
+                            }
                         }
                     }
-                }
 
-                // 2. Employee Task Table
-                const empTaskCard = Array.from(document.querySelectorAll('.card')).find(card => card.querySelector('h2') && card.querySelector('h2').innerText.includes('Tasks Assigned To You'));
-                if (empTaskCard) {
-                    const tbody = empTaskCard.querySelector('tbody');
-                    if (tbody) {
-                        const emptyRow = Array.from(tbody.children).find(tr => !tr.classList.contains('task-row') && !tr.classList.contains('empty-filter-row'));
-                        if (emptyRow && tasks.length > 0) {
-                            emptyRow.remove();
-                        }
-
-                        tbody.querySelectorAll('tr.task-row').forEach(row => {
-                            const rowId = parseInt(row.getAttribute('data-task-id'), 10);
-                            if (!apiTaskIds.has(rowId)) {
-                                row.remove();
+                    // 2. Employee Task Table
+                    const empTaskCard = Array.from(document.querySelectorAll('.card')).find(card => card.querySelector('h2') && card.querySelector('h2').innerText.includes('Tasks Assigned To You'));
+                    if (empTaskCard) {
+                        const tbody = empTaskCard.querySelector('tbody');
+                        if (tbody) {
+                            const emptyRow = Array.from(tbody.children).find(tr => !tr.classList.contains('task-row') && !tr.classList.contains('empty-filter-row'));
+                            if (emptyRow && tasks.length > 0) {
+                                emptyRow.remove();
                             }
-                        });
 
-                        tasks.forEach(task => {
-                            const taskId = task.id;
-                            const newStatus = task.status || 'Not Worked';
-                            const slugStatus = newStatus.toLowerCase().replace(/\s+/g, '-');
-                            let row = tbody.querySelector(`tr.task-row[data-task-id="${taskId}"]`);
+                            tbody.querySelectorAll('tr.task-row').forEach(row => {
+                                const rowId = parseInt(row.getAttribute('data-task-id'), 10);
+                                if (!apiTaskIds.has(rowId)) {
+                                    row.remove();
+                                }
+                            });
 
-                            if (row) {
-                                row.setAttribute('data-status', newStatus.toLowerCase());
-                                row.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
-                                row.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
-                                row.setAttribute('data-description', (task.description || '').toLowerCase());
-                                row.setAttribute('data-due-date', task.due_date || '');
+                            tasks.forEach(task => {
+                                const taskId = task.id;
+                                const newStatus = task.status || 'Not Worked';
+                                const slugStatus = newStatus.toLowerCase().replace(/\s+/g, '-');
+                                let row = tbody.querySelector(`tr.task-row[data-task-id="${taskId}"]`);
 
-                                const cells = row.children;
-                                if (cells.length >= 7) {
-                                    cells[1].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
-                                    cells[2].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
-                                    cells[3].innerText = task.description || '-';
-                                    cells[4].innerText = task.due_date || '-';
+                                if (row) {
+                                    row.setAttribute('data-status', newStatus.toLowerCase());
+                                    row.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
+                                    row.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
+                                    row.setAttribute('data-description', (task.description || '').toLowerCase());
+                                    row.setAttribute('data-due-date', task.due_date || '');
 
-                                    const badge = cells[5].querySelector('.status-badge');
-                                    if (badge) {
-                                        badge.className = `status-badge status-${slugStatus}`;
-                                        badge.innerText = newStatus;
-                                    }
+                                    const cells = row.children;
+                                    if (cells.length >= 7) {
+                                        cells[1].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                        cells[2].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
+                                        cells[3].innerText = task.description || '-';
+                                        cells[4].innerText = task.due_date || '-';
 
-                                    if (cells.length >= 8) {
-                                        const editBtn = cells[7].querySelector('.btn-edit');
-                                        if (editBtn) {
-                                            editBtn.setAttribute('data-name', task.task_name || '');
-                                            editBtn.setAttribute('data-project', task.project_name || '');
-                                            editBtn.setAttribute('data-status', newStatus);
-                                            editBtn.setAttribute('data-description', task.description || '');
+                                        const badge = cells[5].querySelector('.status-badge');
+                                        if (badge) {
+                                            badge.className = `status-badge status-${slugStatus}`;
+                                            badge.innerText = newStatus;
+                                        }
+
+                                        if (cells.length >= 8) {
+                                            const editBtn = cells[7].querySelector('.btn-edit');
+                                            if (editBtn) {
+                                                editBtn.setAttribute('data-name', task.task_name || '');
+                                                editBtn.setAttribute('data-project', task.project_name || '');
+                                                editBtn.setAttribute('data-status', newStatus);
+                                                editBtn.setAttribute('data-description', task.description || '');
+                                            }
                                         }
                                     }
-                                }
-                            } else {
-                                const newTr = document.createElement('tr');
-                                newTr.className = 'task-row';
-                                newTr.setAttribute('data-task-id', task.id);
-                                newTr.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
-                                newTr.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
-                                newTr.setAttribute('data-description', (task.description || '').toLowerCase());
-                                newTr.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
-                                newTr.setAttribute('data-status', newStatus.toLowerCase());
-                                newTr.setAttribute('data-due-date', task.due_date || '');
-                                newTr.setAttribute('data-created-at', task.created_at || '');
+                                } else {
+                                    const newTr = document.createElement('tr');
+                                    newTr.className = 'task-row';
+                                    newTr.setAttribute('data-task-id', task.id);
+                                    newTr.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
+                                    newTr.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
+                                    newTr.setAttribute('data-description', (task.description || '').toLowerCase());
+                                    newTr.setAttribute('data-employee-name', (task.employee_name || '').toLowerCase());
+                                    newTr.setAttribute('data-status', newStatus.toLowerCase());
+                                    newTr.setAttribute('data-due-date', task.due_date || '');
+                                    newTr.setAttribute('data-created-at', task.created_at || '');
 
-                                newTr.innerHTML = `
+                                    newTr.innerHTML = `
                                     <td><strong>1</strong></td>
                                     <td><strong>${escapeHtml(task.task_name)}</strong></td>
                                     <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
@@ -3437,20 +3444,20 @@
                                         </button>
                                     </td>
                                 `;
-                                tbody.prepend(newTr);
-                            }
-                        });
+                                    tbody.prepend(newTr);
+                                }
+                            });
 
-                        if (typeof triggerFilter === 'function') {
-                            triggerFilter(empTaskCard);
+                            if (typeof triggerFilter === 'function') {
+                                triggerFilter(empTaskCard);
+                            }
                         }
                     }
-                }
-                updateMetricCounters(data);
-            })
-            .catch(err => {
-                console.debug("REST API polling status error:", err);
-            });
+                    updateMetricCounters(data);
+                })
+                .catch(err => {
+                    console.debug("REST API polling status error:", err);
+                });
         }
 
         function updateMetricCounters(data) {
@@ -3516,41 +3523,41 @@
                     status: status
                 })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (submitBtn) submitBtn.disabled = false;
-                if (data.status === 'success') {
-                    closeAssignTaskModal();
-                    form.reset();
-                    Swal.fire({
-                        title: 'Task Assigned Successfully!',
-                        text: data.message,
-                        icon: 'success',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3500
-                    });
-                    pollTaskStatus();
-                } else {
-                    Swal.fire({
-                        title: 'Assignment Error',
-                        text: data.message,
-                        icon: 'error',
-                        customClass: {
-                            popup: 'swal-dark-glass',
-                            title: 'swal-dark-title',
-                            htmlContainer: 'swal-dark-text',
-                            confirmButton: 'btn-danger-swal'
-                        },
-                        buttonsStyling: false
-                    });
-                }
-            })
-            .catch(err => {
-                if (submitBtn) submitBtn.disabled = false;
-                Swal.fire('Error', 'Server connection error: ' + err, 'error');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (data.status === 'success') {
+                        closeAssignTaskModal();
+                        form.reset();
+                        Swal.fire({
+                            title: 'Task Assigned Successfully!',
+                            text: data.message,
+                            icon: 'success',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3500
+                        });
+                        pollTaskStatus();
+                    } else {
+                        Swal.fire({
+                            title: 'Assignment Error',
+                            text: data.message,
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal-dark-glass',
+                                title: 'swal-dark-title',
+                                htmlContainer: 'swal-dark-text',
+                                confirmButton: 'btn-danger-swal'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                })
+                .catch(err => {
+                    if (submitBtn) submitBtn.disabled = false;
+                    Swal.fire('Error', 'Server connection error: ' + err, 'error');
+                });
             return false;
         }
 
@@ -3574,38 +3581,38 @@
                     description: description
                 })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    closeEmployeeEditTaskModal();
-                    Swal.fire({
-                        title: 'Details Updated!',
-                        text: data.message,
-                        icon: 'success',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 2500
-                    });
-                    pollTaskStatus();
-                } else {
-                    Swal.fire({
-                        title: 'Status Update Failed',
-                        text: data.message,
-                        icon: 'error',
-                        customClass: {
-                            popup: 'swal-dark-glass',
-                            title: 'swal-dark-title',
-                            htmlContainer: 'swal-dark-text',
-                            confirmButton: 'btn-danger-swal'
-                        },
-                        buttonsStyling: false
-                    });
-                }
-            })
-            .catch(err => {
-                Swal.fire('Error', 'Server connection error: ' + err, 'error');
-            });
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        closeEmployeeEditTaskModal();
+                        Swal.fire({
+                            title: 'Details Updated!',
+                            text: data.message,
+                            icon: 'success',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                        pollTaskStatus();
+                    } else {
+                        Swal.fire({
+                            title: 'Status Update Failed',
+                            text: data.message,
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal-dark-glass',
+                                title: 'swal-dark-title',
+                                htmlContainer: 'swal-dark-text',
+                                confirmButton: 'btn-danger-swal'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Error', 'Server connection error: ' + err, 'error');
+                });
             return false;
         }
 

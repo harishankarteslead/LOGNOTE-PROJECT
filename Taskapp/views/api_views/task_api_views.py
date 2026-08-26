@@ -49,14 +49,14 @@ def api_get_tasks(request):
         formatted_tasks.append({
             'id': t['id'],
             'task_name': t.get('task_name', ''),
+            'project_name': t.get('project_name') or '',
             'description': t.get('description', ''),
-            'assigned_to_id': t.get('assigned_to_id', 0),
             'employee_name': emp_name,
-            'emp_names_list': emp_list,
-            'status': t.get('status', 'Not Worked'),
             'due_date': due_str,
+            'status': t.get('status', 'Not Worked'),
+            'assigned_to_id': t.get('assigned_to_id', 0),
             'created_at': created_str,
-            'project_name': t.get('project_name') or ''
+            'emp_names_list': emp_list
         })
 
     # Summary metrics
@@ -171,8 +171,9 @@ def api_update_task_status(request):
         # Check permissions: employee can only update their assigned task
         if user_role == 'employee':
             emp_id = target_task.get('assigned_to_id')
-            emp_name = target_task.get('employee_name')
-            if emp_id != user_id and username not in emp_name:
+            emp_name = target_task.get('employee_name') or ''
+            emp_list = [e.strip().lower() for e in emp_name.split(',') if e.strip()]
+            if emp_id != user_id and (username or '').lower() not in emp_list and (username or '').lower() not in emp_name.lower():
                 return JsonResponse({'status': 'error', 'message': 'Permission denied. You can only update your own tasks.'}, status=403)
 
         # Enforce single 'In Progress' task rule for the assigned employee
