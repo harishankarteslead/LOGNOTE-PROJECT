@@ -1,6 +1,7 @@
 import threading
 import datetime
 from django.db import connection
+from Taskapp.services import task_request_service
 
 _project_table_created = False
 _project_table_lock = threading.Lock()
@@ -124,11 +125,83 @@ def delete_projects_bulk(project_ids):
         return cursor.rowcount
 
 
-
-def update_project(project_id, project_name, project_type, status='Not Worked', start_date=None, due_date=None, actual_complete_date=None, description=''):
+def cascade_project_status_to_tasks(project_name, new_status, admin_name=""):
     """
-    Update an existing project record in the projects table.
-    Resets start_date & actual_complete_date appropriately when status changes.
+    Cascade project status changes to assigned tasks under that project:
+    - If new_status is 'On Hold' / 'Hold': update all tasks under project to 'On Hold' and notify assigned employees.
+    - If new_status is 'In Progress': reset 'On Hold' tasks under project to 'Not Worked' and notify assigned employees.
+    """
+    if not project_name:
+        return 0
+
+    proj_clean = project_name.strip()
+    status_clean = (new_status or '').strip()
+
+    with connection.cursor() as cursor:
+        if status_clean in ('On Hold', 'Hold'):
+            cursor.execute("""
+                SELECT id, task_name, assigned_to_id, employee_name
+                FROM tasks
+                WHERE LOWER(project_name) = LOWER(%s);
+            """, [proj_clean])
+            tasks_to_update = cursor.fetchall()
+
+            if tasks_to_update:
+                cursor.execute("""
+                    UPDATE tasks
+                    SET status = 'On Hold'
+                    WHERE LOWER(project_name) = LOWER(%s);
+                """, [proj_clean])
+
+                notified_users = set()
+                for task_id, t_name, emp_id, emp_name in tasks_to_update:
+                    if emp_id and emp_id not in notified_users:
+                        task_request_service.create_notification(
+                            user_id=emp_id,
+                            user_role='employee',
+                            title='Project & Tasks On Hold',
+                            message=f'Project "{proj_clean}" has been put On Hold by Admin ({admin_name or "System"}). Your assigned task(s) under this project are now On Hold.',
+                            link='/dashboard/'
+                        )
+                        notified_users.add(emp_id)
+
+                return len(tasks_to_update)
+
+        elif status_clean == 'In Progress':
+            cursor.execute("""
+                SELECT id, task_name, assigned_to_id, employee_name
+                FROM tasks
+                WHERE LOWER(project_name) = LOWER(%s) AND status IN ('On Hold', 'Hold');
+            """, [proj_clean])
+            tasks_to_resume = cursor.fetchall()
+
+            if tasks_to_resume:
+                cursor.execute("""
+                    UPDATE tasks
+                    SET status = 'Not Worked'
+                    WHERE LOWER(project_name) = LOWER(%s) AND status IN ('On Hold', 'Hold');
+                """, [proj_clean])
+
+                notified_users = set()
+                for task_id, t_name, emp_id, emp_name in tasks_to_resume:
+                    if emp_id and emp_id not in notified_users:
+                        task_request_service.create_notification(
+                            user_id=emp_id,
+                            user_role='employee',
+                            title='Project & Tasks Resumed',
+                            message=f'Project "{proj_clean}" status has been set to In Progress by Admin ({admin_name or "System"}). Your task(s) have been reset to Not Worked so you can resume.',
+                            link='/dashboard/'
+                        )
+                        notified_users.add(emp_id)
+
+                return len(tasks_to_resume)
+
+    return 0
+
+
+def update_project(project_id, project_name, project_type, status='Not Worked', start_date=None, due_date=None, actual_complete_date=None, description='', admin_name=""):
+    """
+    Update an existing project record in the projects table and cascade status changes.
     """
     create_project_table()
     today_str = datetime.date.today().isoformat()
@@ -144,7 +217,7 @@ def update_project(project_id, project_name, project_type, status='Not Worked', 
     elif status == 'Completed':
         final_start = start_date if start_date else (existing_start or today_str)
         final_actual = actual_complete_date if actual_complete_date else today_str
-    else:  # 'Not Worked', 'Pending'
+    else:  # 'Not Worked', 'Pending', 'On Hold'
         final_start = None
         final_actual = None
 
@@ -156,20 +229,26 @@ def update_project(project_id, project_name, project_type, status='Not Worked', 
             SET project_name = %s, project_type = %s, status = %s, start_date = %s, due_date = %s, actual_complete_date = %s, description = %s
             WHERE id = %s;
         """, [project_name, project_type, status, final_start, due_val, final_actual, description, project_id])
-        return cursor.rowcount
+        updated_count = cursor.rowcount
+
+    cascade_project_status_to_tasks(project_name, status, admin_name)
+    return updated_count
 
 
-def update_project_status(project_id, status):
+def update_project_status(project_id, status, admin_name=""):
     """
-    Update the status of a specific project and automatically handle start_date / actual_complete_date.
+    Update the status of a specific project and automatically cascade to tasks + notifications.
     """
     create_project_table()
     today_str = datetime.date.today().isoformat()
 
     with connection.cursor() as cursor:
-        cursor.execute("SELECT start_date, actual_complete_date FROM projects WHERE id = %s;", [project_id])
+        cursor.execute("SELECT project_name, start_date, actual_complete_date FROM projects WHERE id = %s;", [project_id])
         row = cursor.fetchone()
-        existing_start = row[0].isoformat() if row and row[0] else None
+        if not row:
+            return 0
+        proj_name = row[0]
+        existing_start = row[1].isoformat() if row[1] else None
 
     if status == 'In Progress':
         final_start = existing_start if existing_start else today_str
@@ -177,7 +256,7 @@ def update_project_status(project_id, status):
     elif status == 'Completed':
         final_start = existing_start if existing_start else today_str
         final_actual = today_str
-    else:  # 'Not Worked', 'Pending'
+    else:  # 'Not Worked', 'Pending', 'On Hold'
         final_start = None
         final_actual = None
 
@@ -187,7 +266,10 @@ def update_project_status(project_id, status):
             SET status = %s, start_date = %s, actual_complete_date = %s
             WHERE id = %s;
         """, [status, final_start, final_actual, project_id])
-        return cursor.rowcount
+        updated_count = cursor.rowcount
+
+    cascade_project_status_to_tasks(proj_name, status, admin_name)
+    return updated_count
 
 
 

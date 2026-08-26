@@ -363,7 +363,7 @@ def dashboard(request):
             new_status = request.POST.get('status', '').strip()
             if project_id and new_status:
                 try:
-                    project_service.update_project_status(int(project_id), new_status)
+                    project_service.update_project_status(int(project_id), new_status, admin_name=username)
                     messages.success(request, f'Project #{project_id} status updated to "{new_status}".')
                 except Exception as e:
                     messages.error(request, f'Failed to update project status: {str(e)}')
@@ -455,7 +455,8 @@ def dashboard(request):
                         start_date=start_date,
                         due_date=due_date,
                         actual_complete_date=actual_complete_date,
-                        description=description
+                        description=description,
+                        admin_name=username
                     )
                     messages.success(request, f'Project #{project_id} ("{project_name}") updated successfully!')
                 except Exception as e:
