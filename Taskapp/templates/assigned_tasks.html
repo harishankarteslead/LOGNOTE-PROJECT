@@ -873,8 +873,8 @@
                                         cells[1].innerHTML = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span>`;
                                         cells[2].innerHTML = `<span class="project-tag">${escapeHtml(task.project_name || '-')}</span>`;
                                         cells[3].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
-                                        cells[4].innerText = task.due_date || '-';
-                                        cells[5].innerHTML = `<span style="color: #2563eb; font-weight: 600;">In Progress</span>`;
+                                         cells[4].innerText = task.due_date || '-';
+                                        cells[5].innerHTML = renderStatusBadge(task.status);
                                     }
                                 } else {
                                     const newTr = document.createElement('tr');
@@ -886,7 +886,7 @@
                                     <td><span class="project-tag">${escapeHtml(task.project_name || '-')}</span></td>
                                     <td><strong>${escapeHtml(task.task_name)}</strong></td>
                                     <td>${escapeHtml(task.due_date || '-')}</td>
-                                    <td><span style="color: #2563eb; font-weight: 600;">In Progress</span></td>
+                                    <td>${renderStatusBadge(task.status)}</td>
                                 `;
                                     tbody.prepend(newTr);
                                 }

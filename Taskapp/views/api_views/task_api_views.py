@@ -33,7 +33,7 @@ def api_get_tasks(request):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized. Please log in.'}, status=401)
 
     if user_role in ('superadmin', 'admin'):
-        tasks = task_service.get_all_tasks()
+        tasks = task_service.get_grouped_tasks()
         projects = project_service.get_all_projects()
     else:
         tasks = task_service.get_tasks_by_employee(user_id, username)

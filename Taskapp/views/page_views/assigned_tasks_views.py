@@ -20,7 +20,7 @@ def assigned_tasks_view(request):
         messages.error(request, 'Access denied. Only Superadmin and Admin can access Assigned Tasks.')
         return redirect('dashboard')
 
-    tasks = task_service.get_all_tasks()
+    tasks = task_service.get_grouped_tasks()
     projects = project_service.get_all_projects()
 
     all_employees = employee_service.get_users_by_role('employee')

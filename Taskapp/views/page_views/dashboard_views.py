@@ -411,15 +411,12 @@ def dashboard(request):
                             emp_names.append(emp['username'])
 
                     if emp_names:
-                        employee_names_str = ", ".join(emp_names)
-                        primary_emp_id = emp_ids[0]
-
                         task_service.update_task_details(
                             task_id=int(task_id),
                             task_name=task_name,
                             description=description,
-                            assigned_to_id=primary_emp_id,
-                            employee_name=employee_names_str,
+                            assigned_to_ids=emp_ids,
+                            employee_names=emp_names,
                             due_date=due_date,
                             status=status,
                             project_name=project_name
@@ -509,7 +506,14 @@ def dashboard(request):
 
     if user_role in ('superadmin', 'admin'):
         tasks = task_service.get_all_tasks()
+        grouped_tasks = task_service.get_grouped_tasks()
         projects = project_service.get_all_projects()
+
+        for t in grouped_tasks:
+            t_due = t.get('due_date')
+            t_created = t.get('created_at')
+            t['due_date_str'] = t_due.strftime('%Y-%m-%d') if hasattr(t_due, 'strftime') else (str(t_due or '-').strip())
+            t['created_at_str'] = t_created.strftime('%Y-%m-%d') if hasattr(t_created, 'strftime') else (str(t_created or '-').strip())
 
         for t in tasks:
             t_due = t.get('due_date')
@@ -530,9 +534,11 @@ def dashboard(request):
             p['actual_complete_date_str'] = p_actual.strftime('%Y-%m-%d') if hasattr(p_actual, 'strftime') else (str(p_actual or '-').strip())
             p['created_at_str'] = p_created.strftime('%Y-%m-%d %H:%M') if hasattr(p_created, 'strftime') else (str(p_created or '-').strip())
 
-        context['tasks'] = tasks
+        context['tasks'] = grouped_tasks
+        context['grouped_tasks'] = grouped_tasks
+        context['all_per_employee_tasks'] = tasks
         context['projects'] = projects
-        context['total_tasks'] = len(tasks)
+        context['total_tasks'] = len(grouped_tasks)
         context['total_projects'] = len(projects)
         context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
         context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])

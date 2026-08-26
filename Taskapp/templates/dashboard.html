@@ -1674,7 +1674,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for task in tasks %}
+                                {% for task in grouped_tasks|default:tasks %}
                                 <tr class="task-row" data-task-id="{{ task.id }}"
                                     data-task-name="{{ task.task_name|lower }}"
                                     data-project-name="{{ task.project_name|default:''|lower }}"
