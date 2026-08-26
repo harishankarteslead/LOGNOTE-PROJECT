@@ -1,32 +1,43 @@
+import threading
 import datetime
 from django.db import connection
+
+_project_table_created = False
+_project_table_lock = threading.Lock()
 
 
 def create_project_table():
     """
     Raw SQL query to create the projects database table if it doesn't exist.
     """
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS projects (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                project_name VARCHAR(255) NOT NULL,
-                project_type VARCHAR(100) NOT NULL,
-                status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
-                start_date DATE NULL,
-                due_date DATE NULL,
-                actual_complete_date DATE NULL,
-                description TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        
-        cursor.execute("SHOW COLUMNS FROM projects;")
-        existing_cols = [col[0] for col in cursor.fetchall()]
-        if 'status' not in existing_cols:
-            cursor.execute("ALTER TABLE projects ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Not Worked';")
-        if 'actual_complete_date' not in existing_cols:
-            cursor.execute("ALTER TABLE projects ADD COLUMN actual_complete_date DATE NULL;")
+    global _project_table_created
+    if _project_table_created:
+        return
+    with _project_table_lock:
+        if _project_table_created:
+            return
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS projects (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    project_name VARCHAR(255) NOT NULL,
+                    project_type VARCHAR(100) NOT NULL,
+                    status VARCHAR(50) NOT NULL DEFAULT 'Not Worked',
+                    start_date DATE NULL,
+                    due_date DATE NULL,
+                    actual_complete_date DATE NULL,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            
+            cursor.execute("SHOW COLUMNS FROM projects;")
+            existing_cols = [col[0] for col in cursor.fetchall()]
+            if 'status' not in existing_cols:
+                cursor.execute("ALTER TABLE projects ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Not Worked';")
+            if 'actual_complete_date' not in existing_cols:
+                cursor.execute("ALTER TABLE projects ADD COLUMN actual_complete_date DATE NULL;")
+        _project_table_created = True
 
 
 def create_project(project_name, project_type, status='Not Worked', start_date=None, due_date=None, actual_complete_date=None, description=''):

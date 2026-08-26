@@ -1,5 +1,9 @@
+import threading
 from django.db import connection
 from django.contrib.auth.hashers import make_password, check_password
+
+_employee_table_created = False
+_employee_table_lock = threading.Lock()
 
 
 def create_employee_table():
@@ -7,22 +11,29 @@ def create_employee_table():
     Raw SQL query to create the employees database table if it doesn't exist.
     Role ENUM values are strictly enforced: 'superadmin', 'admin', 'employee'.
     """
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS employees (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(150) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
-                email VARCHAR(254) NOT NULL,
-                role VARCHAR(20) NOT NULL CHECK (role IN ('superadmin', 'admin', 'employee')),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        # Ensure password column fits long hashes
-        try:
-            cursor.execute("ALTER TABLE employees MODIFY COLUMN password VARCHAR(255) NOT NULL;")
-        except Exception:
-            pass
+    global _employee_table_created
+    if _employee_table_created:
+        return
+    with _employee_table_lock:
+        if _employee_table_created:
+            return
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS employees (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    username VARCHAR(150) NOT NULL UNIQUE,
+                    password VARCHAR(255) NOT NULL,
+                    email VARCHAR(254) NOT NULL,
+                    role VARCHAR(20) NOT NULL CHECK (role IN ('superadmin', 'admin', 'employee')),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            # Ensure password column fits long hashes
+            try:
+                cursor.execute("ALTER TABLE employees MODIFY COLUMN password VARCHAR(255) NOT NULL;")
+            except Exception:
+                pass
+        _employee_table_created = True
 
 
 def is_hashed(password_str):

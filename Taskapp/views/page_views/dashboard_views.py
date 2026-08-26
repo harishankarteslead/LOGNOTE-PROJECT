@@ -511,15 +511,24 @@ def dashboard(request):
         tasks = task_service.get_all_tasks()
         projects = project_service.get_all_projects()
 
+        for t in tasks:
+            t_due = t.get('due_date')
+            t_created = t.get('created_at')
+            t['due_date_str'] = t_due.strftime('%Y-%m-%d') if hasattr(t_due, 'strftime') else (str(t_due or '-').strip())
+            t['created_at_str'] = t_created.strftime('%Y-%m-%d') if hasattr(t_created, 'strftime') else (str(t_created or '-').strip())
+
         for p in projects:
+            p_start = p.get('start_date')
             p_due = p.get('due_date')
-            if p_due:
-                p_due_str = p_due.strftime('%Y-%m-%d') if isinstance(p_due, (datetime, date)) else str(p_due).strip()
-                p['is_expired'] = is_past_date(p_due_str)
-                p['due_date_str'] = p_due_str
-            else:
-                p['is_expired'] = False
-                p['due_date_str'] = ''
+            p_actual = p.get('actual_complete_date')
+            p_created = p.get('created_at')
+
+            p_due_str = p_due.strftime('%Y-%m-%d') if hasattr(p_due, 'strftime') else (str(p_due or '-').strip())
+            p['is_expired'] = is_past_date(p_due_str) if p_due_str and p_due_str != '-' else False
+            p['start_date_str'] = p_start.strftime('%Y-%m-%d') if hasattr(p_start, 'strftime') else (str(p_start or '-').strip())
+            p['due_date_str'] = p_due_str
+            p['actual_complete_date_str'] = p_actual.strftime('%Y-%m-%d') if hasattr(p_actual, 'strftime') else (str(p_actual or '-').strip())
+            p['created_at_str'] = p_created.strftime('%Y-%m-%d %H:%M') if hasattr(p_created, 'strftime') else (str(p_created or '-').strip())
 
         context['tasks'] = tasks
         context['projects'] = projects
@@ -535,6 +544,12 @@ def dashboard(request):
     else:
         # Employee role
         tasks = task_service.get_tasks_by_employee(user_id, username)
+        for t in tasks:
+            t_due = t.get('due_date')
+            t_created = t.get('created_at')
+            t['due_date_str'] = t_due.strftime('%Y-%m-%d') if hasattr(t_due, 'strftime') else (str(t_due or '-').strip())
+            t['created_at_str'] = t_created.strftime('%Y-%m-%d') if hasattr(t_created, 'strftime') else (str(t_created or '-').strip())
+
         context['tasks'] = tasks
         context['total_tasks'] = len(tasks)
         context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])

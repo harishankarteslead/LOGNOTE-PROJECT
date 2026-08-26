@@ -91,8 +91,6 @@ def api_get_tasks(request):
             if t.get('status') == 'In Progress':
                 selected_task = t
                 break
-        if not selected_task and emp_assigned_tasks:
-            selected_task = emp_assigned_tasks[0]
 
         all_tasks_list = []
         for t in emp_assigned_tasks:
@@ -107,27 +105,15 @@ def api_get_tasks(request):
             })
 
         if selected_task:
-            status_val = selected_task.get('status') or 'Not Worked'
             employee_tasks.append({
                 'employee_id': emp_id,
                 'employee_name': emp_username,
                 'project_name': selected_task.get('project_name') or '-',
                 'task_name': selected_task.get('task_name') or '-',
-                'status': status_val,
+                'status': 'In Progress',
                 'total_tasks_count': len(emp_assigned_tasks),
                 'all_tasks': all_tasks_list,
                 'is_assigned': True
-            })
-        else:
-            employee_tasks.append({
-                'employee_id': emp_id,
-                'employee_name': emp_username,
-                'project_name': '-',
-                'task_name': 'No Task Assigned',
-                'status': 'Not Worked',
-                'total_tasks_count': 0,
-                'all_tasks': [],
-                'is_assigned': False
             })
 
     return JsonResponse({
@@ -165,9 +151,11 @@ def api_update_task_status(request):
             body_data = json.loads(request.body)
             task_id = body_data.get('task_id') or body_data.get('assignment_id')
             new_status = (body_data.get('status') or '').strip()
+            description = (body_data.get('description') or '').strip()
         else:
             task_id = request.POST.get('task_id') or request.POST.get('assignment_id')
             new_status = (request.POST.get('status') or '').strip()
+            description = (request.POST.get('description') or '').strip()
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Invalid payload: {str(e)}'}, status=400)
 
@@ -202,7 +190,11 @@ def api_update_task_status(request):
                     'message': f'Employee {target_emp_name} already has task ("{active_task["task_name"]}") In Progress. Please set it to On Hold or Completed first.'
                 }, status=400)
 
-        task_service.update_task_status(task_id_int, new_status)
+        if description:
+            task_service.update_task_employee_fields(task_id_int, description, new_status)
+        else:
+            task_service.update_task_status(task_id_int, new_status)
+
         return JsonResponse({
             'status': 'success',
             'message': f'Task status updated to "{new_status}" successfully.',

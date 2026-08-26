@@ -44,8 +44,6 @@ def assigned_tasks_view(request):
             if t.get('status') == 'In Progress':
                 selected_task = t
                 break
-        if not selected_task and emp_assigned_tasks:
-            selected_task = emp_assigned_tasks[0]
 
         all_tasks_list = []
         for t in emp_assigned_tasks:
@@ -61,27 +59,15 @@ def assigned_tasks_view(request):
             })
 
         if selected_task:
-            status_val = selected_task.get('status') or 'Not Worked'
             employee_tasks.append({
                 'employee_id': emp_id,
                 'employee_name': emp_username,
                 'project_name': selected_task.get('project_name') or '-',
                 'task_name': selected_task.get('task_name') or '-',
-                'status': status_val,
+                'status': 'In Progress',
                 'total_tasks_count': len(emp_assigned_tasks),
                 'all_tasks': all_tasks_list,
                 'is_assigned': True
-            })
-        else:
-            employee_tasks.append({
-                'employee_id': emp_id,
-                'employee_name': emp_username,
-                'project_name': '-',
-                'task_name': 'No Task Assigned',
-                'status': 'Not Worked',
-                'total_tasks_count': 0,
-                'all_tasks': [],
-                'is_assigned': False
             })
 
     for t in tasks:

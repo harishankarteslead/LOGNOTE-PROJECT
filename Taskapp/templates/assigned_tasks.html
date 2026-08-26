@@ -156,6 +156,7 @@
             align-items: center;
             justify-content: space-between;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: none;
         }
 
         .stat-card:hover {
@@ -481,12 +482,12 @@
                     <button class="subtab-btn active" id="btn-tasks" onclick="showSubtab('tasks')">
                         <i class="fa-solid fa-spinner"></i>
                         Currently Worked Tasks
-                        <span class="badge-count">{{ total_in_progress_tasks }}</span>
+                        <!-- <span class="badge-count">{{ total_in_progress_tasks }}</span> -->
                     </button>
                     <button class="subtab-btn" id="btn-projects" onclick="showSubtab('projects')">
                         <i class="fa-solid fa-diagram-project"></i>
                         Currently Worked Projects
-                        <span class="badge-count">{{ total_in_progress_projects }}</span>
+                        <!-- <span class="badge-count">{{ total_in_progress_projects }}</span> -->
                     </button>
                     <button class="subtab-btn" id="btn-all-tasks" onclick="showSubtab('all-tasks')" style="display: none;">
                         <i class="fa-solid fa-list"></i>
@@ -522,32 +523,25 @@
                                     <i class="fa-solid fa-user"></i>
                                     {{ item.employee_name }}
                                     <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-{{ item.employee_id }}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s;"></i>
-                                    {% if item.total_tasks_count > 0 %}
-                                        <span style="background: #6366f1; color: white; border-radius: 10px; padding: 1px 6px; font-size: 11px; margin-left: 6px; font-weight: 700;">{{ item.total_tasks_count }} tasks</span>
-                                    {% endif %}
                                 </span>
                             </td>
                             <td>
                                 <span class="project-tag">{{ item.project_name }}</span>
                             </td>
                             <td>
-                                {% if item.task_name != 'No Task Assigned' %}
+                                {% if item.task_name != 'No Task Assigned' and item.task_name != '-' %}
                                     <strong>{{ item.task_name }}</strong>
-                                {% else %}
+                                {% elif item.task_name == 'No Task Assigned' %}
                                     <span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>
+                                {% else %}
+                                    <span style="color: #94a3b8;">-</span>
                                 {% endif %}
                             </td>
-                             <td>
+                              <td>
                                 {% if item.status == 'In Progress' %}
                                     <span style="color: #2563eb; font-weight: 600;">In Progress</span>
-                                {% elif item.status == 'Completed' %}
-                                    <span class="status-badge status-completed">
-                                        <i class="fa-solid fa-check"></i> Completed
-                                    </span>
-                                {% elif item.status == 'On Hold' or item.status == 'Hold' %}
-                                    <span class="status-badge status-on-hold">
-                                        <i class="fa-solid fa-circle-pause"></i> On Hold
-                                    </span>
+                                {% else %}
+                                    <span style="color: #94a3b8;">-</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -572,6 +566,8 @@
                                                     <span class="status-badge status-completed"><i class="fa-solid fa-check"></i> Completed</span>
                                                 {% elif t.status == 'On Hold' or t.status == 'Hold' %}
                                                     <span class="status-badge status-on-hold"><i class="fa-solid fa-circle-pause"></i> On Hold</span>
+                                                {% else %}
+                                                    <span style="color: #94a3b8;">-</span>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -586,9 +582,9 @@
                         <tr>
                             <td colspan="5">
                                 <div class="empty-state">
-                                    <i class="fa-solid fa-users"></i>
-                                    <h4>No Employees Found</h4>
-                                    <p>No employee records found in the system.</p>
+                                    <i class="fa-solid fa-spinner"></i>
+                                    <h4>No Tasks Currently In Progress</h4>
+                                    <p>No employee tasks are currently in progress.</p>
                                 </div>
                             </td>
                         </tr>
@@ -796,15 +792,19 @@
         }
 
         function renderStatusBadge(status) {
-            const statusStr = status || '';
+            const statusStr = (status || '').trim();
             if (statusStr === 'In Progress') {
                 return '<span style="color: #2563eb; font-weight: 600;">In Progress</span>';
             } else if (statusStr === 'Completed') {
                 return '<span class="status-badge status-completed"><i class="fa-solid fa-check"></i> Completed</span>';
             } else if (statusStr === 'On Hold' || statusStr === 'Hold') {
                 return '<span class="status-badge status-on-hold"><i class="fa-solid fa-circle-pause"></i> On Hold</span>';
+            } else if (statusStr === 'Pending') {
+                return '<span class="status-badge status-pending">Pending</span>';
+            } else if (statusStr === 'Not Worked') {
+                return '<span class="status-badge status-not-worked">Not Worked</span>';
             } else {
-                return '';
+                return '<span style="color: #94a3b8;">-</span>';
             }
         }
 
@@ -884,23 +884,31 @@
                             emptyStateTr.remove();
                         }
 
+                        const apiEmpIds = new Set(empTasks.map(e => String(e.employee_id)));
+                        tbody.querySelectorAll('tr.assigned-emp-row').forEach(row => {
+                            const empId = row.getAttribute('data-emp-id');
+                            if (!apiEmpIds.has(empId)) {
+                                const subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${empId}"]`);
+                                if (subrow) subrow.remove();
+                                row.remove();
+                            }
+                        });
+
                         empTasks.forEach((item, index) => {
                             let row = tbody.querySelector(`tr.assigned-emp-row[data-emp-id="${item.employee_id}"]`);
                             let subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${item.employee_id}"]`);
-                            const isAssignedTask = item.task_name && item.task_name !== 'No Task Assigned';
+                            const isAssignedTask = item.task_name && item.task_name !== 'No Task Assigned' && item.task_name !== '-';
                             const taskHtml = isAssignedTask
                                 ? `<strong>${escapeHtml(item.task_name)}</strong>`
-                                : `<span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>`;
+                                : (item.task_name === 'No Task Assigned'
+                                    ? `<span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>`
+                                    : `<span style="color: #94a3b8;">-</span>`);
                             const statusHtml = renderStatusBadge(item.status);
-
-                            const taskCountBadge = item.total_tasks_count > 0
-                                ? `<span style="background: #6366f1; color: white; border-radius: 10px; padding: 1px 6px; font-size: 11px; margin-left: 6px; font-weight: 700;">${item.total_tasks_count} tasks</span>`
-                                : '';
 
                             const isSubrowVisible = subrow && (subrow.style.display === 'table-row');
                             const isRotated = isSubrowVisible ? 'rotate(90deg)' : 'rotate(0deg)';
 
-                            const empTagHtml = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(item.employee_name)} <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-${item.employee_id}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s; transform: ${isRotated};"></i> ${taskCountBadge}</span>`;
+                            const empTagHtml = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(item.employee_name)} <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-${item.employee_id}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s; transform: ${isRotated};"></i></span>`;
 
                             if (row) {
                                 const cells = row.children;
@@ -931,11 +939,12 @@
                             let subListHtml = '';
                             if (item.all_tasks && item.all_tasks.length > 0) {
                                 item.all_tasks.forEach((t) => {
+                                    const projTagVal = t.project_name || '-';
                                     subListHtml += `
                                         <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
                                                 <strong style="color: #1e293b; font-size: 14px;">${escapeHtml(t.task_name)}</strong>
-                                                <span class="project-tag">${escapeHtml(t.project_name || '-')}</span>
+                                                <span class="project-tag">${escapeHtml(projTagVal)}</span>
                                             </div>
                                             <div>
                                                 ${renderStatusBadge(t.status)}
