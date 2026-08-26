@@ -349,7 +349,7 @@
 
         .status-in-progress {
             background: #fffbeb;
-            color: #b45309;
+            color: #2c1402;
             border: 1px solid #fcd34d;
         }
 
@@ -578,8 +578,7 @@
                                         <div
                                             style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
-                                                <strong style="color: #1e293b; font-size: 14px;">{{ t.task_name
-                                                    }}</strong>
+                                                <strong style="color: #1e293b; font-size: 14px;">{{ t.task_name }}</strong>
                                                 <span class="project-tag">{{ t.project_name|default:"-" }}</span>
                                             </div>
                                             <div>
@@ -847,7 +846,7 @@
 
                     const allTasks = data.tasks || [];
                     const tasks = allTasks.filter(t => t.status === 'In Progress');
-                    const apiTaskIds = new Set(tasks.map(t => t.id));
+                    const apiTaskIds = new Set(tasks.map(t => t.id)); 
 
                     // 1. All Tasks Table (#tableAllTasks - ONLY In Progress Tasks)
                     const tableAllTasks = document.getElementById('tableAllTasks');

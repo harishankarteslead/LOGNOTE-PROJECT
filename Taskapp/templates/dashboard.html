@@ -1164,8 +1164,7 @@
                                     </td>
                                     <td>
                                         <span
-                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not
-                                            Worked" }}</span>
+                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
@@ -1897,8 +1896,7 @@
                                         <td><strong>{{ task.task_name }}</strong></td>
                                         <td>
                                             <span
-                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"
-                                                }}</span>
+                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
                                         </td>
                                         <td><strong>{{ task.employee_name }}</strong></td>
                                         <td>
@@ -2023,8 +2021,7 @@
                             {% for proj in projects %}
                             {% if proj.is_expired %}
                             <option value="{{ proj.project_name }}" disabled
-                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired -
-                                Due: {{ proj.due_date_str }})</option>
+                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
                             {% else %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
@@ -2067,8 +2064,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAssignTaskModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Save Task
-                        Record</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Save Task Record</button>
                 </div>
             </form>
         </div>
@@ -2315,8 +2311,7 @@
                             {% for proj in projects %}
                             {% if proj.is_expired %}
                             <option value="{{ proj.project_name }}" disabled
-                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired -
-                                Due: {{ proj.due_date_str }})</option>
+                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
                             {% else %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
@@ -3617,13 +3612,7 @@
             return cookieValue;
         }
 
-        function submitEmployeeTaskStatusApi(event) {
-            event.preventDefault();
-            const taskId = document.getElementById('emp-edit-task-id').value;
-            const status = document.getElementById('emp-edit-task-status').value;
-            const description = document.getElementById('emp-edit-task-description').value;
-            const csrfToken = document.querySelector('#employeeEditTaskForm [name="csrfmiddlewaretoken"]').value;
-
+        function executeTaskStatusUpdate(taskId, status, description, csrfToken) {
             fetch('/api/tasks/update-status/', {
                 method: 'POST',
                 headers: {
@@ -3659,19 +3648,58 @@
                             title: 'Status Update Failed',
                             text: data.message,
                             icon: 'error',
-                            customClass: {
-                                popup: 'swal-dark-glass',
-                                title: 'swal-dark-title',
-                                htmlContainer: 'swal-dark-text',
-                                confirmButton: 'btn-danger-swal'
-                            },
-                            buttonsStyling: false
+                            confirmButtonColor: '#ef4444'
                         });
                     }
                 })
                 .catch(err => {
                     Swal.fire('Error', 'Server connection error: ' + err, 'error');
                 });
+        }
+
+        function submitEmployeeTaskStatusApi(event) {
+            event.preventDefault();
+            const taskId = document.getElementById('emp-edit-task-id').value;
+            const status = document.getElementById('emp-edit-task-status').value;
+            const description = document.getElementById('emp-edit-task-description').value;
+            const csrfToken = document.querySelector('#employeeEditTaskForm [name="csrfmiddlewaretoken"]').value;
+
+            if (status === 'Completed') {
+                closeEmployeeEditTaskModal();
+                Swal.fire({
+                    title: 'Completion Summary',
+                    width: '360px',
+                    padding: '14px 16px',
+                    html: `
+                        <div style="text-align: left; font-size: 12px; color: #475569; margin-top: 4px;">
+                            <p style="margin-bottom: 8px;">Enter completion notes/summary:</p>
+                            <textarea id="swal-completion-description" class="swal2-textarea" placeholder="Describe completed work..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 12px; min-height: 60px; box-shadow: none;">${escapeHtml(description || '')}</textarea>
+                        </div>
+                    `,
+                    icon: 'question',
+                    iconColor: '#10b981',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#64748b',
+                    preConfirm: () => {
+                        const notes = document.getElementById('swal-completion-description').value.trim();
+                        if (!notes) {
+                            Swal.showValidationMessage('Completion summary is required.');
+                            return false;
+                        }
+                        return notes;
+                    }
+                }).then((res) => {
+                    if (res.isConfirmed && res.value) {
+                        executeTaskStatusUpdate(taskId, 'Completed', res.value, csrfToken);
+                    }
+                });
+                return false;
+            }
+
+            executeTaskStatusUpdate(taskId, status, description, csrfToken);
             return false;
         }
 
