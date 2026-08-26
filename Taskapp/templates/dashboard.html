@@ -943,6 +943,12 @@
                 <i class="fa-solid fa-spinner"></i> Assigned Tasks
             </li>
 
+            <li class="menu-item {% if active_tab == 'task-requests' %}active{% endif %}"
+                onclick="switchTab('task-requests', this)">
+                <i class="fa-solid fa-code-pull-request"></i> Task Request
+                <span id="sidebar-request-badge" class="badge" style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
+            </li>
+
             {% if role == 'superadmin' %}
             <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}"
                 onclick="switchTab('add-members', this)">
@@ -973,10 +979,31 @@
                 {% else %}Employee Overview
                 {% endif %}
             </h2>
-            <div class="user-profile">
-                <div>
-                    <strong style="font-size: 14px; display: block;">{{ username }}</strong>
-                    <span class="role-badge role-{{ role }}">{{ role }}</span>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- Notification Bell Wrapper -->
+                <div class="notification-wrapper" style="position: relative; cursor: pointer;">
+                    <div id="notification-bell-btn" onclick="toggleNotificationDropdown()" style="position: relative; font-size: 18px; color: var(--text-dark); padding: 8px; border-radius: 50%; background: #f1f5f9; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notification-badge" style="display: none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; border: 2px solid white;">0</span>
+                    </div>
+
+                    <!-- Notification Dropdown -->
+                    <div id="notification-dropdown" style="display: none; position: absolute; right: 0; top: 48px; width: 340px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 1000; overflow: hidden;">
+                        <div style="padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 14px; color: var(--text-dark);"><i class="fa-solid fa-bell" style="color: var(--primary);"></i> Notifications</strong>
+                            <button onclick="markAllNotificationsRead()" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;">Mark all read</button>
+                        </div>
+                        <div id="notification-list" style="max-height: 320px; overflow-y: auto;">
+                            <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No unread notifications</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-profile">
+                    <div>
+                        <strong style="font-size: 14px; display: block;">{{ username }}</strong>
+                        <span class="role-badge role-{{ role }}">{{ role }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1948,6 +1975,14 @@
             </div>
             {% endif %}
 
+            <!-- TAB 6: TASK REQUESTS (SUPERADMIN / ADMIN ONLY) -->
+            {% if role == 'superadmin' or role == 'admin' %}
+            <div id="tab-task-requests" class="tab-content {% if active_tab == 'task-requests' %}active{% endif %}">
+                {% include 'task_requests.html' %}
+            </div>
+            {% endif %}
+
+
         </div>
     </div>
 
@@ -2645,11 +2680,16 @@
                 'add-members': role === 'superadmin' ? 'Manage Members' : 'Manage Employees',
                 'form-data': 'Form Data & Task Assignment',
                 'add-project': 'Projects Management',
-                'in-progress': 'Assigned Tasks & Projects'
+                'in-progress': 'Assigned Tasks & Projects',
+                'task-requests': 'Multi-Project & Task Requests'
             };
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
                 pageTitle.innerText = titles[tabName] || 'Dashboard';
+            }
+
+            if (tabName === 'task-requests' && typeof loadTaskRequestsTab === 'function') {
+                loadTaskRequestsTab();
             }
 
             // Sync Cookie, URL parameter, and sessionStorage
@@ -3562,6 +3602,21 @@
             return false;
         }
 
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         function submitEmployeeTaskStatusApi(event) {
             event.preventDefault();
             const taskId = document.getElementById('emp-edit-task-id').value;
@@ -3596,6 +3651,9 @@
                             timer: 2500
                         });
                         pollTaskStatus();
+                    } else if (data.status === 'request_required') {
+                        closeEmployeeEditTaskModal();
+                        openTaskApprovalRequestModal(data.task_id, data.task_name, data.project_name, data.active_task_name);
                     } else {
                         Swal.fire({
                             title: 'Status Update Failed',
@@ -3616,6 +3674,219 @@
                 });
             return false;
         }
+
+        function openTaskApprovalRequestModal(taskId, taskName, projectName, activeTaskName) {
+            Swal.fire({
+                title: 'Request Task Approval',
+                width: '420px',
+                padding: '16px 20px',
+                html: `
+                    <div style="text-align: left; font-size: 13px; color: #475569; line-height: 1.5; margin-top: 6px;">
+                        <p style="margin-bottom: 10px; background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <span style="display: block; margin-bottom: 4px;">Active Task: <strong style="color: #0f172a;">"${escapeHtml(activeTaskName || 'Active Task')}"</strong></span>
+                            <span>Requested Task: <strong style="color: #4f46e5;">"${escapeHtml(taskName)}"</strong> ${projectName ? '<span style="color: #64748b;">(' + escapeHtml(projectName) + ')</span>' : ''}</span>
+                        </p>
+                        <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 4px;">Reason for Admin (Optional):</label>
+                        <textarea id="swal-request-reason" class="swal2-textarea" placeholder="Enter reason to work on multiple tasks..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 13px; min-height: 70px; box-shadow: none;"></textarea>
+                    </div>
+                `,
+                icon: 'info',
+                iconColor: '#4f46e5',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-paper-plane"></i> Send Request',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#64748b'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const reason = document.getElementById('swal-request-reason') ? document.getElementById('swal-request-reason').value.trim() : '';
+                    fetch('/api/tasks/request/create/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            task_id: taskId,
+                            reason: reason
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(reqData => {
+                        if (reqData.status === 'success') {
+                            Swal.fire({
+                                title: 'Request Sent',
+                                text: reqData.message,
+                                icon: 'success',
+                                width: '380px',
+                                confirmButtonColor: '#4f46e5'
+                            });
+                            fetchUnreadNotifications();
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: reqData.message,
+                                icon: 'error',
+                                width: '380px',
+                                confirmButtonColor: '#ef4444'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        window.knownNotificationIds = window.knownNotificationIds || new Set();
+        let isFirstNotificationFetch = true;
+
+        function fetchUnreadNotifications() {
+            fetch('/api/notifications/', { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const count = data.unread_count || 0;
+                        const badge = document.getElementById('notification-badge');
+                        const sidebarBadge = document.getElementById('sidebar-request-badge');
+
+                        if (badge) {
+                            if (count > 0) {
+                                badge.innerText = count;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+
+                        const role = "{{ role }}";
+                        if ((role === 'superadmin' || role === 'admin') && sidebarBadge) {
+                            fetch('/api/tasks/requests/', { credentials: 'same-origin' })
+                                .then(r => r.json())
+                                .then(reqData => {
+                                    if (reqData.status === 'success') {
+                                        if (reqData.pending_count > 0) {
+                                            sidebarBadge.innerText = reqData.pending_count;
+                                            sidebarBadge.style.display = 'inline-block';
+                                        } else {
+                                            sidebarBadge.style.display = 'none';
+                                        }
+
+                                        // If Task Requests tab is active, refresh table dynamically without page reload
+                                        const currentTab = sessionStorage.getItem('active_tab') || (new URLSearchParams(window.location.search)).get('tab');
+                                        if (currentTab === 'task-requests' && typeof loadTaskRequestsTab === 'function') {
+                                            loadTaskRequestsTab(true);
+                                        }
+                                    }
+                                }).catch(() => {});
+                        }
+
+                        const notifications = data.notifications || [];
+                        let newUnreadCount = 0;
+                        let latestNewNotification = null;
+
+                        notifications.forEach(n => {
+                            if (!window.knownNotificationIds.has(n.id)) {
+                                window.knownNotificationIds.add(n.id);
+                                if (!isFirstNotificationFetch) {
+                                    newUnreadCount++;
+                                    latestNewNotification = n;
+                                }
+                            }
+                        });
+
+                        isFirstNotificationFetch = false;
+
+                        // Trigger live Toast popup if new unread notification arrived
+                        if (newUnreadCount > 0 && latestNewNotification) {
+                            let toastIcon = 'info';
+                            if (latestNewNotification.title.includes('Approved')) toastIcon = 'success';
+                            else if (latestNewNotification.title.includes('Rejected')) toastIcon = 'error';
+                            else if (latestNewNotification.title.includes('Request')) toastIcon = 'warning';
+
+                            Swal.fire({
+                                title: latestNewNotification.title,
+                                text: latestNewNotification.message,
+                                icon: toastIcon,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4500,
+                                timerProgressBar: true
+                            });
+                        }
+
+                        const listEl = document.getElementById('notification-list');
+                        if (listEl) {
+                            if (notifications.length > 0) {
+                                let html = '';
+                                notifications.forEach(n => {
+                                    html += `
+                                        <div onclick="clickNotification(${n.id}, '${n.link || ''}')" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; background: #fff;">
+                                            <div style="font-weight: 600; font-size: 13px; color: var(--text-dark); margin-bottom: 4px;">${n.title}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">${n.message}</div>
+                                            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-align: right;">${n.created_at || ''}</div>
+                                        </div>
+                                    `;
+                                });
+                                listEl.innerHTML = html;
+                            } else {
+                                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No unread notifications</div>`;
+                            }
+                        }
+                    }
+                }).catch(() => {});
+        }
+
+        function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notification-dropdown');
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/api/notifications/mark-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notification_id: 0 })
+            }).then(() => {
+                fetchUnreadNotifications();
+            });
+        }
+
+        function clickNotification(id, link) {
+            fetch('/api/notifications/mark-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notification_id: id })
+            }).then(() => {
+                const dropdown = document.getElementById('notification-dropdown');
+                if (dropdown) dropdown.style.display = 'none';
+                fetchUnreadNotifications();
+                if (link && link.includes('task-requests')) {
+                    switchTab('task-requests');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchUnreadNotifications();
+            setInterval(fetchUnreadNotifications, 3000);
+            
+            // Close notification dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                const bellWrapper = document.querySelector('.notification-wrapper');
+                const dropdown = document.getElementById('notification-dropdown');
+                if (dropdown && bellWrapper && !bellWrapper.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
 
         function confirmDeleteForm(event, messageText) {
             event.preventDefault();

@@ -27,46 +27,47 @@ def assigned_tasks_view(request):
     if not all_employees:
         all_employees = [u for u in employee_service.get_all_users() if u.get('role') == 'employee']
 
+    in_progress_tasks_list = [t for t in tasks if t.get('status') == 'In Progress']
+    in_progress_projects_list = [p for p in projects if p.get('status') == 'In Progress']
+    all_assigned_tasks = in_progress_tasks_list
+
     employee_tasks = []
     for emp in all_employees:
         emp_id = emp['id']
         emp_username = emp['username']
 
-        emp_assigned_tasks = []
-        for t in tasks:
+        emp_in_progress_tasks = []
+        for t in in_progress_tasks_list:
             emp_name_str = t.get('employee_name') or ''
             emp_list = [e.strip().lower() for e in emp_name_str.split(',') if e.strip()]
             if t.get('assigned_to_id') == emp_id or emp_username.lower() in emp_list:
-                emp_assigned_tasks.append(t)
+                emp_in_progress_tasks.append(t)
 
-        selected_task = None
-        for t in emp_assigned_tasks:
-            if t.get('status') == 'In Progress':
-                selected_task = t
-                break
+        if emp_in_progress_tasks:
+            task_names = ", ".join([t.get('task_name', '-') for t in emp_in_progress_tasks])
+            proj_names = ", ".join(list(dict.fromkeys([t.get('project_name') for t in emp_in_progress_tasks if t.get('project_name')])))
 
-        all_tasks_list = []
-        for t in emp_assigned_tasks:
-            due_val = t.get('due_date')
-            due_str = due_val.strftime('%Y-%m-%d') if hasattr(due_val, 'strftime') else str(due_val or '-').strip()
-            all_tasks_list.append({
-                'id': t['id'],
-                'task_name': t.get('task_name', '-'),
-                'project_name': t.get('project_name', '-'),
-                'description': t.get('description', '-'),
-                'due_date': due_str,
-                'status': t.get('status', 'Not Worked')
-            })
+            in_prog_list_formatted = []
+            for t in emp_in_progress_tasks:
+                due_val = t.get('due_date')
+                due_str = due_val.strftime('%Y-%m-%d') if hasattr(due_val, 'strftime') else str(due_val or '-').strip()
+                in_prog_list_formatted.append({
+                    'id': t['id'],
+                    'task_name': t.get('task_name', '-'),
+                    'project_name': t.get('project_name', '-'),
+                    'description': t.get('description', '-'),
+                    'due_date': due_str,
+                    'status': 'In Progress'
+                })
 
-        if selected_task:
             employee_tasks.append({
                 'employee_id': emp_id,
                 'employee_name': emp_username,
-                'project_name': selected_task.get('project_name') or '-',
-                'task_name': selected_task.get('task_name') or '-',
+                'project_name': proj_names or '-',
+                'task_name': task_names or '-',
                 'status': 'In Progress',
-                'total_tasks_count': len(emp_assigned_tasks),
-                'all_tasks': all_tasks_list,
+                'total_tasks_count': len(emp_in_progress_tasks),
+                'all_tasks': in_prog_list_formatted,
                 'is_assigned': True
             })
 
@@ -74,15 +75,11 @@ def assigned_tasks_view(request):
         emp_str = t.get('employee_name') or ''
         t['emp_names_list'] = [e.strip() for e in emp_str.split(',') if e.strip()]
 
-    in_progress_tasks_list = [t for t in tasks if t.get('status') == 'In Progress']
-    in_progress_projects_list = [p for p in projects if p.get('status') == 'In Progress']
-    all_assigned_tasks = tasks
-
     context = {
         'username': username,
         'role': user_role,
         'user_id': user_id,
-        'tasks': tasks,
+        'tasks': in_progress_tasks_list,
         'projects': projects,
         'employee_tasks': employee_tasks,
         'in_progress_tasks_list': in_progress_tasks_list,

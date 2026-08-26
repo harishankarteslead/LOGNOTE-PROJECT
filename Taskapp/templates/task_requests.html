@@ -1,0 +1,282 @@
+{% load static %}
+<div class="table-card" style="margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-code-pull-request" style="color: var(--primary);"></i> Multi-Project / Task Requests
+        </h3>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Filter Status:</span>
+            <select id="request-status-filter" class="filter-status-select" onchange="filterTaskRequests(this.value)" style="padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 13px; font-weight: 500;">
+                <option value="ALL">All Requests</option>
+                <option value="Pending" selected>Pending Only</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <button class="btn btn-secondary" onclick="loadTaskRequestsTab()" style="padding: 7px 14px; font-size: 13px; border-radius: 8px;">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive" style="overflow-x: auto;">
+        <table class="data-table" id="task-requests-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; font-size: 13px; color: #64748b;">
+                    <th style="padding: 12px 16px;">#</th>
+                    <th style="padding: 12px 16px;">Employee</th>
+                    <th style="padding: 12px 16px;">Task Name</th>
+                    <th style="padding: 12px 16px;">Project Name</th>
+                    <th style="padding: 12px 16px;">Request Reason</th>
+                    <th style="padding: 12px 16px;">Date Requested</th>
+                    <th style="padding: 12px 16px;">Status</th>
+                    <th style="padding: 12px 16px; text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="task-requests-tbody">
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                        <p style="margin-top: 10px; font-size: 14px;">Loading task requests...</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function loadTaskRequestsTab(isSilent = false) {
+        const tbody = document.getElementById('task-requests-tbody');
+        if (!tbody) return;
+        
+        if (!isSilent && (!window.allTaskRequests || window.allTaskRequests.length === 0)) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
+                        <p style="margin-top: 10px; font-size: 14px;">Loading task requests...</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        fetch('/api/tasks/requests/', { credentials: 'same-origin' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.allTaskRequests = data.requests || [];
+                    const filterVal = document.getElementById('request-status-filter') ? document.getElementById('request-status-filter').value : 'ALL';
+                    renderTaskRequestsTable(filterVal);
+                } else if (!isSilent) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">${data.message || 'Failed to load task requests.'}</td></tr>`;
+                }
+            })
+            .catch(err => {
+                if (!isSilent) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">Error connecting to server.</td></tr>`;
+                }
+            });
+    }
+
+    function renderTaskRequestsTable(filter) {
+        const tbody = document.getElementById('task-requests-tbody');
+        if (!tbody) return;
+
+        let list = window.allTaskRequests || [];
+        if (filter && filter !== 'ALL') {
+            list = list.filter(r => r.status === filter);
+        }
+
+        if (list.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <i class="fa-regular fa-folder-open fa-2x" style="margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+                        No ${filter !== 'ALL' ? filter : ''} task requests found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        list.forEach((r, index) => {
+            let statusBadge = '';
+            if (r.status === 'Approved') {
+                statusBadge = `<span class="status-badge status-completed"><i class="fa-solid fa-circle-check"></i> Approved</span>`;
+            } else if (r.status === 'Rejected') {
+                statusBadge = `<span class="status-badge status-on-hold" style="background:#fee2e2; color:#ef4444;" title="Reason: ${r.rejection_reason || 'N/A'}"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`;
+            } else {
+                statusBadge = `<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-clock"></i> Pending</span>`;
+            }
+
+            let actionBtns = '';
+            if (r.status === 'Pending') {
+                actionBtns = `
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button onclick="approveRequest(${r.id})" class="btn" style="background: #10b981; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">
+                            <i class="fa-solid fa-check"></i> Approve
+                        </button>
+                        <button onclick="openRejectRequestModal(${r.id}, '${escapeHtml(r.employee_name)}', '${escapeHtml(r.task_name)}')" class="btn" style="background: #ef4444; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">
+                            <i class="fa-solid fa-xmark"></i> Reject
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionBtns = `<span style="font-size: 12px; color: var(--text-muted); italic;">Completed</span>`;
+            }
+
+            let reasonDisplay = escapeHtml(r.reason || '-');
+            if (r.status === 'Rejected' && r.rejection_reason) {
+                reasonDisplay += `<br><small style="color: #ef4444; font-weight: 600;">Rejection Reason: ${escapeHtml(r.rejection_reason)}</small>`;
+            }
+
+            html += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 14px 16px; font-weight: 600;">${index + 1}</td>
+                    <td style="padding: 14px 16px;">
+                        <strong style="color: var(--text-dark); display: block; font-size: 14px;">${escapeHtml(r.employee_name)}</strong>
+                    </td>
+                    <td style="padding: 14px 16px; font-weight: 600; color: var(--primary);">${escapeHtml(r.task_name)}</td>
+                    <td style="padding: 14px 16px;">${escapeHtml(r.project_name || '-')}</td>
+                    <td style="padding: 14px 16px; max-width: 250px; font-size: 13px;">${reasonDisplay}</td>
+                    <td style="padding: 14px 16px; font-size: 12px; color: var(--text-muted);">${r.created_at || '-'}</td>
+                    <td style="padding: 14px 16px;">${statusBadge}</td>
+                    <td style="padding: 14px 16px; text-align: center;">${actionBtns}</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function filterTaskRequests(val) {
+        renderTaskRequestsTable(val);
+    }
+
+    function approveRequest(reqId) {
+        Swal.fire({
+            title: 'Approve Request?',
+            text: 'Allow employee to work on this task concurrently?',
+            icon: 'question',
+            iconColor: '#10b981',
+            width: '380px',
+            padding: '16px 20px',
+            showCancelButton: true,
+            confirmButtonText: 'Approve',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b'
+        }).then((res) => {
+            if (res.isConfirmed) {
+                fetch('/api/tasks/request/approve/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ request_id: reqId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Approved',
+                            text: data.message,
+                            icon: 'success',
+                            width: '380px',
+                            confirmButtonColor: '#4f46e5'
+                        });
+                        loadTaskRequestsTab();
+                        if (typeof fetchUnreadNotifications === 'function') fetchUnreadNotifications();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Failed to approve request.',
+                            icon: 'error',
+                            width: '380px',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function openRejectRequestModal(reqId, empName, taskName) {
+        Swal.fire({
+            title: 'Reject Request',
+            width: '420px',
+            padding: '16px 20px',
+            html: `
+                <div style="text-align: left; font-size: 13px; color: #475569; margin-top: 6px;">
+                    <p style="margin-bottom: 10px;">
+                        Provide reason for rejecting <strong style="color: #0f172a;">${escapeHtml(empName)}</strong>'s request for <strong style="color: #4f46e5;">"${escapeHtml(taskName)}"</strong>:
+                    </p>
+                    <textarea id="swal-rejection-reason" class="swal2-textarea" placeholder="Reason for rejection..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 13px; min-height: 70px; box-shadow: none;"></textarea>
+                </div>
+            `,
+            icon: 'warning',
+            iconColor: '#ef4444',
+            showCancelButton: true,
+            confirmButtonText: 'Reject Request',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            preConfirm: () => {
+                const reason = document.getElementById('swal-rejection-reason').value.trim();
+                if (!reason) {
+                    Swal.showValidationMessage('Rejection reason is required.');
+                    return false;
+                }
+                return reason;
+            }
+        }).then((res) => {
+            if (res.isConfirmed && res.value) {
+                fetch('/api/tasks/request/reject/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        request_id: reqId,
+                        rejection_reason: res.value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Rejected',
+                            text: data.message,
+                            icon: 'success',
+                            width: '380px',
+                            confirmButtonColor: '#4f46e5'
+                        });
+                        loadTaskRequestsTab();
+                        if (typeof fetchUnreadNotifications === 'function') fetchUnreadNotifications();
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Failed to reject request.',
+                            icon: 'error',
+                            width: '380px',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+</script>

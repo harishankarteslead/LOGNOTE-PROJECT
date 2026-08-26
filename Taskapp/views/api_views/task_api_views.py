@@ -2,12 +2,13 @@ import json
 from datetime import datetime, date
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from Taskapp.services import task_service, employee_service, project_service
+from Taskapp.services import task_service, employee_service, project_service, task_request_service
 from Taskapp.views.page_views.dashboard_views import (
     is_past_date,
     check_project_is_expired,
     check_task_due_date_exceeds_project
 )
+
 
 
 def format_date(val):
@@ -86,33 +87,30 @@ def api_get_tasks(request):
             if t.get('assigned_to_id') == emp_id or emp_username.lower() in emp_list:
                 emp_assigned_tasks.append(t)
 
-        selected_task = None
-        for t in emp_assigned_tasks:
-            if t.get('status') == 'In Progress':
-                selected_task = t
-                break
+        emp_in_progress = [t for t in emp_assigned_tasks if t.get('status') == 'In Progress']
+        if emp_in_progress:
+            t_names = ", ".join([t.get('task_name', '-') for t in emp_in_progress])
+            p_names = ", ".join(list(dict.fromkeys([t.get('project_name') for t in emp_in_progress if t.get('project_name')])))
+            in_prog_formatted = []
+            for t in emp_in_progress:
+                due_str = format_date(t.get('due_date'))
+                in_prog_formatted.append({
+                    'id': t['id'],
+                    'task_name': t.get('task_name', '-'),
+                    'project_name': t.get('project_name', '-'),
+                    'description': t.get('description', '-'),
+                    'due_date': due_str,
+                    'status': 'In Progress'
+                })
 
-        all_tasks_list = []
-        for t in emp_assigned_tasks:
-            due_str = format_date(t.get('due_date'))
-            all_tasks_list.append({
-                'id': t['id'],
-                'task_name': t.get('task_name', '-'),
-                'project_name': t.get('project_name', '-'),
-                'description': t.get('description', '-'),
-                'due_date': due_str,
-                'status': t.get('status', 'Not Worked')
-            })
-
-        if selected_task:
             employee_tasks.append({
                 'employee_id': emp_id,
                 'employee_name': emp_username,
-                'project_name': selected_task.get('project_name') or '-',
-                'task_name': selected_task.get('task_name') or '-',
+                'project_name': p_names or '-',
+                'task_name': t_names or '-',
                 'status': 'In Progress',
-                'total_tasks_count': len(emp_assigned_tasks),
-                'all_tasks': all_tasks_list,
+                'total_tasks_count': len(emp_in_progress),
+                'all_tasks': in_prog_formatted,
                 'is_assigned': True
             })
 
@@ -186,10 +184,17 @@ def api_update_task_status(request):
                 exclude_task_id=task_id_int
             )
             if active_task:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'Employee {target_emp_name} already has task ("{active_task["task_name"]}") In Progress. Please set it to On Hold or Completed first.'
-                }, status=400)
+                # Check if Admin/Superadmin approved a request for this task
+                has_approved = task_request_service.has_approved_request_for_task(user_id, task_id_int)
+                if not has_approved:
+                    return JsonResponse({
+                        'status': 'request_required',
+                        'message': f'Employee {target_emp_name} already has an active task ("{active_task["task_name"]}") In Progress. Please send a request to Admin/Superadmin to work on this task simultaneously.',
+                        'active_task_name': active_task['task_name'],
+                        'task_id': task_id_int,
+                        'task_name': target_task.get('task_name'),
+                        'project_name': target_task.get('project_name') or ''
+                    }, status=400)
 
         if description:
             task_service.update_task_employee_fields(task_id_int, description, new_status)

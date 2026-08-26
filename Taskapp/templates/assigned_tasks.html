@@ -10,6 +10,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
             --primary: #4f46e5;
@@ -91,7 +93,7 @@
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .btn {
@@ -420,25 +422,35 @@
 
     <!-- FULLSCREEN TOP HEADER -->
     <header class="fullscreen-header">
-        <!-- <div class="header-title-group">
-            <div class="header-icon">
-                <i class="fa-solid fa-expand"></i>
-            </div> -->
         <div class="header-text">
-            <h1>Assigned Tasks & Projects </h1>
+            <h1>Assigned Tasks & Projects</h1>
         </div>
-        <!-- </div>
 
         <div class="header-actions">
-            <button class="btn btn-fullscreen" onclick="toggleFullScreen()" id="fullscreenBtn">
-                <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
-                <span id="fullscreenText">Full Screen</span>
-            </button>
+            <!-- Notification Bell Wrapper -->
+            <div class="notification-wrapper" style="position: relative; cursor: pointer;">
+                <div id="notification-bell-btn" onclick="toggleNotificationDropdown()" style="position: relative; font-size: 18px; color: #ffffff; padding: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notification-badge" style="display: none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; border: 2px solid #1e293b;">0</span>
+                </div>
+
+                <!-- Notification Dropdown -->
+                <div id="notification-dropdown" style="display: none; position: absolute; right: 0; top: 48px; width: 340px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; z-index: 1000; overflow: hidden;">
+                    <div style="padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="font-size: 14px; color: #0f172a;"><i class="fa-solid fa-bell" style="color: #4f46e5;"></i> Notifications</strong>
+                        <button onclick="markAllNotificationsRead()" style="background: none; border: none; color: #4f46e5; font-size: 12px; font-weight: 600; cursor: pointer;">Mark all read</button>
+                    </div>
+                    <div id="notification-list" style="max-height: 320px; overflow-y: auto;">
+                        <div style="padding: 20px; text-align: center; color: #64748b; font-size: 13px;">No unread notifications</div>
+                    </div>
+                </div>
+            </div>
+
             <a href="{% url 'dashboard' %}" class="btn btn-back">
                 <i class="fa-solid fa-arrow-left"></i>
                 Back to Dashboard
             </a>
-        </div> -->
+        </div>
     </header>
 
     <!-- MAIN FULLSCREEN CONTAINER -->
@@ -833,10 +845,11 @@
                 .then(data => {
                     if (!data || data.status !== 'success') return;
 
-                    const tasks = data.tasks || [];
+                    const allTasks = data.tasks || [];
+                    const tasks = allTasks.filter(t => t.status === 'In Progress');
                     const apiTaskIds = new Set(tasks.map(t => t.id));
 
-                    // 1. All Tasks Table (#tableAllTasks)
+                    // 1. All Tasks Table (#tableAllTasks - ONLY In Progress Tasks)
                     const tableAllTasks = document.getElementById('tableAllTasks');
                     if (tableAllTasks) {
                         const tbody = tableAllTasks.querySelector('tbody');
@@ -862,7 +875,7 @@
                                         cells[2].innerHTML = `<span class="project-tag">${escapeHtml(task.project_name || '-')}</span>`;
                                         cells[3].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
                                         cells[4].innerText = task.due_date || '-';
-                                        cells[5].innerHTML = renderStatusBadge(task.status);
+                                        cells[5].innerHTML = `<span style="color: #2563eb; font-weight: 600;">In Progress</span>`;
                                     }
                                 } else {
                                     const newTr = document.createElement('tr');
@@ -874,7 +887,7 @@
                                     <td><span class="project-tag">${escapeHtml(task.project_name || '-')}</span></td>
                                     <td><strong>${escapeHtml(task.task_name)}</strong></td>
                                     <td>${escapeHtml(task.due_date || '-')}</td>
-                                    <td>${renderStatusBadge(task.status)}</td>
+                                    <td><span style="color: #2563eb; font-weight: 600;">In Progress</span></td>
                                 `;
                                     tbody.prepend(newTr);
                                 }
@@ -885,6 +898,20 @@
                                 const firstTd = row.querySelector('td strong');
                                 if (firstTd) firstTd.innerText = counter++;
                             });
+
+                            if (tasks.length === 0) {
+                                tbody.innerHTML = `
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="empty-state">
+                                                <i class="fa-solid fa-list"></i>
+                                                <h4>No In-Progress Tasks Found</h4>
+                                                <p>No tasks are currently marked as in-progress.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
                         }
                     }
 
@@ -951,10 +978,11 @@
                                     tbody.appendChild(row);
                                 }
 
-                                // Update sub-row content
+                                // Update sub-row content (In Progress tasks only)
                                 let subListHtml = '';
-                                if (item.all_tasks && item.all_tasks.length > 0) {
-                                    item.all_tasks.forEach((t) => {
+                                const inProgSubTasks = (item.all_tasks || []).filter(t => t.status === 'In Progress');
+                                if (inProgSubTasks.length > 0) {
+                                    inProgSubTasks.forEach((t) => {
                                         const projTagVal = t.project_name || '-';
                                         subListHtml += `
                                         <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
@@ -963,13 +991,13 @@
                                                 <span class="project-tag">${escapeHtml(projTagVal)}</span>
                                             </div>
                                             <div>
-                                                ${renderStatusBadge(t.status)}
+                                                <span style="color: #2563eb; font-weight: 600;">In Progress</span>
                                             </div>
                                         </div>
                                     `;
                                     });
                                 } else {
-                                    subListHtml = `<div style="color: #94a3b8; font-style: italic; font-size: 13px;">No tasks assigned to this employee.</div>`;
+                                    subListHtml = `<div style="color: #94a3b8; font-style: italic; font-size: 13px;">No in-progress tasks.</div>`;
                                 }
 
                                 if (subrow) {
@@ -1002,14 +1030,150 @@
                 .catch(err => console.debug("Poll error:", err));
         }
 
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        window.knownNotificationIds = window.knownNotificationIds || new Set();
+        let isFirstNotificationFetch = true;
+
+        function fetchUnreadNotifications() {
+            fetch('/api/notifications/', { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const count = data.unread_count || 0;
+                        const badge = document.getElementById('notification-badge');
+
+                        if (badge) {
+                            if (count > 0) {
+                                badge.innerText = count;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+
+                        const notifications = data.notifications || [];
+                        let newUnreadCount = 0;
+                        let latestNewNotification = null;
+
+                        notifications.forEach(n => {
+                            if (!window.knownNotificationIds.has(n.id)) {
+                                window.knownNotificationIds.add(n.id);
+                                if (!isFirstNotificationFetch) {
+                                    newUnreadCount++;
+                                    latestNewNotification = n;
+                                }
+                            }
+                        });
+
+                        isFirstNotificationFetch = false;
+
+                        if (newUnreadCount > 0 && latestNewNotification) {
+                            let toastIcon = 'info';
+                            if (latestNewNotification.title.includes('Approved')) toastIcon = 'success';
+                            else if (latestNewNotification.title.includes('Rejected')) toastIcon = 'error';
+                            else if (latestNewNotification.title.includes('Request')) toastIcon = 'warning';
+
+                            Swal.fire({
+                                title: latestNewNotification.title,
+                                text: latestNewNotification.message,
+                                icon: toastIcon,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4500,
+                                timerProgressBar: true
+                            });
+                        }
+
+                        const listEl = document.getElementById('notification-list');
+                        if (listEl) {
+                            if (notifications.length > 0) {
+                                let html = '';
+                                notifications.forEach(n => {
+                                    html += `
+                                        <div onclick="clickNotification(${n.id}, '${n.link || ''}')" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; background: #fff;">
+                                            <div style="font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 4px;">${n.title}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">${n.message}</div>
+                                            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-align: right;">${n.created_at || ''}</div>
+                                        </div>
+                                    `;
+                                });
+                                listEl.innerHTML = html;
+                            } else {
+                                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No unread notifications</div>`;
+                            }
+                        }
+                    }
+                }).catch(() => {});
+        }
+
+        function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notification-dropdown');
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/api/notifications/mark-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notification_id: 0 })
+            }).then(() => {
+                fetchUnreadNotifications();
+            });
+        }
+
+        function clickNotification(id, link) {
+            fetch('/api/notifications/mark-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notification_id: id })
+            }).then(() => {
+                const dropdown = document.getElementById('notification-dropdown');
+                if (dropdown) dropdown.style.display = 'none';
+                fetchUnreadNotifications();
+                if (link) {
+                    window.location.href = link;
+                }
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             pollAssignedTasks();
-            setInterval(pollAssignedTasks, 1000);
+            setInterval(pollAssignedTasks, 3000);
+
+            fetchUnreadNotifications();
+            setInterval(fetchUnreadNotifications, 3000);
+
+            document.addEventListener('click', function(e) {
+                const bellWrapper = document.querySelector('.notification-wrapper');
+                const dropdown = document.getElementById('notification-dropdown');
+                if (dropdown && bellWrapper && !bellWrapper.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>
-
-</html>
-</body>
-
 </html>
