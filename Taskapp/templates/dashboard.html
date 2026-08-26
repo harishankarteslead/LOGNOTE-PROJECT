@@ -1772,7 +1772,7 @@
                                             <select name="status"
                                                 class="status-select status-{{ proj.status|default:'Not Worked'|slugify }}"
                                                 onchange="this.form.submit()">
-                                                <option value="Not Worked" {% if proj.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
+                                                <option value="Not Worked" {% if proj.status == ' Not Worked' %}selected{% endif %}>Not Worked</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
                                                 <option value="On Hold" {% if proj.status == 'On Hold' or proj.status == 'Hold' %}selected{% endif %}>On Hold</option>
                                                 <option value="Completed" {% if proj.status == 'Completed' %}selected{% endif %}>Completed</option>
@@ -2280,7 +2280,8 @@
                             {% for proj in projects %}
                             {% if proj.is_expired %}
                             <option value="{{ proj.project_name }}" disabled
-                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
+                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired -
+                                Due: {{ proj.due_date_str }})</option>
                             {% else %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}

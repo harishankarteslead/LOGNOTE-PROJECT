@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -414,6 +415,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- FULLSCREEN TOP HEADER -->
@@ -422,9 +424,9 @@
             <div class="header-icon">
                 <i class="fa-solid fa-expand"></i>
             </div> -->
-            <div class="header-text">
-                <h1>Assigned Tasks & Projects </h1>
-            </div>
+        <div class="header-text">
+            <h1>Assigned Tasks & Projects </h1>
+        </div>
         <!-- </div>
 
         <div class="header-actions">
@@ -489,7 +491,8 @@
                         Currently Worked Projects
                         <!-- <span class="badge-count">{{ total_in_progress_projects }}</span> -->
                     </button>
-                    <button class="subtab-btn" id="btn-all-tasks" onclick="showSubtab('all-tasks')" style="display: none;">
+                    <button class="subtab-btn" id="btn-all-tasks" onclick="showSubtab('all-tasks')"
+                        style="display: none;">
                         <i class="fa-solid fa-list"></i>
                         All Assigned Tasks
                         <span class="badge-count">{{ total_assigned_tasks }}</span>
@@ -498,7 +501,8 @@
 
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="tableSearch" placeholder="Search tasks, projects or employees..." onkeyup="filterTables()">
+                    <input type="text" id="tableSearch" placeholder="Search tasks, projects or employees..."
+                        onkeyup="filterTables()">
                 </div>
             </div>
 
@@ -516,13 +520,15 @@
                     </thead>
                     <tbody>
                         {% for item in employee_tasks %}
-                        <tr class="assigned-emp-row" data-emp-id="{{ item.employee_id }}" onclick="toggleEmpTasksRow('{{ item.employee_id }}')" style="cursor: pointer;">
+                        <tr class="assigned-emp-row" data-emp-id="{{ item.employee_id }}"
+                            onclick="toggleEmpTasksRow('{{ item.employee_id }}')" style="cursor: pointer;">
                             <td><strong>{{ forloop.counter }}</strong></td>
                             <td>
                                 <span class="emp-tag">
                                     <i class="fa-solid fa-user"></i>
                                     {{ item.employee_name }}
-                                    <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-{{ item.employee_id }}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s;"></i>
+                                    <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-{{ item.employee_id }}"
+                                        style="margin-left: 6px; font-size: 11px; transition: transform 0.2s;"></i>
                                 </span>
                             </td>
                             <td>
@@ -530,49 +536,57 @@
                             </td>
                             <td>
                                 {% if item.task_name != 'No Task Assigned' and item.task_name != '-' %}
-                                    <strong>{{ item.task_name }}</strong>
+                                <strong>{{ item.task_name }}</strong>
                                 {% elif item.task_name == 'No Task Assigned' %}
-                                    <span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>
+                                <span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>
                                 {% else %}
-                                    <span style="color: #94a3b8;">-</span>
+                                <span style="color: #94a3b8;">-</span>
                                 {% endif %}
                             </td>
-                              <td>
+                            <td>
                                 {% if item.status == 'In Progress' %}
-                                    <span style="color: #2563eb; font-weight: 600;">In Progress</span>
+                                <span style="color: #2563eb; font-weight: 600;">In Progress</span>
                                 {% else %}
-                                    <span style="color: #94a3b8;">-</span>
+                                <span style="color: #94a3b8;">-</span>
                                 {% endif %}
                             </td>
                         </tr>
                         <!-- Expandable Sub-Row for All Employee Tasks -->
-                        <tr class="emp-tasks-subrow" id="subrow-{{ item.employee_id }}" style="display: none; background: #f8fafc;">
+                        <tr class="emp-tasks-subrow" id="subrow-{{ item.employee_id }}"
+                            style="display: none; background: #f8fafc;">
                             <td colspan="5" style="padding: 12px 20px;">
-                                <div style="background: #ffffff; border-radius: 12px; padding: 14px 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                                <div
+                                    style="background: #ffffff; border-radius: 12px; padding: 14px 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
                                     <!-- <div style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
                                         <i class="fa-solid fa-list-check" style="color: #6366f1;"></i> Assigned Tasks for {{ item.employee_name }}:
                                     </div> -->
-                                    <div id="subrow-list-{{ item.employee_id }}" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <div id="subrow-list-{{ item.employee_id }}"
+                                        style="display: flex; flex-direction: column; gap: 8px;">
                                         {% for t in item.all_tasks %}
-                                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
+                                        <div
+                                            style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
-                                                <strong style="color: #1e293b; font-size: 14px;">{{ t.task_name }}</strong>
+                                                <strong style="color: #1e293b; font-size: 14px;">{{ t.task_name
+                                                    }}</strong>
                                                 <span class="project-tag">{{ t.project_name|default:"-" }}</span>
                                             </div>
                                             <div>
                                                 {% if t.status == 'In Progress' %}
-                                                    <span style="color: #2563eb; font-weight: 600;">In Progress</span>
+                                                <span style="color: #2563eb; font-weight: 600;">In Progress</span>
                                                 {% elif t.status == 'Completed' %}
-                                                    <span class="status-badge status-completed"><i class="fa-solid fa-check"></i> Completed</span>
+                                                <span class="status-badge status-completed"><i
+                                                        class="fa-solid fa-check"></i> Completed</span>
                                                 {% elif t.status == 'On Hold' or t.status == 'Hold' %}
-                                                    <span class="status-badge status-on-hold"><i class="fa-solid fa-circle-pause"></i> On Hold</span>
+                                                <span class="status-badge status-on-hold"><i
+                                                        class="fa-solid fa-circle-pause"></i> On Hold</span>
                                                 {% else %}
-                                                    <span style="color: #94a3b8;">-</span>
+                                                <span style="color: #94a3b8;">-</span>
                                                 {% endif %}
                                             </div>
                                         </div>
                                         {% empty %}
-                                        <div style="color: #94a3b8; font-style: italic; font-size: 13px;">No tasks assigned to this employee.</div>
+                                        <div style="color: #94a3b8; font-style: italic; font-size: 13px;">No tasks
+                                            assigned to this employee.</div>
                                         {% endfor %}
                                     </div>
                                 </div>
@@ -665,11 +679,13 @@
                             <td>{{ task.due_date|default:"-" }}</td>
                             <td>
                                 {% if task.status == 'In Progress' %}
-                                    <span style="color: #2563eb; font-weight: 600;">In Progress</span>
+                                <span style="color: #2563eb; font-weight: 600;">In Progress</span>
                                 {% elif task.status == 'Completed' %}
-                                    <span class="status-badge status-completed"><i class="fa-solid fa-check"></i> Completed</span>
+                                <span class="status-badge status-completed"><i class="fa-solid fa-check"></i>
+                                    Completed</span>
                                 {% else %}
-                                    <span class="status-badge status-pending"><i class="fa-solid fa-clock"></i> {{ task.status }}</span>
+                                <span class="status-badge status-pending"><i class="fa-solid fa-clock"></i> {{
+                                    task.status }}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -813,46 +829,46 @@
             fetch('/api/tasks/', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (!data || data.status !== 'success') return;
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (!data || data.status !== 'success') return;
 
-                const tasks = data.tasks || [];
-                const apiTaskIds = new Set(tasks.map(t => t.id));
+                    const tasks = data.tasks || [];
+                    const apiTaskIds = new Set(tasks.map(t => t.id));
 
-                // 1. All Tasks Table (#tableAllTasks)
-                const tableAllTasks = document.getElementById('tableAllTasks');
-                if (tableAllTasks) {
-                    const tbody = tableAllTasks.querySelector('tbody');
-                    if (tbody) {
-                        const emptyStateTr = Array.from(tbody.children).find(tr => !tr.classList.contains('assigned-task-row'));
-                        if (emptyStateTr && tasks.length > 0) {
-                            emptyStateTr.remove();
-                        }
-
-                        tbody.querySelectorAll('tr.assigned-task-row').forEach(row => {
-                            const id = parseInt(row.getAttribute('data-task-id'), 10);
-                            if (!apiTaskIds.has(id)) {
-                                row.remove();
+                    // 1. All Tasks Table (#tableAllTasks)
+                    const tableAllTasks = document.getElementById('tableAllTasks');
+                    if (tableAllTasks) {
+                        const tbody = tableAllTasks.querySelector('tbody');
+                        if (tbody) {
+                            const emptyStateTr = Array.from(tbody.children).find(tr => !tr.classList.contains('assigned-task-row'));
+                            if (emptyStateTr && tasks.length > 0) {
+                                emptyStateTr.remove();
                             }
-                        });
 
-                        tasks.forEach(task => {
-                            let row = tbody.querySelector(`tr.assigned-task-row[data-task-id="${task.id}"]`);
-                            if (row) {
-                                const cells = row.children;
-                                if (cells.length >= 6) {
-                                    cells[1].innerHTML = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span>`;
-                                    cells[2].innerHTML = `<span class="project-tag">${escapeHtml(task.project_name || '-')}</span>`;
-                                    cells[3].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
-                                    cells[4].innerText = task.due_date || '-';
-                                    cells[5].innerHTML = renderStatusBadge(task.status);
+                            tbody.querySelectorAll('tr.assigned-task-row').forEach(row => {
+                                const id = parseInt(row.getAttribute('data-task-id'), 10);
+                                if (!apiTaskIds.has(id)) {
+                                    row.remove();
                                 }
-                            } else {
-                                const newTr = document.createElement('tr');
-                                newTr.className = 'assigned-task-row';
-                                newTr.setAttribute('data-task-id', task.id);
-                                newTr.innerHTML = `
+                            });
+
+                            tasks.forEach(task => {
+                                let row = tbody.querySelector(`tr.assigned-task-row[data-task-id="${task.id}"]`);
+                                if (row) {
+                                    const cells = row.children;
+                                    if (cells.length >= 6) {
+                                        cells[1].innerHTML = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span>`;
+                                        cells[2].innerHTML = `<span class="project-tag">${escapeHtml(task.project_name || '-')}</span>`;
+                                        cells[3].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                        cells[4].innerText = task.due_date || '-';
+                                        cells[5].innerHTML = renderStatusBadge(task.status);
+                                    }
+                                } else {
+                                    const newTr = document.createElement('tr');
+                                    newTr.className = 'assigned-task-row';
+                                    newTr.setAttribute('data-task-id', task.id);
+                                    newTr.innerHTML = `
                                     <td><strong>1</strong></td>
                                     <td><span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span></td>
                                     <td><span class="project-tag">${escapeHtml(task.project_name || '-')}</span></td>
@@ -860,87 +876,87 @@
                                     <td>${escapeHtml(task.due_date || '-')}</td>
                                     <td>${renderStatusBadge(task.status)}</td>
                                 `;
-                                tbody.prepend(newTr);
-                            }
-                        });
-
-                        let counter = 1;
-                        tbody.querySelectorAll('tr.assigned-task-row').forEach(row => {
-                            const firstTd = row.querySelector('td strong');
-                            if (firstTd) firstTd.innerText = counter++;
-                        });
-                    }
-                }
-
-                // 2. Currently Worked Tasks Table (#tableTasks)
-                const tableTasks = document.getElementById('tableTasks');
-                if (tableTasks && data.employee_tasks && Array.isArray(data.employee_tasks)) {
-                    const tbody = tableTasks.querySelector('tbody');
-                    if (tbody) {
-                        const empTasks = data.employee_tasks;
-
-                        const emptyStateTr = Array.from(tbody.children).find(tr => !tr.classList.contains('assigned-emp-row') && !tr.classList.contains('emp-tasks-subrow'));
-                        if (emptyStateTr && empTasks.length > 0) {
-                            emptyStateTr.remove();
-                        }
-
-                        const apiEmpIds = new Set(empTasks.map(e => String(e.employee_id)));
-                        tbody.querySelectorAll('tr.assigned-emp-row').forEach(row => {
-                            const empId = row.getAttribute('data-emp-id');
-                            if (!apiEmpIds.has(empId)) {
-                                const subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${empId}"]`);
-                                if (subrow) subrow.remove();
-                                row.remove();
-                            }
-                        });
-
-                        empTasks.forEach((item, index) => {
-                            let row = tbody.querySelector(`tr.assigned-emp-row[data-emp-id="${item.employee_id}"]`);
-                            let subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${item.employee_id}"]`);
-                            const isAssignedTask = item.task_name && item.task_name !== 'No Task Assigned' && item.task_name !== '-';
-                            const taskHtml = isAssignedTask
-                                ? `<strong>${escapeHtml(item.task_name)}</strong>`
-                                : (item.task_name === 'No Task Assigned'
-                                    ? `<span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>`
-                                    : `<span style="color: #94a3b8;">-</span>`);
-                            const statusHtml = renderStatusBadge(item.status);
-
-                            const isSubrowVisible = subrow && (subrow.style.display === 'table-row');
-                            const isRotated = isSubrowVisible ? 'rotate(90deg)' : 'rotate(0deg)';
-
-                            const empTagHtml = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(item.employee_name)} <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-${item.employee_id}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s; transform: ${isRotated};"></i></span>`;
-
-                            if (row) {
-                                const cells = row.children;
-                                if (cells.length >= 5) {
-                                    cells[0].innerHTML = `<strong>${index + 1}</strong>`;
-                                    cells[1].innerHTML = empTagHtml;
-                                    cells[2].innerHTML = `<span class="project-tag">${escapeHtml(item.project_name || '-')}</span>`;
-                                    cells[3].innerHTML = taskHtml;
-                                    cells[4].innerHTML = statusHtml;
+                                    tbody.prepend(newTr);
                                 }
-                            } else {
-                                row = document.createElement('tr');
-                                row.className = 'assigned-emp-row';
-                                row.setAttribute('data-emp-id', item.employee_id);
-                                row.setAttribute('onclick', `toggleEmpTasksRow('${item.employee_id}')`);
-                                row.style.cursor = 'pointer';
-                                row.innerHTML = `
+                            });
+
+                            let counter = 1;
+                            tbody.querySelectorAll('tr.assigned-task-row').forEach(row => {
+                                const firstTd = row.querySelector('td strong');
+                                if (firstTd) firstTd.innerText = counter++;
+                            });
+                        }
+                    }
+
+                    // 2. Currently Worked Tasks Table (#tableTasks)
+                    const tableTasks = document.getElementById('tableTasks');
+                    if (tableTasks && data.employee_tasks && Array.isArray(data.employee_tasks)) {
+                        const tbody = tableTasks.querySelector('tbody');
+                        if (tbody) {
+                            const empTasks = data.employee_tasks;
+
+                            const emptyStateTr = Array.from(tbody.children).find(tr => !tr.classList.contains('assigned-emp-row') && !tr.classList.contains('emp-tasks-subrow'));
+                            if (emptyStateTr && empTasks.length > 0) {
+                                emptyStateTr.remove();
+                            }
+
+                            const apiEmpIds = new Set(empTasks.map(e => String(e.employee_id)));
+                            tbody.querySelectorAll('tr.assigned-emp-row').forEach(row => {
+                                const empId = row.getAttribute('data-emp-id');
+                                if (!apiEmpIds.has(empId)) {
+                                    const subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${empId}"]`);
+                                    if (subrow) subrow.remove();
+                                    row.remove();
+                                }
+                            });
+
+                            empTasks.forEach((item, index) => {
+                                let row = tbody.querySelector(`tr.assigned-emp-row[data-emp-id="${item.employee_id}"]`);
+                                let subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${item.employee_id}"]`);
+                                const isAssignedTask = item.task_name && item.task_name !== 'No Task Assigned' && item.task_name !== '-';
+                                const taskHtml = isAssignedTask
+                                    ? `<strong>${escapeHtml(item.task_name)}</strong>`
+                                    : (item.task_name === 'No Task Assigned'
+                                        ? `<span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>`
+                                        : `<span style="color: #94a3b8;">-</span>`);
+                                const statusHtml = renderStatusBadge(item.status);
+
+                                const isSubrowVisible = subrow && (subrow.style.display === 'table-row');
+                                const isRotated = isSubrowVisible ? 'rotate(90deg)' : 'rotate(0deg)';
+
+                                const empTagHtml = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(item.employee_name)} <i class="fa-solid fa-chevron-right emp-chevron" id="chevron-${item.employee_id}" style="margin-left: 6px; font-size: 11px; transition: transform 0.2s; transform: ${isRotated};"></i></span>`;
+
+                                if (row) {
+                                    const cells = row.children;
+                                    if (cells.length >= 5) {
+                                        cells[0].innerHTML = `<strong>${index + 1}</strong>`;
+                                        cells[1].innerHTML = empTagHtml;
+                                        cells[2].innerHTML = `<span class="project-tag">${escapeHtml(item.project_name || '-')}</span>`;
+                                        cells[3].innerHTML = taskHtml;
+                                        cells[4].innerHTML = statusHtml;
+                                    }
+                                } else {
+                                    row = document.createElement('tr');
+                                    row.className = 'assigned-emp-row';
+                                    row.setAttribute('data-emp-id', item.employee_id);
+                                    row.setAttribute('onclick', `toggleEmpTasksRow('${item.employee_id}')`);
+                                    row.style.cursor = 'pointer';
+                                    row.innerHTML = `
                                     <td><strong>${index + 1}</strong></td>
                                     <td>${empTagHtml}</td>
                                     <td><span class="project-tag">${escapeHtml(item.project_name || '-')}</span></td>
                                     <td>${taskHtml}</td>
                                     <td>${statusHtml}</td>
                                 `;
-                                tbody.appendChild(row);
-                            }
+                                    tbody.appendChild(row);
+                                }
 
-                            // Update sub-row content
-                            let subListHtml = '';
-                            if (item.all_tasks && item.all_tasks.length > 0) {
-                                item.all_tasks.forEach((t) => {
-                                    const projTagVal = t.project_name || '-';
-                                    subListHtml += `
+                                // Update sub-row content
+                                let subListHtml = '';
+                                if (item.all_tasks && item.all_tasks.length > 0) {
+                                    item.all_tasks.forEach((t) => {
+                                        const projTagVal = t.project_name || '-';
+                                        subListHtml += `
                                         <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
                                                 <strong style="color: #1e293b; font-size: 14px;">${escapeHtml(t.task_name)}</strong>
@@ -951,21 +967,21 @@
                                             </div>
                                         </div>
                                     `;
-                                });
-                            } else {
-                                subListHtml = `<div style="color: #94a3b8; font-style: italic; font-size: 13px;">No tasks assigned to this employee.</div>`;
-                            }
+                                    });
+                                } else {
+                                    subListHtml = `<div style="color: #94a3b8; font-style: italic; font-size: 13px;">No tasks assigned to this employee.</div>`;
+                                }
 
-                            if (subrow) {
-                                const subListContainer = subrow.querySelector(`#subrow-list-${item.employee_id}`);
-                                if (subListContainer) subListContainer.innerHTML = subListHtml;
-                            } else {
-                                subrow = document.createElement('tr');
-                                subrow.className = 'emp-tasks-subrow';
-                                subrow.id = `subrow-${item.employee_id}`;
-                                subrow.style.display = 'none';
-                                subrow.style.background = '#f8fafc';
-                                subrow.innerHTML = `
+                                if (subrow) {
+                                    const subListContainer = subrow.querySelector(`#subrow-list-${item.employee_id}`);
+                                    if (subListContainer) subListContainer.innerHTML = subListHtml;
+                                } else {
+                                    subrow = document.createElement('tr');
+                                    subrow.className = 'emp-tasks-subrow';
+                                    subrow.id = `subrow-${item.employee_id}`;
+                                    subrow.style.display = 'none';
+                                    subrow.style.background = '#f8fafc';
+                                    subrow.innerHTML = `
                                     <td colspan="5" style="padding: 12px 20px;">
                                         <div style="background: #ffffff; border-radius: 12px; padding: 14px 18px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
                                             <div style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
@@ -977,21 +993,23 @@
                                         </div>
                                     </td>
                                 `;
-                                row.after(subrow);
-                            }
-                        });
+                                    row.after(subrow);
+                                }
+                            });
+                        }
                     }
-                }
-            })
-            .catch(err => console.debug("Poll error:", err));
+                })
+                .catch(err => console.debug("Poll error:", err));
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             pollAssignedTasks();
             setInterval(pollAssignedTasks, 1000);
         });
     </script>
 </body>
+
 </html>
 </body>
+
 </html>
