@@ -533,71 +533,103 @@
             color: #075985;
         }
 
-        /* Status Badges */
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+        /* Status Badges & Status Select Pills - Model from Projects Table */
+        .status-badge,
+        .status-select {
+            border-radius: 20px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            border-style: solid !important;
+            border-width: 1px !important;
+            background-color: #ffffff !important;
+            white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            box-sizing: border-box;
+            vertical-align: middle;
+            transition: all 0.2s ease;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         }
 
+        .status-badge {
+            padding: 4px 12px;
+            gap: 5px;
+        }
+
+        .status-select {
+            padding: 4px 26px 4px 12px !important;
+            height: 28px !important;
+            line-height: 18px !important;
+            cursor: pointer;
+            outline: none !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background-repeat: no-repeat !important;
+            background-position: right 8px center !important;
+            background-size: 10px !important;
+        }
+
+        .status-select option {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            font-weight: 500;
+        }
+
+        /* Not Worked - Grey */
         .status-not-worked {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+            background-color: #ffffff !important;
+            color: #64748b !important;
+            border-color: #cbd5e1 !important;
+        }
+        .status-select.status-not-worked {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
 
+        /* Pending - Red */
         .status-pending {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fca5a5;
+            background-color: #ffffff !important;
+            color: #dc2626 !important;
+            border-color: #fca5a5 !important;
+        }
+        .status-select.status-pending {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
 
+        /* In Progress - Dark Blue */
         .status-in-progress {
-            background: #1e3a8a;
-            color: #ffffff;
-            border: 1px solid #1e40af;
+            background-color: #ffffff !important;
+            color: #1e3a8a !important;
+            border-color: #3b82f6 !important;
+        }
+        .status-select.status-in-progress {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e3a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
 
+        /* On Hold / Hold - Amber/Brown */
         .status-on-hold,
         .status-hold {
-            background: #fef3c7;
-            color: #78350f;
-            border: 1px solid #fde68a;
+            background-color: #ffffff !important;
+            color: #b45309 !important;
+            border-color: #fcd34d !important;
+        }
+        .status-select.status-on-hold,
+        .status-select.status-hold {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b45309' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
 
+        /* Completed - Dark Green */
         .status-completed {
-            background: #dcfce7;
-            color: #15803d;
-            border: 1px solid #86efac;
+            background-color: #ffffff !important;
+            color: #15803d !important;
+            border-color: #86efac !important;
         }
-
-        /* Status Select Pill Styling */
-        .status-select {
-            padding: 6px 28px 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 12px;
+        .status-select.status-completed {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2315803d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
 
         .status-select:focus {
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
         }
 
         /* Task Table Filter Bar Styles */
@@ -1256,8 +1288,7 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"NotWorked"}}</span>
+                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1386,8 +1417,7 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
                                 </tr>
@@ -1465,7 +1495,7 @@
                                     <th>S.No</th>
                                     <th>Task Name</th>
                                     <th>Project</th>
-                                    <th>Description</th>
+                                    <th>Remarks</th>
                                     <th>Due Date</th>
                                     <th>Status</th>
                                     <th>Assigned Date</th>
@@ -1487,12 +1517,15 @@
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td>{{ task.Remarks|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not
-                                            Worked"}}</span>
+                                        <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
+                                            <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
+                                            <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                            <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
+                                            <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+                                        </select>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
                                     <td>
@@ -1696,9 +1729,7 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not
-                                            Worked"}}</span>
+                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
@@ -2019,10 +2050,7 @@
                         <select id="project_name" name="project_name" class="form-control" required>
                             <option value="" selected>-- Select Project --</option>
                             {% for proj in projects %}
-                            {% if proj.is_expired %}
-                            <option value="{{ proj.project_name }}" disabled
-                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
-                            {% else %}
+                            {% if not proj.is_expired %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
                             {% endfor %}
@@ -2309,10 +2337,7 @@
                         <select id="edit-task-project" name="project_name" class="form-control">
                             <option value="">-- Select Project</option>
                             {% for proj in projects %}
-                            {% if proj.is_expired %}
-                            <option value="{{ proj.project_name }}" disabled
-                                style="color: #94a3b8; background-color: #f1f5f9;">{{ proj.project_name }} (Expired - Due: {{ proj.due_date_str }})</option>
-                            {% else %}
+                            {% if not proj.is_expired %}
                             <option value="{{ proj.project_name }}">{{ proj.project_name }}</option>
                             {% endif %}
                             {% endfor %}
@@ -2440,7 +2465,7 @@
             <div class="modal-header">
                 <h3>
                     <i class="fa-solid fa-pen-to-square" style="color: var(--primary); margin-right: 8px;"></i>
-                    Edit Task Status & Description
+                    Edit Task 
                 </h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeEmployeeEditTaskModal()">&times;</span>
             </div>
@@ -2477,9 +2502,9 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="emp-edit-task-description">Description</label>
+                    <label for="emp-edit-task-description">Remarks</label>
                     <textarea id="emp-edit-task-description" name="description" class="form-control" rows="4"
-                        placeholder="Enter status update or task notes..."></textarea>
+                        placeholder="Enter any remarks..."></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -3056,7 +3081,8 @@
         function updateSelectStatusClass(selectEl) {
             if (!selectEl) return;
             const valSlug = (selectEl.value || 'not-worked').toLowerCase().replace(/\s+/g, '-');
-            selectEl.className = selectEl.className.replace(/\bstatus-[a-z-]+\b/g, '').trim();
+            selectEl.classList.remove('status-not-worked', 'status-pending', 'status-in-progress', 'status-on-hold', 'status-hold', 'status-completed');
+            selectEl.classList.add('status-select');
             selectEl.classList.add('status-' + valSlug);
         }
 
@@ -3303,6 +3329,11 @@
                                         cells[4 + offset].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
                                         cells[5 + offset].innerText = task.due_date || '-';
 
+                                        const statusSelect = cells[6 + offset].querySelector('.status-select');
+                                        if (statusSelect) {
+                                            statusSelect.value = (newStatus === 'Hold') ? 'On Hold' : newStatus;
+                                            updateSelectStatusClass(statusSelect);
+                                        }
                                         const badge = cells[6 + offset].querySelector('.status-badge');
                                         if (badge) {
                                             badge.className = `status-badge status-${slugStatus}`;
@@ -3610,6 +3641,50 @@
                 }
             }
             return cookieValue;
+        }
+
+        function updateTaskStatus(selectEl) {
+            if (!selectEl) return;
+            const taskId = selectEl.getAttribute('data-task-id');
+            const status = selectEl.value;
+            updateSelectStatusClass(selectEl);
+            const csrfToken = getCookie('csrftoken');
+            if (status === 'Completed') {
+                Swal.fire({
+                    title: 'Completion Summary',
+                    width: '360px',
+                    padding: '14px 16px',
+                    html: `
+                        <div style="text-align: left; font-size: 12px; color: #475569; margin-top: 4px;">
+                            <p style="margin-bottom: 8px;">Enter completion notes/summary:</p>
+                            <textarea id="swal-completion-description" class="swal2-textarea" placeholder="Describe completed work..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 12px; min-height: 60px; box-shadow: none;"></textarea>
+                        </div>
+                    `,
+                    icon: 'question',
+                    iconColor: '#10b981',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#64748b',
+                    preConfirm: () => {
+                        const notes = document.getElementById('swal-completion-description').value.trim();
+                        if (!notes) {
+                            Swal.showValidationMessage('Completion summary is required.');
+                            return false;
+                        }
+                        return notes;
+                    }
+                }).then((res) => {
+                    if (res.isConfirmed && res.value) {
+                        executeTaskStatusUpdate(taskId, 'Completed', res.value, csrfToken);
+                    } else {
+                        if (typeof pollTaskStatus === 'function') pollTaskStatus();
+                    }
+                });
+            } else {
+                executeTaskStatusUpdate(taskId, status, '', csrfToken);
+            }
         }
 
         function executeTaskStatusUpdate(taskId, status, description, csrfToken) {

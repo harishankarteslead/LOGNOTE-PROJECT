@@ -342,27 +342,44 @@
             align-items: center;
             gap: 6px;
             padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            border-radius: 20px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            border-style: solid !important;
+            border-width: 1.5px !important;
+            background-color: #ffffff !important;
+            white-space: nowrap;
         }
 
-        .status-in-progress {
-            background: #fffbeb;
-            color: #2c1402;
-            border: 1px solid #fcd34d;
-        }
-
-        .status-completed {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #6ee7b7;
+        .status-not-worked {
+            background-color: #ffffff !important;
+            color: #64748b !important;
+            border-color: #cbd5e1 !important;
         }
 
         .status-pending {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #93c5fd;
+            background-color: #ffffff !important;
+            color: #dc2626 !important;
+            border-color: #fca5a5 !important;
+        }
+
+        .status-in-progress {
+            background-color: #ffffff !important;
+            color: #1e3a8a !important;
+            border-color: #3b82f6 !important;
+        }
+
+        .status-on-hold,
+        .status-hold {
+            background-color: #ffffff !important;
+            color: #78350f !important;
+            border-color: #f59e0b !important;
+        }
+
+        .status-completed {
+            background-color: #ffffff !important;
+            color: #15803d !important;
+            border-color: #22c55e !important;
         }
 
         .project-tag {
