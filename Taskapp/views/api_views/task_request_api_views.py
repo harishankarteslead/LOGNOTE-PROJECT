@@ -162,7 +162,7 @@ def api_reject_task_request(request):
 @require_http_methods(["GET"])
 def api_get_notifications(request):
     """
-    REST API endpoint to get unread notifications.
+    REST API endpoint to get unread and all notifications for real-time page updates without reload.
     """
     user_id = request.session.get('user_id')
     user_role = request.session.get('role')
@@ -171,9 +171,11 @@ def api_get_notifications(request):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     notifications = task_request_service.get_unread_notifications(user_id=user_id, user_role=user_role)
+    all_notifications = task_request_service.get_all_notifications(user_id=user_id, user_role=user_role)
     return JsonResponse({
         'status': 'success',
         'notifications': notifications,
+        'all_notifications': all_notifications,
         'unread_count': len(notifications)
     })
 

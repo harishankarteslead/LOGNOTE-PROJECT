@@ -533,6 +533,14 @@
             color: #075985;
         }
 
+        .notif-bg-unread { background-color: #f0f9ff !important; }
+        .notif-bg-read { background-color: #ffffff !important; }
+
+        .notif-icon-approved { background-color: #dcfce7 !important; color: #15803d !important; }
+        .notif-icon-rejected { background-color: #fee2e2 !important; color: #dc2626 !important; }
+        .notif-icon-request { background-color: #e0e7ff !important; color: #3730a3 !important; }
+        .notif-icon-default { background-color: #f1f5f9 !important; color: #64748b !important; }
+
         /* Status Badges & Status Select Pills - Model from Projects Table */
         .status-badge,
         .status-select {
@@ -1523,7 +1531,7 @@
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.Remarks|default:"-" }}</td>
+                                    <td>{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
@@ -2061,11 +2069,11 @@
                     <!-- Notifications List Container -->
                     <div id="tab-notifications-list" style="display: flex; flex-direction: column; gap: 10px;">
                         {% for notif in all_notifications %}
-                        <div class="notification-card-item notif-type-{% if 'Approved' in notif.title %}approved{% elif 'Rejected' in notif.title %}rejected{% elif 'Request' in notif.title %}request{% else %}system{% endif %}"
-                            style="padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border); background: {% if not notif.is_read %}#f0f9ff{% else %}#ffffff{% endif %}; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
+                        <div class="notification-card-item notif-type-{% if 'Approved' in notif.title %}approved{% elif 'Rejected' in notif.title %}rejected{% elif 'Request' in notif.title %}request{% else %}system{% endif %} {% if not notif.is_read %}notif-bg-unread{% else %}notif-bg-read{% endif %}"
+                            style="padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
                             <div style="display: flex; align-items: flex-start; gap: 12px;">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
-                                    background: {% if 'Approved' in notif.title %}#dcfce7; color: #15803d;{% elif 'Rejected' in notif.title %}#fee2e2; color: #dc2626;{% elif 'Request' in notif.title %}#e0e7ff; color: #3730a3;{% else %}#f1f5f9; color: #64748b;{% endif %}">
+                                <div class="{% if 'Approved' in notif.title %}notif-icon-approved{% elif 'Rejected' in notif.title %}notif-icon-rejected{% elif 'Request' in notif.title %}notif-icon-request{% else %}notif-icon-default{% endif %}"
+                                    style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
                                     <i class="fa-solid {% if 'Approved' in notif.title %}fa-circle-check{% elif 'Rejected' in notif.title %}fa-circle-xmark{% elif 'Request' in notif.title %}fa-code-pull-request{% else %}fa-bell{% endif %}"></i>
                                 </div>
                                 <div>
@@ -3414,33 +3422,63 @@
                                     row.setAttribute('data-due-date', task.due_date || '');
 
                                     const cells = row.children;
-                                    if (cells.length >= 7 + offset) {
-                                        cells[1 + offset].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
-                                        cells[2 + offset].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
-                                        cells[3 + offset].innerText = task.description || '-';
-                                        cells[4 + offset].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
-                                        cells[5 + offset].innerText = task.due_date || '-';
+                                    if (hasCb) {
+                                        // Superadmin / Admin table with bulk checkboxes (9 columns)
+                                        if (cells.length >= 8) {
+                                            cells[2].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                            cells[3].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
+                                            cells[4].innerText = task.description || '-';
+                                            cells[5].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
+                                            cells[6].innerText = task.due_date || '-';
 
-                                        const statusSelect = cells[6 + offset].querySelector('.status-select');
-                                        if (statusSelect) {
-                                            statusSelect.value = (newStatus === 'Hold') ? 'On Hold' : newStatus;
-                                            updateSelectStatusClass(statusSelect);
-                                        }
-                                        const badge = cells[6 + offset].querySelector('.status-badge');
-                                        if (badge) {
-                                            badge.className = `status-badge status-${slugStatus}`;
-                                            badge.innerText = newStatus;
-                                        }
+                                            const badge = cells[7].querySelector('.status-badge');
+                                            if (badge) {
+                                                badge.className = `status-badge status-${slugStatus}`;
+                                                badge.innerText = newStatus;
+                                            }
 
-                                        if (hasCb && cells.length >= 9) {
-                                            const editBtn = cells[8].querySelector('.btn-edit');
-                                            if (editBtn) {
-                                                editBtn.setAttribute('data-name', task.task_name || '');
-                                                editBtn.setAttribute('data-project', task.project_name || '');
-                                                editBtn.setAttribute('data-due-date', task.due_date || '');
-                                                editBtn.setAttribute('data-status', newStatus);
-                                                editBtn.setAttribute('data-description', task.description || '');
-                                                editBtn.setAttribute('data-employee-name', task.employee_name || '');
+                                            if (cells.length >= 9) {
+                                                const editBtn = cells[8].querySelector('.btn-edit');
+                                                if (editBtn) {
+                                                    editBtn.setAttribute('data-name', task.task_name || '');
+                                                    editBtn.setAttribute('data-project', task.project_name || '');
+                                                    editBtn.setAttribute('data-due-date', task.due_date || '');
+                                                    editBtn.setAttribute('data-status', newStatus);
+                                                    editBtn.setAttribute('data-description', task.description || '');
+                                                    editBtn.setAttribute('data-employee-name', task.employee_name || '');
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // Employee Dashboard table without checkboxes (8 columns: S.No, Task, Project, Remarks, Due Date, Status Select, Assigned Date, Action)
+                                        if (cells.length >= 7) {
+                                            cells[1].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                            cells[2].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
+                                            cells[3].innerText = task.description || '-';
+                                            cells[4].innerText = task.due_date || '-';
+
+                                            const statusSelect = cells[5].querySelector('.status-select');
+                                            if (statusSelect) {
+                                                statusSelect.value = (newStatus === 'Hold') ? 'On Hold' : newStatus;
+                                                updateSelectStatusClass(statusSelect);
+                                            }
+                                            const badge = cells[5].querySelector('.status-badge');
+                                            if (badge) {
+                                                badge.className = `status-badge status-${slugStatus}`;
+                                                badge.innerText = newStatus;
+                                            }
+
+                                            if (cells[6]) cells[6].innerText = task.created_at || '-';
+
+                                            if (cells[7]) {
+                                                const editBtn = cells[7].querySelector('.btn-edit');
+                                                if (editBtn) {
+                                                    editBtn.setAttribute('data-name', task.task_name || '');
+                                                    editBtn.setAttribute('data-project', task.project_name || '');
+                                                    editBtn.setAttribute('data-due-date', task.due_date || '');
+                                                    editBtn.setAttribute('data-status', newStatus);
+                                                    editBtn.setAttribute('data-description', task.description || '');
+                                                }
                                             }
                                         }
                                     }
@@ -3498,12 +3536,29 @@
                                         <td><strong>${escapeHtml(task.task_name)}</strong></td>
                                         <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
                                         <td>${escapeHtml(task.description || '-')}</td>
-                                        <td><strong>${escapeHtml(task.employee_name || '-')}</strong></td>
                                         <td>${escapeHtml(task.due_date || '-')}</td>
                                         <td>
-                                            <span class="status-badge status-${slugStatus}">${escapeHtml(newStatus)}</span>
+                                            <select class="status-select status-${slugStatus}" name="status" data-task-id="${task.id}" onchange="updateTaskStatus(this)">
+                                                <option value="Not Worked" ${newStatus === 'Not Worked' ? 'selected' : ''}>Not Worked</option>
+                                                <option value="In Progress" ${newStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                                <option value="Pending" ${newStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                                                <option value="On Hold" ${(newStatus === 'Hold' || newStatus === 'On Hold') ? 'selected' : ''}>On Hold</option>
+                                                <option value="Completed" ${newStatus === 'Completed' ? 'selected' : ''}>Completed</option>
+                                            </select>
                                         </td>
                                         <td>${escapeHtml(task.created_at || '-')}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-edit" title="Edit"
+                                                data-id="${task.id}"
+                                                data-name="${escapeHtml(task.task_name)}"
+                                                data-project="${escapeHtml(task.project_name || '')}"
+                                                data-due-date="${escapeHtml(task.due_date || '')}"
+                                                data-status="${escapeHtml(newStatus)}"
+                                                data-description="${escapeHtml(task.description || '')}"
+                                                onclick="openEmployeeEditTaskModalFromBtn(this)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                        </td>
                                     `;
                                     }
                                     tbody.prepend(newTr);
@@ -4061,15 +4116,76 @@
                                 notifications.forEach(n => {
                                     html += `
                                         <div onclick="clickNotification(${n.id}, '${n.link || ''}')" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: 0.2s; background: #fff;">
-                                            <div style="font-weight: 600; font-size: 13px; color: var(--text-dark); margin-bottom: 4px;">${n.title}</div>
-                                            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">${n.message}</div>
-                                            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-align: right;">${n.created_at || ''}</div>
+                                            <div style="font-weight: 600; font-size: 13px; color: var(--text-dark); margin-bottom: 4px;">${escapeHtml(n.title)}</div>
+                                            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">${escapeHtml(n.message)}</div>
+                                            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px; text-align: right;">${escapeHtml(n.created_at || '')}</div>
                                         </div>
                                     `;
                                 });
                                 listEl.innerHTML = html;
                             } else {
                                 listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No unread notifications</div>`;
+                            }
+                        }
+
+                        // Update Notification Tab List in real-time without page reload
+                        const tabListEl = document.getElementById('tab-notifications-list');
+                        if (tabListEl && data.all_notifications) {
+                            const allNotifs = data.all_notifications || [];
+                            if (allNotifs.length > 0) {
+                                let tabHtml = '';
+                                allNotifs.forEach(n => {
+                                    const isApproved = n.title.includes('Approved');
+                                    const isRejected = n.title.includes('Rejected');
+                                    const isRequest = n.title.includes('Request');
+                                    const typeClass = isApproved ? 'approved' : (isRejected ? 'rejected' : (isRequest ? 'request' : 'system'));
+
+                                    const iconClass = isApproved ? 'fa-circle-check' : (isRejected ? 'fa-circle-xmark' : (isRequest ? 'fa-code-pull-request' : 'fa-bell'));
+                                    const iconCssClass = isApproved ? 'notif-icon-approved' : (isRejected ? 'notif-icon-rejected' : (isRequest ? 'notif-icon-request' : 'notif-icon-default'));
+                                    const bgClass = n.is_read ? 'notif-bg-read' : 'notif-bg-unread';
+                                    const newTag = !n.is_read ? '<span class="unread-tag-pill" style="background: #3b82f6; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">NEW</span>' : '';
+                                    const readBtn = !n.is_read ? `<button type="button" class="btn btn-sm btn-outline" onclick="markSingleNotificationRead(${n.id}, this)" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">Mark Read</button>` : '';
+                                    const viewReqBtn = (isRequest && !isApproved && !isRejected) ? `<button type="button" class="btn btn-sm btn-primary" onclick="switchTab('task-requests')" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">View Request</button>` : '';
+
+                                    tabHtml += `
+                                        <div class="notification-card-item notif-type-${typeClass} ${bgClass}"
+                                            style="padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
+                                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                                <div class="${iconCssClass}" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
+                                                    <i class="fa-solid ${iconClass}"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                                                        <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">${escapeHtml(n.title)}</span>
+                                                        ${newTag}
+                                                    </div>
+                                                    <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; line-height: 1.4;">${escapeHtml(n.message)}</p>
+                                                    <span style="font-size: 11px; color: #94a3b8;"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i>${escapeHtml(n.created_at || '')}</span>
+                                                </div>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                                ${readBtn}
+                                                ${viewReqBtn}
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                tabListEl.innerHTML = tabHtml;
+
+                                const activeFilterBtn = document.querySelector('.notif-filter-btn.active');
+                                if (activeFilterBtn) {
+                                    const match = activeFilterBtn.getAttribute('onclick').match(/'([^']+)'/);
+                                    if (match && match[1]) {
+                                        filterNotificationTab(match[1], activeFilterBtn);
+                                    }
+                                }
+                            } else {
+                                tabListEl.innerHTML = `
+                                    <div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                                        <i class="fa-solid fa-bell-slash" style="font-size: 28px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+                                        No notifications found.
+                                    </div>
+                                `;
                             }
                         }
                     }
