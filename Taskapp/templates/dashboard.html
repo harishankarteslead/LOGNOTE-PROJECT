@@ -1523,6 +1523,7 @@
                                         <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
                                             <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
                                             <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
                                             <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
                                             <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
                                         </select>
@@ -3461,6 +3462,11 @@
                                         cells[3].innerText = task.description || '-';
                                         cells[4].innerText = task.due_date || '-';
 
+                                        const statusSelect = cells[5].querySelector('.status-select');
+                                        if (statusSelect) {
+                                            statusSelect.value = (newStatus === 'Hold') ? 'On Hold' : newStatus;
+                                            updateSelectStatusClass(statusSelect);
+                                        }
                                         const badge = cells[5].querySelector('.status-badge');
                                         if (badge) {
                                             badge.className = `status-badge status-${slugStatus}`;
@@ -3496,7 +3502,12 @@
                                     <td>${escapeHtml(task.description || '-')}</td>
                                     <td>${escapeHtml(task.due_date || '-')}</td>
                                     <td>
-                                        <span class="status-badge status-${slugStatus}">${escapeHtml(newStatus)}</span>
+                                        <select class="status-select status-${slugStatus}" name="status" data-task-id="${task.id}" onchange="updateTaskStatus(this)">
+                                            <option value="Not Worked" ${newStatus === 'Not Worked' ? 'selected' : ''}>Not Worked</option>
+                                            <option value="In Progress" ${newStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                            <option value="On Hold" ${newStatus === 'Hold' || newStatus === 'On Hold' ? 'selected' : ''}>On Hold</option>
+                                            <option value="Completed" ${newStatus === 'Completed' ? 'selected' : ''}>Completed</option>
+                                        </select>
                                     </td>
                                     <td>${escapeHtml(task.created_at || '-')}</td>
                                     <td>
@@ -3677,17 +3688,17 @@
                     }
                 }).then((res) => {
                     if (res.isConfirmed && res.value) {
-                        executeTaskStatusUpdate(taskId, 'Completed', res.value, csrfToken);
+                        executeTaskStatusUpdate(taskId, 'Completed', res.value, csrfToken, selectEl);
                     } else {
                         if (typeof pollTaskStatus === 'function') pollTaskStatus();
                     }
                 });
             } else {
-                executeTaskStatusUpdate(taskId, status, '', csrfToken);
+                executeTaskStatusUpdate(taskId, status, '', csrfToken, selectEl);
             }
         }
 
-        function executeTaskStatusUpdate(taskId, status, description, csrfToken) {
+        function executeTaskStatusUpdate(taskId, status, description, csrfToken, selectEl = null) {
             fetch('/api/tasks/update-status/', {
                 method: 'POST',
                 headers: {
@@ -3705,8 +3716,16 @@
                 .then(data => {
                     if (data.status === 'success') {
                         closeEmployeeEditTaskModal();
+                        if (selectEl) {
+                            selectEl.value = status;
+                            updateSelectStatusClass(selectEl);
+                            const row = selectEl.closest('tr');
+                            if (row) {
+                                row.setAttribute('data-status', status.toLowerCase());
+                            }
+                        }
                         Swal.fire({
-                            title: 'Details Updated!',
+                            title: 'Status Updated!',
                             text: data.message,
                             icon: 'success',
                             toast: true,
@@ -3714,11 +3733,23 @@
                             showConfirmButton: false,
                             timer: 2500
                         });
-                        pollTaskStatus();
+                        if (typeof pollTaskStatus === 'function') pollTaskStatus();
                     } else if (data.status === 'request_required') {
                         closeEmployeeEditTaskModal();
+                        if (selectEl) {
+                            const row = selectEl.closest('tr');
+                            const prevStatus = row ? row.getAttribute('data-status') : 'not worked';
+                            selectEl.value = (prevStatus === 'hold' || prevStatus === 'on-hold') ? 'On Hold' : (prevStatus === 'in-progress' ? 'In Progress' : (prevStatus === 'completed' ? 'Completed' : 'Not Worked'));
+                            updateSelectStatusClass(selectEl);
+                        }
                         openTaskApprovalRequestModal(data.task_id, data.task_name, data.project_name, data.active_task_name);
                     } else {
+                        if (selectEl) {
+                            const row = selectEl.closest('tr');
+                            const prevStatus = row ? row.getAttribute('data-status') : 'not worked';
+                            selectEl.value = (prevStatus === 'hold' || prevStatus === 'on-hold') ? 'On Hold' : (prevStatus === 'in-progress' ? 'In Progress' : (prevStatus === 'completed' ? 'Completed' : 'Not Worked'));
+                            updateSelectStatusClass(selectEl);
+                        }
                         Swal.fire({
                             title: 'Status Update Failed',
                             text: data.message,
@@ -3728,6 +3759,12 @@
                     }
                 })
                 .catch(err => {
+                    if (selectEl) {
+                        const row = selectEl.closest('tr');
+                        const prevStatus = row ? row.getAttribute('data-status') : 'not worked';
+                        selectEl.value = (prevStatus === 'hold' || prevStatus === 'on-hold') ? 'On Hold' : (prevStatus === 'in-progress' ? 'In Progress' : (prevStatus === 'completed' ? 'Completed' : 'Not Worked'));
+                        updateSelectStatusClass(selectEl);
+                    }
                     Swal.fire('Error', 'Server connection error: ' + err, 'error');
                 });
         }

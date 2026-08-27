@@ -129,6 +129,7 @@ def cascade_project_status_to_tasks(project_name, new_status, admin_name=""):
     """
     Cascade project status changes to assigned tasks under that project:
     - If new_status is 'On Hold' / 'Hold': update all tasks under project to 'On Hold' and notify assigned employees.
+    - If new_status is 'Not Worked': update all tasks under project to 'Not Worked' and notify assigned employees.
     - If new_status is 'In Progress': reset 'On Hold' tasks under project to 'Not Worked' and notify assigned employees.
     """
     if not project_name:
@@ -161,6 +162,35 @@ def cascade_project_status_to_tasks(project_name, new_status, admin_name=""):
                             user_role='employee',
                             title='Project & Tasks On Hold',
                             message=f'Project "{proj_clean}" has been put On Hold by Admin ({admin_name or "System"}). Your assigned task(s) under this project are now On Hold.',
+                            link='/dashboard/'
+                        )
+                        notified_users.add(emp_id)
+
+                return len(tasks_to_update)
+
+        elif status_clean == 'Not Worked':
+            cursor.execute("""
+                SELECT id, task_name, assigned_to_id, employee_name
+                FROM tasks
+                WHERE LOWER(project_name) = LOWER(%s);
+            """, [proj_clean])
+            tasks_to_update = cursor.fetchall()
+
+            if tasks_to_update:
+                cursor.execute("""
+                    UPDATE tasks
+                    SET status = 'Not Worked'
+                    WHERE LOWER(project_name) = LOWER(%s);
+                """, [proj_clean])
+
+                notified_users = set()
+                for task_id, t_name, emp_id, emp_name in tasks_to_update:
+                    if emp_id and emp_id not in notified_users:
+                        task_request_service.create_notification(
+                            user_id=emp_id,
+                            user_role='employee',
+                            title='Project & Tasks Reset to Not Worked',
+                            message=f'Project "{proj_clean}" status has been set to Not Worked by Admin ({admin_name or "System"}). All assigned task(s) under this project are now set to Not Worked.',
                             link='/dashboard/'
                         )
                         notified_users.add(emp_id)
