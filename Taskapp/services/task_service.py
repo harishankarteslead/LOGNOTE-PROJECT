@@ -321,36 +321,60 @@ def update_task_status(task_id, status):
 
 def delete_task(task_id):
     """
-    Delete a task record from the tasks table by ID.
+    Delete task record(s) from the tasks table by ID or comma-separated/list of IDs.
     """
     create_task_table()
+    ids = []
+    if isinstance(task_id, (list, tuple, set)):
+        for item in task_id:
+            for part in str(item).split(','):
+                part = part.strip()
+                if part.isdigit():
+                    ids.append(int(part))
+    elif isinstance(task_id, str):
+        for part in str(task_id).split(','):
+            part = part.strip()
+            if part.isdigit():
+                ids.append(int(part))
+    elif isinstance(task_id, int):
+        ids.append(task_id)
+
+    if not ids:
+        return 0
+
+    placeholders = ', '.join(['%s'] * len(ids))
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM tasks WHERE id = %s;", [task_id])
+        cursor.execute(f"DELETE FROM tasks WHERE id IN ({placeholders});", ids)
         return cursor.rowcount
 
 
 def delete_tasks_bulk(task_ids):
     """
     Delete multiple task records from the tasks table by their IDs.
+    Supports integers, list of integers, or list of comma-separated strings.
     """
-    if not task_ids:
-        return 0
-    create_task_table()
-    placeholders = ', '.join(['%s'] * len(task_ids))
-    with connection.cursor() as cursor:
-        cursor.execute(f"DELETE FROM tasks WHERE id IN ({placeholders});", list(task_ids))
-        return cursor.rowcount
+    return delete_task(task_ids)
 
 
 def update_task_details(task_id, task_name, description, assigned_to_ids=None, employee_names=None, due_date=None, status='Not Worked', project_name=None, assigned_to_id=0, employee_name=''):
     """
-    Update details of a specific task row and ensure individual employee rows exist for all assigned employees.
+    Update details of a task and manage individual employee rows for all assigned employees without creating duplicate tasks.
     """
     create_task_table()
     due_val = due_date if due_date else None
     proj_val = project_name if project_name else None
 
-    # Handle single vs multiple employee input
+    # Retrieve target task to get original properties
+    target_task = get_task_by_id(task_id)
+    if not target_task:
+        return 0
+
+    orig_task_name = target_task['task_name']
+    orig_proj_name = target_task['project_name']
+    orig_due_date = target_task['due_date']
+    orig_due_str = orig_due_date.strftime('%Y-%m-%d') if hasattr(orig_due_date, 'strftime') else str(orig_due_date or '').strip()
+
+    # Handle assigned_to_ids & employee_names lists
     if isinstance(employee_names, str):
         employee_names = [n.strip() for n in employee_names.split(',') if n.strip()]
     if not employee_names and employee_name:
@@ -362,40 +386,81 @@ def update_task_details(task_id, task_name, description, assigned_to_ids=None, e
         assigned_to_ids = [assigned_to_id]
     assigned_to_ids = [int(i) for i in (assigned_to_ids or []) if str(i).isdigit()]
 
+    # Build target employee list: [(emp_id, emp_name), ...]
+    target_employees = []
+    if employee_names:
+        for idx, emp_name in enumerate(employee_names):
+            emp_id = assigned_to_ids[idx] if idx < len(assigned_to_ids) else 0
+            target_employees.append((emp_id, emp_name))
+    elif assigned_to_ids:
+        for emp_id in assigned_to_ids:
+            target_employees.append((emp_id, ''))
+    else:
+        target_employees.append((int(assigned_to_id) if assigned_to_id else 0, employee_name or ''))
+
     with connection.cursor() as cursor:
-        if employee_names:
-            first_emp_name = employee_names[0]
-            first_emp_id = assigned_to_ids[0] if assigned_to_ids else 0
+        # Find all related task rows belonging to the original task group
+        cursor.execute("""
+            SELECT id, assigned_to_id, employee_name, status
+            FROM tasks
+            WHERE (id = %s)
+               OR (task_name = %s 
+                   AND COALESCE(project_name, '') = COALESCE(%s, '')
+                   AND (due_date = %s OR (%s = '' AND due_date IS NULL)));
+        """, [task_id, orig_task_name, orig_proj_name or '', orig_due_str, orig_due_str])
+        related_rows = cursor.fetchall()
+        related_pool = [{'id': r[0], 'emp_id': r[1], 'emp_name': (r[2] or '').strip(), 'status': r[3]} for r in related_rows]
 
-            cursor.execute("""
-                UPDATE tasks
-                SET task_name = %s, project_name = %s, description = %s, employee_name = %s, due_date = %s, status = %s, assigned_to_id = %s
-                WHERE id = %s;
-            """, [task_name, proj_val, description, first_emp_name, due_val, status, first_emp_id, task_id])
+        assigned_row_ids = set()
 
-            for idx in range(1, len(employee_names)):
-                emp_name = employee_names[idx]
-                emp_id = assigned_to_ids[idx] if idx < len(assigned_to_ids) else 0
+        for emp_id, emp_name in target_employees:
+            matched_item = None
+
+            # 1. Try to find row in related_pool matching exact emp_id or emp_name
+            for item in related_pool:
+                if item['id'] not in assigned_row_ids:
+                    if (emp_id > 0 and item['emp_id'] == emp_id) or (emp_name and item['emp_name'].lower() == emp_name.lower()):
+                        matched_item = item
+                        break
+
+            # 2. If no exact employee match, try to repurpose target_task row if available
+            if not matched_item:
+                for item in related_pool:
+                    if item['id'] == task_id and item['id'] not in assigned_row_ids:
+                        matched_item = item
+                        break
+
+            # 3. Otherwise try to repurpose any available unused item in related_pool
+            if not matched_item:
+                for item in related_pool:
+                    if item['id'] not in assigned_row_ids:
+                        matched_item = item
+                        break
+
+            if matched_item:
+                assigned_row_ids.add(matched_item['id'])
                 cursor.execute("""
-                    SELECT id FROM tasks 
-                    WHERE task_name = %s AND assigned_to_id = %s AND LOWER(employee_name) = LOWER(%s)
-                      AND COALESCE(project_name, '') = COALESCE(%s, '')
-                    LIMIT 1;
-                """, [task_name, emp_id, emp_name, proj_val or ''])
-                if not cursor.fetchone():
-                    cursor.execute("""
-                        INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s);
-                    """, [task_name, proj_val, description, emp_name, due_val, status, emp_id])
-            return 1
-        else:
-            emp_id_val = int(assigned_to_id) if assigned_to_id else 0
-            cursor.execute("""
-                UPDATE tasks
-                SET task_name = %s, project_name = %s, description = %s, employee_name = %s, due_date = %s, status = %s, assigned_to_id = %s
-                WHERE id = %s;
-            """, [task_name, proj_val, description, employee_name, due_val, status, emp_id_val, task_id])
-            return cursor.rowcount
+                    UPDATE tasks
+                    SET task_name = %s, project_name = %s, description = %s, employee_name = %s, due_date = %s, status = %s, assigned_to_id = %s
+                    WHERE id = %s;
+                """, [task_name, proj_val, description, emp_name, due_val, status, emp_id, matched_item['id']])
+            else:
+                # Insert new task row for this employee if no related row is available
+                cursor.execute("""
+                    INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """, [task_name, proj_val, description, emp_name, due_val, status, emp_id])
+                assigned_row_ids.add(cursor.lastrowid)
+
+        # Delete any remaining unselected related rows that were not assigned
+        unassigned_ids = [item['id'] for item in related_pool if item['id'] not in assigned_row_ids]
+        if unassigned_ids:
+            placeholders = ', '.join(['%s'] * len(unassigned_ids))
+            cursor.execute(f"DELETE FROM tasks WHERE id IN ({placeholders});", unassigned_ids)
+
+    deduplicate_existing_tasks()
+    return len(assigned_row_ids)
+
 
 
 def update_task_employee_fields(task_id, description, status):

@@ -266,11 +266,17 @@ def dashboard(request):
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
                 return redirect('dashboard')
-            task_id = request.POST.get('task_id', '') or request.POST.get('assignment_id', '')
-            if task_id:
+            raw_task_id = request.POST.get('task_id', '') or request.POST.get('assignment_id', '')
+            ids_to_del = []
+            if raw_task_id:
+                for part in str(raw_task_id).split(','):
+                    part = part.strip()
+                    if part.isdigit():
+                        ids_to_del.append(int(part))
+            if ids_to_del:
                 try:
-                    task_service.delete_task(int(task_id))
-                    messages.success(request, f'Task #{task_id} deleted successfully.')
+                    deleted_count = task_service.delete_task(ids_to_del)
+                    messages.success(request, f'{deleted_count} task record(s) deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to delete task: {str(e)}')
             dest_tab = active_tab_post or 'form-data'
@@ -280,10 +286,17 @@ def dashboard(request):
             if user_role not in ('superadmin', 'admin'):
                 messages.error(request, 'Permission denied.')
                 return redirect('dashboard')
-            task_ids = request.POST.getlist('task_ids') or request.POST.getlist('assignment_ids')
-            if task_ids:
+            task_ids_raw = request.POST.getlist('task_ids') or request.POST.getlist('assignment_ids')
+            ids_to_del = []
+            if task_ids_raw:
+                for item in task_ids_raw:
+                    for part in str(item).split(','):
+                        part = part.strip()
+                        if part.isdigit():
+                            ids_to_del.append(int(part))
+            if ids_to_del:
                 try:
-                    deleted_count = task_service.delete_tasks_bulk([int(tid) for tid in task_ids if str(tid).isdigit()])
+                    deleted_count = task_service.delete_tasks_bulk(ids_to_del)
                     messages.success(request, f'{deleted_count} task(s) deleted successfully.')
                 except Exception as e:
                     messages.error(request, f'Failed to bulk delete tasks: {str(e)}')
