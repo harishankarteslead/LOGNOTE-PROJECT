@@ -981,6 +981,12 @@
                 <span id="sidebar-request-badge" class="badge" style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
             </li>
 
+            <li class="menu-item {% if active_tab == 'notifications' %}active{% endif %}"
+                onclick="switchTab('notifications', this)">
+                <i class="fa-solid fa-bell"></i> Notifications
+                <span id="sidebar-notification-badge" class="badge" style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
+            </li>
+
             {% if role == 'superadmin' %}
             <li class="menu-item {% if active_tab == 'add-members' %}active{% endif %}"
                 onclick="switchTab('add-members', this)">
@@ -2009,6 +2015,91 @@
             {% if role == 'superadmin' or role == 'admin' %}
             <div id="tab-task-requests" class="tab-content {% if active_tab == 'task-requests' %}active{% endif %}">
                 {% include 'task_requests.html' %}
+            </div>
+            {% endif %}
+
+            <!-- TAB 7: NOTIFICATIONS (SUPERADMIN / ADMIN ONLY) -->
+            {% if role == 'superadmin' or role == 'admin' %}
+            <div id="tab-notifications" class="tab-content {% if active_tab == 'notifications' %}active{% endif %}">
+                <div class="card" style="padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+                        <div>
+                            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
+                                Notifications & Employee Request Activity
+                            </h2>
+                            <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">
+                                Track employee task requests, approval decisions, and system notifications in real-time.
+                            </p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn btn-sm btn-outline" onclick="markAllNotificationsReadPage()" style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
+                                <i class="fa-solid fa-check-double" style="margin-right: 4px;"></i> Mark All Read
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="fetchUnreadNotifications()" style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
+                                <i class="fa-solid fa-rotate" style="margin-right: 4px;"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Small Filter Buttons -->
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                        <button type="button" class="btn btn-sm notif-filter-btn active" onclick="filterNotificationTab('all', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                            All
+                        </button>
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('request', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                            Requests Received
+                        </button>
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('approved', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                            Approved
+                        </button>
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('rejected', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                            Rejected
+                        </button>
+                    </div>
+
+                    <!-- Notifications List Container -->
+                    <div id="tab-notifications-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for notif in all_notifications %}
+                        <div class="notification-card-item notif-type-{% if 'Approved' in notif.title %}approved{% elif 'Rejected' in notif.title %}rejected{% elif 'Request' in notif.title %}request{% else %}system{% endif %}"
+                            style="padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border); background: {% if not notif.is_read %}#f0f9ff{% else %}#ffffff{% endif %}; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; transition: all 0.2s ease;">
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+                                    background: {% if 'Approved' in notif.title %}#dcfce7; color: #15803d;{% elif 'Rejected' in notif.title %}#fee2e2; color: #dc2626;{% elif 'Request' in notif.title %}#e0e7ff; color: #3730a3;{% else %}#f1f5f9; color: #64748b;{% endif %}">
+                                    <i class="fa-solid {% if 'Approved' in notif.title %}fa-circle-check{% elif 'Rejected' in notif.title %}fa-circle-xmark{% elif 'Request' in notif.title %}fa-code-pull-request{% else %}fa-bell{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                                        <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">{{ notif.title }}</span>
+                                        {% if not notif.is_read %}
+                                        <span class="unread-tag-pill" style="background: #3b82f6; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">NEW</span>
+                                        {% endif %}
+                                    </div>
+                                    <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; line-height: 1.4;">{{ notif.message }}</p>
+                                    <span style="font-size: 11px; color: #94a3b8;"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i>{{ notif.created_at }}</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                {% if not notif.is_read %}
+                                <button type="button" class="btn btn-sm btn-outline" onclick="markSingleNotificationRead({{ notif.id }}, this)" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                    Mark Read
+                                </button>
+                                {% endif %}
+                                {% if 'Request' in notif.title and 'Approved' not in notif.title and 'Rejected' not in notif.title %}
+                                <button type="button" class="btn btn-sm btn-primary" onclick="switchTab('task-requests')" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                    View Request
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                            <i class="fa-solid fa-bell-slash" style="font-size: 28px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+                            No notifications found.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
             {% endif %}
 
@@ -3887,6 +3978,7 @@
                         const count = data.unread_count || 0;
                         const badge = document.getElementById('notification-badge');
                         const sidebarBadge = document.getElementById('sidebar-request-badge');
+                        const sidebarNotifBadge = document.getElementById('sidebar-notification-badge');
 
                         if (badge) {
                             if (count > 0) {
@@ -3894,6 +3986,14 @@
                                 badge.style.display = 'inline-block';
                             } else {
                                 badge.style.display = 'none';
+                            }
+                        }
+                        if (sidebarNotifBadge) {
+                            if (count > 0) {
+                                sidebarNotifBadge.innerText = count;
+                                sidebarNotifBadge.style.display = 'inline-block';
+                            } else {
+                                sidebarNotifBadge.style.display = 'none';
                             }
                         }
 
@@ -4010,6 +4110,74 @@
                 fetchUnreadNotifications();
                 if (link && link.includes('task-requests')) {
                     switchTab('task-requests');
+                }
+            });
+        }
+
+        function filterNotificationTab(filterType, btnEl) {
+            const btns = document.querySelectorAll('.notif-filter-btn');
+            btns.forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('btn-outline');
+            });
+            if (btnEl) {
+                btnEl.classList.remove('btn-outline');
+                btnEl.classList.add('active');
+            }
+
+            const items = document.querySelectorAll('.notification-card-item');
+            items.forEach(item => {
+                if (filterType === 'all') {
+                    item.style.display = 'flex';
+                } else if (filterType === 'request') {
+                    item.style.display = item.classList.contains('notif-type-request') ? 'flex' : 'none';
+                } else if (filterType === 'approved') {
+                    item.style.display = item.classList.contains('notif-type-approved') ? 'flex' : 'none';
+                } else if (filterType === 'rejected') {
+                    item.style.display = item.classList.contains('notif-type-rejected') ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function markAllNotificationsReadPage() {
+            markAllNotificationsRead();
+            const items = document.querySelectorAll('.notification-card-item');
+            items.forEach(item => {
+                item.style.background = '#ffffff';
+                const unreadPill = item.querySelector('.unread-tag-pill');
+                if (unreadPill) unreadPill.remove();
+                const readBtn = item.querySelector('button[onclick*="markSingleNotificationRead"]');
+                if (readBtn) readBtn.remove();
+            });
+            Swal.fire({
+                title: 'Notifications Cleared',
+                text: 'All notifications marked as read.',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        function markSingleNotificationRead(id, btnEl) {
+            fetch('/api/notifications/mark-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ notification_id: id })
+            }).then(() => {
+                fetchUnreadNotifications();
+                if (btnEl) {
+                    const card = btnEl.closest('.notification-card-item');
+                    if (card) {
+                        card.style.background = '#ffffff';
+                        const unreadPill = card.querySelector('.unread-tag-pill');
+                        if (unreadPill) unreadPill.remove();
+                    }
+                    btnEl.remove();
                 }
             });
         }

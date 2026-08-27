@@ -2,7 +2,7 @@ import re
 from datetime import datetime, date
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from Taskapp.services import employee_service, task_service, project_service
+from Taskapp.services import employee_service, task_service, project_service, task_request_service
 
 
 def is_valid_email(email):
@@ -588,6 +588,9 @@ def dashboard(request):
         context.update({
             'user_info': user_info,
         })
+
+    context['all_notifications'] = task_request_service.get_all_notifications(user_id=user_id, user_role=user_role)
+    context['unread_notifications'] = task_request_service.get_unread_notifications(user_id=user_id, user_role=user_role)
 
     response = render(request, 'dashboard.html', context)
     response.set_cookie('active_tab', active_tab, max_age=86400 * 30)

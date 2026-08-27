@@ -218,15 +218,22 @@ def approve_task_request(request_id, admin_id=0, admin_name=""):
         user_id=emp_id,
         user_role='employee',
         title='Task Request Approved!',
-        message=f'Your request to work on task "{t_name}" has been APPROVED by Admin ({admin_name or "System"}). .',
+        message=f'Your request to work on task "{t_name}" has been APPROVED by Admin ({admin_name or "System"}).',
         link='/dashboard/'
+    )
+    create_notification(
+        user_id=0,
+        user_role='all_admins',
+        title='Task Request Approved',
+        message=f'Task request #{req_id} for employee {emp_name} (Task: "{t_name}") was APPROVED by Admin ({admin_name or "System"}).',
+        link='/task-requests/'
     )
     return True, f'Task request #{req_id} approved successfully.'
 
 
 def reject_task_request(request_id, rejection_reason="", admin_id=0, admin_name=""):
     """
-    Reject a pending task request with a mandatory reason and notify the employee.
+    Reject a pending task request with a mandatory reason and notify the employee and admins.
     """
     init_task_request_tables()
     req_id = int(request_id)
@@ -254,7 +261,54 @@ def reject_task_request(request_id, rejection_reason="", admin_id=0, admin_name=
         message=f'Your request for task "{t_name}" was REJECTED by Admin ({admin_name or "System"}). Reason: {rej_reason}',
         link='/dashboard/'
     )
+    create_notification(
+        user_id=0,
+        user_role='all_admins',
+        title='Task Request Rejected',
+        message=f'Task request #{req_id} for employee {emp_name} (Task: "{t_name}") was REJECTED by Admin ({admin_name or "System"}). Reason: {rej_reason}',
+        link='/task-requests/'
+    )
     return True, f'Task request #{req_id} rejected successfully.'
+
+
+def get_all_notifications(user_id=0, user_role=""):
+    """
+    Retrieve all notifications (read and unread) for rendering full notification page.
+    """
+    init_task_request_tables()
+    u_id = int(user_id) if user_id else 0
+    role = (user_role or '').lower()
+
+    with connection.cursor() as cursor:
+        if role in ('superadmin', 'admin'):
+            cursor.execute("""
+                SELECT id, user_id, user_role, title, message, link, is_read, created_at
+                FROM notifications
+                WHERE user_id = %s OR user_role IN ('admin', 'superadmin', 'all_admins')
+                ORDER BY id DESC LIMIT 100;
+            """, [u_id])
+        else:
+            cursor.execute("""
+                SELECT id, user_id, user_role, title, message, link, is_read, created_at
+                FROM notifications
+                WHERE user_id = %s OR (user_id = 0 AND user_role IN ('employee', 'all'))
+                ORDER BY id DESC LIMIT 100;
+            """, [u_id])
+
+        rows = cursor.fetchall()
+        notifications = []
+        for r in rows:
+            notifications.append({
+                'id': r[0],
+                'user_id': r[1],
+                'user_role': r[2] or '',
+                'title': r[3],
+                'message': r[4],
+                'link': r[5] or '',
+                'is_read': bool(r[6]),
+                'created_at': r[7].strftime('%Y-%m-%d %H:%M:%S') if r[7] and hasattr(r[7], 'strftime') else str(r[7] or '')
+            })
+        return notifications
 
 
 def has_approved_request_for_task(employee_id, task_id):
