@@ -225,7 +225,7 @@ def approve_task_request(request_id, admin_id=0, admin_name=""):
         user_id=0,
         user_role='all_admins',
         title='Task Request Approved',
-        message=f'Task request #{req_id} for employee {emp_name} (Task: "{t_name}") was APPROVED by Admin ({admin_name or "System"}).',
+        message=f'Task request for employee {emp_name} (Task: "{t_name}") was APPROVED by Admin ({admin_name or "System"}).',
         link='/task-requests/'
     )
     return True, f'Task request #{req_id} approved successfully.'
@@ -265,7 +265,7 @@ def reject_task_request(request_id, rejection_reason="", admin_id=0, admin_name=
         user_id=0,
         user_role='all_admins',
         title='Task Request Rejected',
-        message=f'Task request #{req_id} for employee {emp_name} (Task: "{t_name}") was REJECTED by Admin ({admin_name or "System"}). Reason: {rej_reason}',
+        message=f'Task request for employee {emp_name} (Task: "{t_name}") was REJECTED by Admin ({admin_name or "System"}). Reason: {rej_reason}',
         link='/task-requests/'
     )
     return True, f'Task request #{req_id} rejected successfully.'
