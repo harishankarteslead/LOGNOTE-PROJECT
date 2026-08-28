@@ -533,13 +533,33 @@
             color: #075985;
         }
 
-        .notif-bg-unread { background-color: #f0f9ff !important; }
-        .notif-bg-read { background-color: #ffffff !important; }
+        .notif-bg-unread {
+            background-color: #f0f9ff !important;
+        }
 
-        .notif-icon-approved { background-color: #dcfce7 !important; color: #15803d !important; }
-        .notif-icon-rejected { background-color: #fee2e2 !important; color: #dc2626 !important; }
-        .notif-icon-request { background-color: #e0e7ff !important; color: #3730a3 !important; }
-        .notif-icon-default { background-color: #f1f5f9 !important; color: #64748b !important; }
+        .notif-bg-read {
+            background-color: #ffffff !important;
+        }
+
+        .notif-icon-approved {
+            background-color: #dcfce7 !important;
+            color: #15803d !important;
+        }
+
+        .notif-icon-rejected {
+            background-color: #fee2e2 !important;
+            color: #dc2626 !important;
+        }
+
+        .notif-icon-request {
+            background-color: #e0e7ff !important;
+            color: #3730a3 !important;
+        }
+
+        .notif-icon-default {
+            background-color: #f1f5f9 !important;
+            color: #64748b !important;
+        }
 
         /* Status Badges & Status Select Pills - Model from Projects Table */
         .status-badge,
@@ -590,6 +610,7 @@
             color: #64748b !important;
             border-color: #cbd5e1 !important;
         }
+
         .status-select.status-not-worked {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
@@ -600,6 +621,7 @@
             color: #dc2626 !important;
             border-color: #fca5a5 !important;
         }
+
         .status-select.status-pending {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
@@ -610,6 +632,7 @@
             color: #1e3a8a !important;
             border-color: #3b82f6 !important;
         }
+
         .status-select.status-in-progress {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e3a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
@@ -621,6 +644,7 @@
             color: #b45309 !important;
             border-color: #fcd34d !important;
         }
+
         .status-select.status-on-hold,
         .status-select.status-hold {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b45309' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
@@ -632,6 +656,7 @@
             color: #15803d !important;
             border-color: #86efac !important;
         }
+
         .status-select.status-completed {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2315803d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
         }
@@ -993,13 +1018,15 @@
             <li class="menu-item {% if active_tab == 'task-requests' %}active{% endif %}"
                 onclick="switchTab('task-requests', this)">
                 <i class="fa-solid fa-code-pull-request"></i> Task Request
-                <span id="sidebar-request-badge" class="badge" style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
+                <span id="sidebar-request-badge" class="badge"
+                    style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
             </li>
 
             <li class="menu-item {% if active_tab == 'notifications' %}active{% endif %}"
                 onclick="switchTab('notifications', this)">
                 <i class="fa-solid fa-bell"></i> Notifications
-                <span id="sidebar-notification-badge" class="badge" style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
+                <span id="sidebar-notification-badge" class="badge"
+                    style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
             </li>
 
             {% if role == 'superadmin' %}
@@ -1035,19 +1062,27 @@
             <div style="display: flex; align-items: center; gap: 20px;">
                 <!-- Notification Bell Wrapper -->
                 <div class="notification-wrapper" style="position: relative; cursor: pointer;">
-                    <div id="notification-bell-btn" onclick="toggleNotificationDropdown()" style="position: relative; font-size: 18px; color: var(--text-dark); padding: 8px; border-radius: 50%; background: #f1f5f9; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                    <div id="notification-bell-btn" onclick="toggleNotificationDropdown()"
+                        style="position: relative; font-size: 18px; color: var(--text-dark); padding: 8px; border-radius: 50%; background: #f1f5f9; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
                         <i class="fa-solid fa-bell"></i>
-                        <span id="notification-badge" style="display: none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; border: 2px solid white;">0</span>
+                        <span id="notification-badge"
+                            style="display: none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; border: 2px solid white;">0</span>
                     </div>
 
                     <!-- Notification Dropdown -->
-                    <div id="notification-dropdown" style="display: none; position: absolute; right: 0; top: 48px; width: 340px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 1000; overflow: hidden;">
-                        <div style="padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="font-size: 14px; color: var(--text-dark);"><i class="fa-solid fa-bell" style="color: var(--primary);"></i> Notifications</strong>
-                            <button onclick="markAllNotificationsRead()" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;">Mark all read</button>
+                    <div id="notification-dropdown"
+                        style="display: none; position: absolute; right: 0; top: 48px; width: 340px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 1000; overflow: hidden;">
+                        <div
+                            style="padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 14px; color: var(--text-dark);"><i class="fa-solid fa-bell"
+                                    style="color: var(--primary);"></i> Notifications</strong>
+                            <button onclick="markAllNotificationsRead()"
+                                style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;">Mark
+                                all read</button>
                         </div>
                         <div id="notification-list" style="max-height: 320px; overflow-y: auto;">
-                            <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No unread notifications</div>
+                            <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
+                                No unread notifications</div>
                         </div>
                     </div>
                 </div>
@@ -1216,8 +1251,7 @@
                                         <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                     </td>
                                     <td>
-                                        <span
-                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{proj.status|default:"Not Worked" }}</span>
+                                        <span class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
@@ -1309,7 +1343,7 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1438,7 +1472,7 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
                                 </tr>
@@ -1472,12 +1506,15 @@
 
                 <!-- Employee Assigned Tasks Quick View (Last 5 Tasks) -->
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h2>
-                            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 8px;"></i>
+                            <i class="fa-solid fa-clock-rotate-left"
+                                style="color: var(--primary); margin-right: 8px;"></i>
                             Recent Tasks (Last 5 Tasks)
                         </h2>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('employee-tasks')" style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('employee-tasks')"
+                            style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
                             <i class="fa-solid fa-arrow-right-long" style="margin-right: 6px;"></i> View All Tasks
                         </button>
                     </div>
@@ -1538,10 +1575,13 @@
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
+                                        <select
+                                            class="status-select status-{{ task.status|default:'Not Worked'|slugify }}"
+                                            name="status" data-task-id="{{ task.id }}"
+                                            onchange="updateTaskStatus(this)">
                                             <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
                                             <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
+                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}> Pending</option>
                                             <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
                                             <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
                                         </select>
@@ -1575,12 +1615,14 @@
             {% if role == 'employee' %}
             <div id="tab-employee-tasks" class="tab-content {% if active_tab == 'employee-tasks' %}active{% endif %}">
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
                         <h2>
                             <i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 8px;"></i>
                             All Assigned Tasks
                         </h2>
-                        <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
+                        <span
+                            style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
                             Total Tasks: {{ total_tasks }}
                         </span>
                     </div>
@@ -1591,13 +1633,15 @@
                         <div class="filter-group search-group">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
                             <input type="text" id="employee-task-search" class="filter-search-input"
-                                placeholder="Search task name, project, description..." oninput="triggerEmployeeTaskFilter()">
+                                placeholder="Search task name, project, description..."
+                                oninput="triggerEmployeeTaskFilter()">
                         </div>
 
                         <!-- Status Filter -->
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
-                            <select id="employee-task-status-filter" class="filter-status-select" onchange="triggerEmployeeTaskFilter()">
+                            <select id="employee-task-status-filter" class="filter-status-select"
+                                onchange="triggerEmployeeTaskFilter()">
                                 <option value="all">All Statuses</option>
                                 <option value="not worked">Not Worked</option>
                                 <option value="pending">Pending</option>
@@ -1610,7 +1654,8 @@
                         <!-- Project Filter -->
                         <div class="filter-group select-group">
                             <label><i class="fa-solid fa-folder" style="color: var(--primary);"></i> Project:</label>
-                            <select id="employee-task-project-filter" class="filter-status-select" onchange="triggerEmployeeTaskFilter()">
+                            <select id="employee-task-project-filter" class="filter-status-select"
+                                onchange="triggerEmployeeTaskFilter()">
                                 <option value="all">All Projects</option>
                                 {% for proj in employee_projects %}
                                 <option value="{{ proj|lower }}">{{ proj }}</option>
@@ -1620,8 +1665,10 @@
 
                         <!-- Date Filter -->
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
-                            <input type="date" id="employee-task-date-filter" class="filter-date-input filter-exact-date" onchange="triggerEmployeeTaskFilter()">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
+                            <input type="date" id="employee-task-date-filter"
+                                class="filter-date-input filter-exact-date" onchange="triggerEmployeeTaskFilter()">
                         </div>
 
                         <!-- Preset Buttons -->
@@ -1662,17 +1709,21 @@
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ task.task_name }}</strong></td>
                                     <td>
-                                        <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
+                                        <span
+                                            style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
                                             {{ task.project_name|default:"-" }}
                                         </span>
                                     </td>
                                     <td>{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
+                                        <select
+                                            class="status-select status-{{ task.status|default:'Not Worked'|slugify }}"
+                                            name="status" data-task-id="{{ task.id }}"
+                                            onchange="updateTaskStatus(this)">
                                             <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
                                             <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
+                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}> Pending</option>
                                             <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
                                             <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
                                         </select>
@@ -1867,7 +1918,8 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td style="text-align: center;">
-                                        <input type="checkbox" class="task-select-cb" value="{% if task.task_ids %}{{ task.task_ids|join:',' }}{% else %}{{ task.id }}{% endif %}"
+                                        <input type="checkbox" class="task-select-cb"
+                                            value="{% if task.task_ids %}{{ task.task_ids|join:',' }}{% else %}{{ task.id }}{% endif %}"
                                             onchange="updateTaskBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
@@ -1879,7 +1931,9 @@
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not Worked"}}</span>
+                                        <span
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{task.status|default:"Not
+                                            Worked"}}</span>
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
@@ -1896,7 +1950,8 @@
                                             onsubmit="return confirmDeleteForm(event, 'Are you sure you want to delete this task?');">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_task">
-                                            <input type="hidden" name="task_id" value="{% if task.task_ids %}{{ task.task_ids|join:',' }}{% else %}{{ task.id }}{% endif %}">
+                                            <input type="hidden" name="task_id"
+                                                value="{% if task.task_ids %}{{ task.task_ids|join:',' }}{% else %}{{ task.id }}{% endif %}">
                                             <button type="submit" class="btn btn-sm btn-del" title="Delete">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
@@ -1940,7 +1995,7 @@
                             <button type="button" class="btn btn-primary" onclick="openAddProjectModal()">
                                 <i class="fa-solid fa-plus"></i> Add New Project
                             </button>
-                        </div>
+                        </div>       
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -2077,7 +2132,8 @@
                                         <td><strong>{{ task.task_name }}</strong></td>
                                         <td>
                                             <span
-                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-" }}</span>
+                                                style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"
+                                                }}</span>
                                         </td>
                                         <td><strong>{{ task.employee_name }}</strong></td>
                                         <td>
@@ -2164,10 +2220,13 @@
             <!-- TAB 7: NOTIFICATIONS (SUPERADMIN / ADMIN ONLY) -->
             {% if role == 'superadmin' or role == 'admin' %}
             <div id="tab-notifications" class="tab-content {% if active_tab == 'notifications' %}active{% endif %}">
-                <div class="card" style="padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+                <div class="card"
+                    style="padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
                         <div>
-                            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <h2
+                                style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
                                 <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
                                 Notifications & Employee Request Activity
                             </h2>
@@ -2176,10 +2235,13 @@
                             </p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <button type="button" class="btn btn-sm btn-outline" onclick="markAllNotificationsReadPage()" style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
+                            <button type="button" class="btn btn-sm btn-outline"
+                                onclick="markAllNotificationsReadPage()"
+                                style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
                                 <i class="fa-solid fa-check-double" style="margin-right: 4px;"></i> Mark All Read
                             </button>
-                            <button type="button" class="btn btn-sm btn-primary" onclick="fetchUnreadNotifications()" style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="fetchUnreadNotifications()"
+                                style="font-size: 12px; padding: 5px 12px; border-radius: 6px;">
                                 <i class="fa-solid fa-rotate" style="margin-right: 4px;"></i> Refresh
                             </button>
                         </div>
@@ -2187,16 +2249,24 @@
 
                     <!-- Small Filter Buttons -->
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-                        <button type="button" class="btn btn-sm notif-filter-btn active" onclick="filterNotificationTab('all', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                        <button type="button" class="btn btn-sm notif-filter-btn active"
+                            onclick="filterNotificationTab('all', this)"
+                            style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
                             All
                         </button>
-                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('request', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline"
+                            onclick="filterNotificationTab('request', this)"
+                            style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
                             Requests Received
                         </button>
-                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('approved', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline"
+                            onclick="filterNotificationTab('approved', this)"
+                            style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
                             Approved
                         </button>
-                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline" onclick="filterNotificationTab('rejected', this)" style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
+                        <button type="button" class="btn btn-sm notif-filter-btn btn-outline"
+                            onclick="filterNotificationTab('rejected', this)"
+                            style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
                             Rejected
                         </button>
                     </div>
@@ -2209,7 +2279,8 @@
                             <div style="display: flex; align-items: flex-start; gap: 12px;">
                                 <div class="{% if 'Approved' in notif.title %}notif-icon-approved{% elif 'Rejected' in notif.title %}notif-icon-rejected{% elif 'Request' in notif.title %}notif-icon-request{% else %}notif-icon-default{% endif %}"
                                     style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">
-                                    <i class="fa-solid {% if 'Approved' in notif.title %}fa-circle-check{% elif 'Rejected' in notif.title %}fa-circle-xmark{% elif 'Request' in notif.title %}fa-code-pull-request{% else %}fa-bell{% endif %}"></i>
+                                    <i
+                                        class="fa-solid {% if 'Approved' in notif.title %}fa-circle-check{% elif 'Rejected' in notif.title %}fa-circle-xmark{% elif 'Request' in notif.title %}fa-code-pull-request{% else %}fa-bell{% endif %}"></i>
                                 </div>
                                 <div>
                                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
@@ -2237,7 +2308,8 @@
                         </div>
                         {% empty %}
                         <div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 14px;">
-                            <i class="fa-solid fa-bell-slash" style="font-size: 28px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+                            <i class="fa-solid fa-bell-slash"
+                                style="font-size: 28px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
                             No notifications found.
                         </div>
                         {% endfor %}
@@ -2294,7 +2366,7 @@
 
                     <div class="form-group">
                         <label for="due_date">Due Date</label>
-                        <input type="date" id="due_date" name="due_date" class="form-control">
+                        <input type="date" id="due_date" name="due_date" class="form-control" required>
                     </div>
 
                     <input type="hidden" name="status" value="Not Worked">
@@ -2322,12 +2394,13 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="task_description">Description</label>
                     <textarea id="task_description" name="description" class="form-control" rows="3"
-                        placeholder="Enter detailed task description..."></textarea>
+                        placeholder="Enter detailed task description..." required></textarea>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeAssignTaskModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Save Task Record</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Save Task
+                        Record</button>
                 </div>
             </form>
         </div>
@@ -2519,7 +2592,7 @@
 
                     <div class="form-group">
                         <label for="due_date">Due Date</label>
-                        <input type="date" id="due_date" name="due_date" class="form-control">
+                        <input type="date" id="due_date" name="due_date" class="form-control" required>
                     </div>
 
                     <div class="form-group">
@@ -2532,7 +2605,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="project_description">Description</label>
                     <textarea id="project_description" name="description" class="form-control" rows="3"
-                        placeholder="Enter detailed project description..."></textarea>
+                        placeholder="Enter detailed project description..." required></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -2700,7 +2773,7 @@
             <div class="modal-header">
                 <h3>
                     <i class="fa-solid fa-pen-to-square" style="color: var(--primary); margin-right: 8px;"></i>
-                    Edit Task 
+                    Edit Task
                 </h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeEmployeeEditTaskModal()">&times;</span>
             </div>
@@ -2999,7 +3072,7 @@
                 const matchSearch = !searchVal || taskName.includes(searchVal) || projName.includes(searchVal) || desc.includes(searchVal);
                 const matchStatus = (statusVal === 'all') || (status === statusVal) || (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
                 const matchProject = (projectVal === 'all') || (projName === projectVal);
-                
+
                 let matchDate = true;
                 if (dateVal) {
                     const dueDateMatch = dueDate.match(/\d{4}-\d{2}-\d{2}/);
@@ -3821,9 +3894,15 @@
                         }
                     }
 
-                    // 2. Employee Task Table
-                    const empTaskCard = Array.from(document.querySelectorAll('.card')).find(card => card.querySelector('h2') && card.querySelector('h2').innerText.includes('Tasks Assigned To You'));
-                    if (empTaskCard) {
+                    // 2. Employee Task Tables (Both Recent Tasks & All Assigned Tasks)
+                    const empTaskCards = Array.from(document.querySelectorAll('.card')).filter(card => {
+                        const h2 = card.querySelector('h2');
+                        if (!h2) return false;
+                        const txt = h2.innerText;
+                        return txt.includes('Recent Tasks') || txt.includes('All Assigned Tasks') || txt.includes('Tasks Assigned To You');
+                    });
+
+                    empTaskCards.forEach(empTaskCard => {
                         const tbody = empTaskCard.querySelector('tbody');
                         if (tbody) {
                             const emptyRow = Array.from(tbody.children).find(tr => !tr.classList.contains('task-row') && !tr.classList.contains('empty-filter-row'));
@@ -3901,6 +3980,7 @@
                                         <select class="status-select status-${slugStatus}" name="status" data-task-id="${task.id}" onchange="updateTaskStatus(this)">
                                             <option value="Not Worked" ${newStatus === 'Not Worked' ? 'selected' : ''}>Not Worked</option>
                                             <option value="In Progress" ${newStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                            <option value="Pending" ${newStatus === 'Pending' ? 'selected' : ''}>Pending</option>
                                             <option value="On Hold" ${newStatus === 'Hold' || newStatus === 'On Hold' ? 'selected' : ''}>On Hold</option>
                                             <option value="Completed" ${newStatus === 'Completed' ? 'selected' : ''}>Completed</option>
                                         </select>
@@ -3922,11 +4002,18 @@
                                 }
                             });
 
-                            if (typeof triggerFilter === 'function') {
+                            tbody.querySelectorAll('tr.task-row').forEach((r, idx) => {
+                                const snoCell = r.children[0];
+                                if (snoCell) snoCell.innerHTML = `<strong>${idx + 1}</strong>`;
+                            });
+
+                            if (typeof triggerEmployeeTaskFilter === 'function') {
+                                triggerEmployeeTaskFilter();
+                            } else if (typeof triggerFilter === 'function') {
                                 triggerFilter(empTaskCard);
                             }
                         }
-                    }
+                    });
                     updateMetricCounters(data);
                 })
                 .catch(err => {
@@ -4247,27 +4334,27 @@
                             reason: reason
                         })
                     })
-                    .then(res => res.json())
-                    .then(reqData => {
-                        if (reqData.status === 'success') {
-                            Swal.fire({
-                                title: 'Request Sent',
-                                text: reqData.message,
-                                icon: 'success',
-                                width: '380px',
-                                confirmButtonColor: '#4f46e5'
-                            });
-                            fetchUnreadNotifications();
-                        } else {
-                            Swal.fire({
-                                title: 'Error',
-                                text: reqData.message,
-                                icon: 'error',
-                                width: '380px',
-                                confirmButtonColor: '#ef4444'
-                            });
-                        }
-                    });
+                        .then(res => res.json())
+                        .then(reqData => {
+                            if (reqData.status === 'success') {
+                                Swal.fire({
+                                    title: 'Request Sent',
+                                    text: reqData.message,
+                                    icon: 'success',
+                                    width: '380px',
+                                    confirmButtonColor: '#4f46e5'
+                                });
+                                fetchUnreadNotifications();
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: reqData.message,
+                                    icon: 'error',
+                                    width: '380px',
+                                    confirmButtonColor: '#ef4444'
+                                });
+                            }
+                        });
                 }
             });
         }
@@ -4321,7 +4408,7 @@
                                             loadTaskRequestsTab(true);
                                         }
                                     }
-                                }).catch(() => {});
+                                }).catch(() => { });
                         }
 
                         const notifications = data.notifications || [];
@@ -4340,7 +4427,7 @@
 
                         isFirstNotificationFetch = false;
 
-                        // Trigger live Toast popup if new unread notification arrived
+                        // Trigger live Toast popup & task table sync if new unread notification arrived
                         if (newUnreadCount > 0 && latestNewNotification) {
                             let toastIcon = 'info';
                             if (latestNewNotification.title.includes('Approved')) toastIcon = 'success';
@@ -4357,6 +4444,10 @@
                                 timer: 4500,
                                 timerProgressBar: true
                             });
+
+                            if (typeof pollTaskStatus === 'function') {
+                                pollTaskStatus();
+                            }
                         }
 
                         const listEl = document.getElementById('notification-list');
@@ -4439,7 +4530,7 @@
                             }
                         }
                     }
-                }).catch(() => {});
+                }).catch(() => { });
         }
 
         function toggleNotificationDropdown() {
@@ -4551,9 +4642,13 @@
         document.addEventListener('DOMContentLoaded', function () {
             fetchUnreadNotifications();
             setInterval(fetchUnreadNotifications, 3000);
-            
+
+            // Enable instant real-time synchronization for assigned tasks and status updates
+            pollTaskStatus();
+            setInterval(pollTaskStatus, 2000);
+
             // Close notification dropdown when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const bellWrapper = document.querySelector('.notification-wrapper');
                 const dropdown = document.getElementById('notification-dropdown');
                 if (dropdown && bellWrapper && !bellWrapper.contains(e.target)) {
@@ -4593,7 +4688,7 @@
             const logoutUrl = event.currentTarget.href;
             Swal.fire({
                 title: 'Logout Confirmation',
-                text: 'Are you sure you want to log out of your session?',
+                text: 'Are you sure you want to log out ?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: '<i class="fa-solid fa-right-from-bracket"></i> Yes, Logout',
