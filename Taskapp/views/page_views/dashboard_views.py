@@ -570,7 +570,11 @@ def dashboard(request):
             t['due_date_str'] = t_due.strftime('%Y-%m-%d') if hasattr(t_due, 'strftime') else (str(t_due or '-').strip())
             t['created_at_str'] = t_created.strftime('%Y-%m-%d') if hasattr(t_created, 'strftime') else (str(t_created or '-').strip())
 
-        context['tasks'] = tasks
+        employee_projects = list(dict.fromkeys([t.get('project_name') for t in tasks if t.get('project_name') and t.get('project_name') != '-']))
+
+        context['tasks'] = tasks[:5]
+        context['all_employee_tasks'] = tasks
+        context['employee_projects'] = employee_projects
         context['total_tasks'] = len(tasks)
         context['not_worked_tasks'] = len([t for t in tasks if t.get('status') == 'Not Worked'])
         context['pending_tasks'] = len([t for t in tasks if t.get('status') == 'Pending'])

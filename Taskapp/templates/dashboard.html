@@ -967,6 +967,13 @@
                 <i class="fa-solid fa-chart-pie"></i> Dashboard
             </li>
 
+            {% if role == 'employee' %}
+            <li class="menu-item {% if active_tab == 'employee-tasks' %}active{% endif %}"
+                onclick="switchTab('employee-tasks', this)">
+                <i class="fa-solid fa-list-check"></i> Tasks
+            </li>
+            {% endif %}
+
             {% if role == 'superadmin' or role == 'admin' %}
             <li class="menu-item {% if active_tab == 'form-data' %}active{% endif %}"
                 onclick="switchTab('form-data', this)">
@@ -1463,11 +1470,16 @@
                     </div> -->
                 </div>
 
-                <!-- Employee Assigned Tasks Quick View -->
+                <!-- Employee Assigned Tasks Quick View (Last 5 Tasks) -->
                 <div class="card">
-                    <div class="card-header">
-                        <h2><i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 8px;"></i>
-                            Tasks Assigned To You</h2>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>
+                            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 8px;"></i>
+                            Recent Tasks (Last 5 Tasks)
+                        </h2>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('employee-tasks')" style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+                            <i class="fa-solid fa-arrow-right-long" style="margin-right: 6px;"></i> View All Tasks
+                        </button>
                     </div>
                     <!-- Filter Toolbar -->
                     <div class="table-filter-bar">
@@ -1493,14 +1505,6 @@
                             <input type="date" class="filter-date-input filter-exact-date"
                                 onchange="triggerFilter(this)">
                         </div>
-                        <!-- <div class="filter-presets">
-                            <button type="button" class="preset-btn active" onclick="setPresetDate(this, 'all')">All Time</button>
-                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'today')">Today</button>
-                            <button type="button" class="preset-btn" onclick="setPresetDate(this, 'yesterday')">Yesterday</button>
-                            <button type="button" class="reset-filter-btn" onclick="resetTableFilter(this)">
-                                <i class="fa-solid fa-rotate-left"></i> Reset
-                            </button>
-                        </div> -->
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -1566,6 +1570,137 @@
                 {% endif %}
 
             </div>
+
+            <!-- TAB FOR EMPLOYEE ALL TASKS PAGE -->
+            {% if role == 'employee' %}
+            <div id="tab-employee-tasks" class="tab-content {% if active_tab == 'employee-tasks' %}active{% endif %}">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>
+                            <i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 8px;"></i>
+                            All Assigned Tasks
+                        </h2>
+                        <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 13px;">
+                            Total Tasks: {{ total_tasks }}
+                        </span>
+                    </div>
+
+                    <!-- Comprehensive Filter Toolbar for Employee Tasks -->
+                    <div class="table-filter-bar" id="employee-tasks-filter-bar">
+                        <!-- Search Group -->
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="employee-task-search" class="filter-search-input"
+                                placeholder="Search task name, project, description..." oninput="triggerEmployeeTaskFilter()">
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select id="employee-task-status-filter" class="filter-status-select" onchange="triggerEmployeeTaskFilter()">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <!-- Project Filter -->
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-folder" style="color: var(--primary);"></i> Project:</label>
+                            <select id="employee-task-project-filter" class="filter-status-select" onchange="triggerEmployeeTaskFilter()">
+                                <option value="all">All Projects</option>
+                                {% for proj in employee_projects %}
+                                <option value="{{ proj|lower }}">{{ proj }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Date Filter -->
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
+                            <input type="date" id="employee-task-date-filter" class="filter-date-input filter-exact-date" onchange="triggerEmployeeTaskFilter()">
+                        </div>
+
+                        <!-- Preset Buttons -->
+                        <!-- <div class="filter-presets" style="display: flex; gap: 6px; align-items: center;">
+                            <button type="button" class="preset-btn active" onclick="setEmployeePresetDate(this, 'all')">All Time</button>
+                            <button type="button" class="preset-btn" onclick="setEmployeePresetDate(this, 'today')">Today</button>
+                            <button type="button" class="preset-btn" onclick="setEmployeePresetDate(this, 'yesterday')">Yesterday</button>
+                            <button type="button" class="reset-filter-btn" onclick="resetEmployeeTaskFilter(this)">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div> -->
+                    </div>
+
+                    <!-- Responsive Table for All Tasks -->
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Task Name</th>
+                                    <th>Project</th>
+                                    <th>Remarks</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Assigned Date</th>
+                                    <th>Update Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-all-tasks-tbody">
+                                {% for task in all_employee_tasks %}
+                                <tr class="employee-task-row" data-task-id="{{ task.id }}"
+                                    data-task-name="{{ task.task_name|lower }}"
+                                    data-project-name="{{ task.project_name|default:''|lower }}"
+                                    data-description="{{ task.description|default:''|lower }}"
+                                    data-status="{{ task.status|default:'Not Worked'|lower }}"
+                                    data-due-date="{{ task.due_date_str|default:'' }}"
+                                    data-created-at="{{ task.created_at_str|default:'' }}">
+                                    <td><strong>{{ forloop.counter }}</strong></td>
+                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td>
+                                        <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
+                                            {{ task.project_name|default:"-" }}
+                                        </span>
+                                    </td>
+                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td>{{ task.due_date_str|default:"-" }}</td>
+                                    <td>
+                                        <select class="status-select status-{{ task.status|default:'Not Worked'|slugify }}" name="status" data-task-id="{{ task.id }}" onchange="updateTaskStatus(this)">
+                                            <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
+                                            <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}>Pending</option>
+                                            <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
+                                            <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+                                        </select>
+                                    </td>
+                                    <td>{{ task.created_at_str|default:"-" }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-edit" title="Edit"
+                                            data-id="{{ task.id }}" data-name="{{ task.task_name }}"
+                                            data-project="{{ task.project_name|default:'' }}"
+                                            data-status="{{ task.status }}" data-description="{{ task.description }}"
+                                            onclick="openEmployeeEditTaskModalFromBtn(this)">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 20px;">
+                                        No tasks assigned specifically to you yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- TAB 2: MANAGE MEMBERS (SUPERADMIN / ADMIN) -->
             {% if role == 'superadmin' or role == 'admin' %}
@@ -2801,7 +2936,8 @@
                 'form-data': 'Form Data & Task Assignment',
                 'add-project': 'Projects Management',
                 'in-progress': 'Assigned Tasks & Projects',
-                'task-requests': 'Multi-Project & Task Requests'
+                'task-requests': 'Multi-Project & Task Requests',
+                'employee-tasks': 'My Assigned Tasks'
             };
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
@@ -2833,6 +2969,120 @@
                 }
                 tabInput.value = tabName;
             });
+        }
+
+        // Employee Task Filtering Functions
+        function triggerEmployeeTaskFilter() {
+            const container = document.getElementById('tab-employee-tasks');
+            if (!container) return;
+
+            const searchVal = (document.getElementById('employee-task-search')?.value || '').trim().toLowerCase();
+            const statusVal = (document.getElementById('employee-task-status-filter')?.value || 'all').trim().toLowerCase();
+            const projectVal = (document.getElementById('employee-task-project-filter')?.value || 'all').trim().toLowerCase();
+            const dateVal = (document.getElementById('employee-task-date-filter')?.value || '').trim();
+
+            const tbody = document.getElementById('employee-all-tasks-tbody');
+            if (!tbody) return;
+
+            const rows = Array.from(tbody.querySelectorAll('tr.employee-task-row'));
+            let visibleIndex = 1;
+            let matchCount = 0;
+
+            rows.forEach(row => {
+                const taskName = row.getAttribute('data-task-name') || '';
+                const projName = row.getAttribute('data-project-name') || '';
+                const desc = row.getAttribute('data-description') || '';
+                const status = row.getAttribute('data-status') || '';
+                const dueDate = row.getAttribute('data-due-date') || '';
+                const createdAt = row.getAttribute('data-created-at') || '';
+
+                const matchSearch = !searchVal || taskName.includes(searchVal) || projName.includes(searchVal) || desc.includes(searchVal);
+                const matchStatus = (statusVal === 'all') || (status === statusVal) || (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
+                const matchProject = (projectVal === 'all') || (projName === projectVal);
+                
+                let matchDate = true;
+                if (dateVal) {
+                    const dueDateMatch = dueDate.match(/\d{4}-\d{2}-\d{2}/);
+                    const rowDueDateStr = dueDateMatch ? dueDateMatch[0] : dueDate;
+                    const createdMatch = createdAt.match(/\d{4}-\d{2}-\d{2}/);
+                    const rowCreatedStr = createdMatch ? createdMatch[0] : createdAt;
+                    matchDate = (rowDueDateStr === dateVal || rowCreatedStr === dateVal);
+                }
+
+                if (matchSearch && matchStatus && matchProject && matchDate) {
+                    row.style.display = '';
+                    const snoCell = row.querySelector('td strong');
+                    if (snoCell) snoCell.innerText = visibleIndex++;
+                    matchCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            let emptyRow = tbody.querySelector('.empty-filter-row');
+            if (matchCount === 0 && rows.length > 0) {
+                if (!emptyRow) {
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-filter-row';
+                    emptyRow.innerHTML = `<td colspan="8" style="text-align: center; color: #94a3b8; padding: 24px;">No tasks matching the selected filter criteria.</td>`;
+                    tbody.appendChild(emptyRow);
+                } else {
+                    emptyRow.style.display = '';
+                }
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        }
+
+        function setEmployeePresetDate(btn, preset) {
+            const filterBar = document.getElementById('employee-tasks-filter-bar');
+            if (!filterBar) return;
+
+            const presetBtns = filterBar.querySelectorAll('.preset-btn');
+            presetBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const dateInput = document.getElementById('employee-task-date-filter');
+            const today = new Date();
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            if (preset === 'all') {
+                if (dateInput) dateInput.value = '';
+            } else if (preset === 'today') {
+                if (dateInput) dateInput.value = formatDate(today);
+            } else if (preset === 'yesterday') {
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                if (dateInput) dateInput.value = formatDate(yesterday);
+            }
+
+            triggerEmployeeTaskFilter();
+        }
+
+        function resetEmployeeTaskFilter(btn) {
+            const searchInput = document.getElementById('employee-task-search');
+            const statusSelect = document.getElementById('employee-task-status-filter');
+            const projectSelect = document.getElementById('employee-task-project-filter');
+            const dateInput = document.getElementById('employee-task-date-filter');
+
+            if (searchInput) searchInput.value = '';
+            if (statusSelect) statusSelect.value = 'all';
+            if (projectSelect) projectSelect.value = 'all';
+            if (dateInput) dateInput.value = '';
+
+            const filterBar = document.getElementById('employee-tasks-filter-bar');
+            if (filterBar) {
+                const presetBtns = filterBar.querySelectorAll('.preset-btn');
+                presetBtns.forEach(b => b.classList.remove('active'));
+                if (presetBtns.length > 0) presetBtns[0].classList.add('active');
+            }
+
+            triggerEmployeeTaskFilter();
         }
 
         document.addEventListener('DOMContentLoaded', function () {
