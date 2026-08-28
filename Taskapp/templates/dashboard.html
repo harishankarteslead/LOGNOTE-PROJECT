@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>=>LOGNOTE</title>
     <!-- Google Fonts & FontAwesome -->
+     <link rel="icon" type="image/png" href="{% static 'images/lognote.png' %}"
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
@@ -531,6 +532,32 @@
         .role-tag.role-employee {
             background: #e0f2fe;
             color: #075985;
+        }
+
+        .proj-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .proj-type-data-logger {
+            background-color: #dcfce7 !important;
+            color: #14532d !important;
+            border: 1px solid #86efac !important;
+        }
+
+        .proj-type-internal-project {
+            background-color: #dbeafe !important;
+            color: #1e3a8a !important;
+            border: 1px solid #93c5fd !important;
+        }
+
+        .proj-type-default {
+            background-color: #f1f5f9 !important;
+            color: #475569 !important;
+            border: 1px solid #cbd5e1 !important;
         }
 
         .notif-bg-unread {
@@ -1248,7 +1275,7 @@
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
                                     <td>
-                                        <span class="role-tag role-employee">{{ proj.project_type }}</span>
+                                        <span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span>
                                     </td>
                                     <td>
                                         <span class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
@@ -1511,7 +1538,7 @@
                         <h2>
                             <i class="fa-solid fa-clock-rotate-left"
                                 style="color: var(--primary); margin-right: 8px;"></i>
-                            Recent Tasks (Last 5 Tasks)
+                            Recent Tasks 
                         </h2>
                         <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('employee-tasks')"
                             style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
@@ -1997,6 +2024,39 @@
                             </button>
                         </div>       
                     </div>
+                    <!-- Filter Toolbar for Projects -->
+                    <div class="table-filter-bar" id="projects-filter-bar">
+                        <div class="filter-group search-group">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" class="filter-search-input"
+                                placeholder="Search project name, type, description..."
+                                oninput="triggerProjectFilter(this)">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-filter" style="color: var(--primary);"></i> Status:</label>
+                            <select class="filter-status-select" onchange="triggerProjectFilter(this)">
+                                <option value="all">All Statuses</option>
+                                <option value="not worked">Not Worked</option>
+                                <option value="pending">Pending</option>
+                                <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-folder" style="color: var(--primary);"></i> Type:</label>
+                            <select class="filter-type-select" onchange="triggerProjectFilter(this)">
+                                <option value="all">All Types</option>
+                                <option value="data logger">Data Logger</option>
+                                <option value="internal project">Internal Project</option>
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
+                            <input type="date" class="filter-date-input filter-exact-date"
+                                onchange="triggerProjectFilter(this)">
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -2018,14 +2078,20 @@
                             </thead>
                             <tbody>
                                 {% for proj in projects %}
-                                <tr>
+                                <tr class="project-row"
+                                    data-project-id="{{ proj.id }}"
+                                    data-project-name="{{ proj.project_name|lower }}"
+                                    data-project-type="{{ proj.project_type|lower }}"
+                                    data-status="{{ proj.status|default:'not worked'|slugify }}"
+                                    data-description="{{ proj.description|lower }}"
+                                    data-due-date="{{ proj.due_date|date:'Y-m-d'|default:proj.due_date|default:'' }}">
                                     <td style="text-align: center;">
                                         <input type="checkbox" class="project-select-cb" value="{{ proj.id }}"
                                             onchange="updateProjectBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
                                     <td><strong>{{ proj.project_name }}</strong></td>
-                                    <td><span class="role-tag role-employee">{{ proj.project_type }}</span></td>
+                                    <td><span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span></td>
                                     <td>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
                                             {% csrf_token %}
@@ -2034,7 +2100,7 @@
                                             <select name="status"
                                                 class="status-select status-{{ proj.status|default:'Not Worked'|slugify }}"
                                                 onchange="this.form.submit()">
-                                                <option value="Not Worked" {% if proj.status == ' Not Worked' %}selected{% endif %}>Not Worked</option>
+                                                <option value="Not Worked" {% if proj.status == 'Not Worked' or proj.status == ' Not Worked' or not proj.status %}selected{% endif %}>Not Worked</option>
                                                 <option value="In Progress" {% if proj.status == 'In Progress' %}selected{% endif %}>In Progress</option>
                                                 <option value="On Hold" {% if proj.status == 'On Hold' or proj.status == 'Hold' %}selected{% endif %}>On Hold</option>
                                                 <option value="Completed" {% if proj.status == 'Completed' %}selected{% endif %}>Completed</option>
@@ -3546,24 +3612,42 @@
             const filterBar = card.querySelector('.table-filter-bar');
             const searchVal = (filterBar?.querySelector('.filter-search-input')?.value || '').trim().toLowerCase();
             const statusVal = (filterBar?.querySelector('.filter-status-select')?.value || 'all').trim().toLowerCase();
+            const typeVal = (filterBar?.querySelector('.filter-type-select')?.value || 'all').trim().toLowerCase();
+            const dateVal = (filterBar?.querySelector('.filter-date-input')?.value || '').trim();
 
             const rows = Array.from(tbody.querySelectorAll('tr.project-row, #tab-add-project tbody tr:not(.empty-filter-row)'));
             const matchingRows = [];
 
             rows.forEach(row => {
-                const projName = row.getAttribute('data-project-name') || row.children[2]?.innerText.toLowerCase() || '';
-                const projType = row.getAttribute('data-project-type') || row.children[3]?.innerText.toLowerCase() || '';
-                const desc = row.getAttribute('data-description') || '';
-                const status = row.getAttribute('data-status') || '';
+                const projName = (row.getAttribute('data-project-name') || row.children[2]?.innerText || '').toLowerCase();
+                const projType = (row.getAttribute('data-project-type') || row.children[3]?.innerText || '').toLowerCase();
+                const desc = (row.getAttribute('data-description') || row.children[8]?.innerText || '').toLowerCase();
+                const rawStatus = (row.getAttribute('data-status') || row.querySelector('.status-select')?.value || row.children[4]?.innerText || '').toLowerCase();
+                const dueDate = row.getAttribute('data-due-date') || row.children[6]?.innerText || '';
+
+                const normStatus = rawStatus.replace(/[\s_-]+/g, '');
+                const normStatusVal = statusVal.replace(/[\s_-]+/g, '');
 
                 const matchSearch = !searchVal ||
                     projName.includes(searchVal) ||
                     projType.includes(searchVal) ||
                     desc.includes(searchVal);
 
-                const matchStatus = (statusVal === 'all') || (status === statusVal);
+                const matchStatus = (statusVal === 'all') || 
+                    (normStatus === normStatusVal) || 
+                    (normStatusVal === 'onhold' && normStatus === 'hold') ||
+                    (normStatusVal === 'notworked' && (normStatus === 'notworked' || normStatus === ''));
 
-                if (matchSearch && matchStatus) {
+                const matchType = (typeVal === 'all') || (projType.includes(typeVal));
+
+                let matchDate = true;
+                if (dateVal) {
+                    const dueMatch = dueDate.match(/\d{4}-\d{2}-\d{2}/);
+                    const rowDateStr = dueMatch ? dueMatch[0] : dueDate;
+                    matchDate = (rowDateStr === dateVal);
+                }
+
+                if (matchSearch && matchStatus && matchType && matchDate) {
                     matchingRows.push(row);
                 } else {
                     row.style.display = 'none';
