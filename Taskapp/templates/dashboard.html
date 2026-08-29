@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>=>LOGNOTE</title>
     <!-- Google Fonts & FontAwesome -->
-     <link rel="icon" type="image/png" href="{% static 'images/lognote.png' %}"
+     <link rel="icon" type="image/png" href="{% static 'images/lognote.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
@@ -3128,16 +3128,23 @@
             let matchCount = 0;
 
             rows.forEach(row => {
-                const taskName = row.getAttribute('data-task-name') || '';
-                const projName = row.getAttribute('data-project-name') || '';
-                const desc = row.getAttribute('data-description') || '';
-                const status = row.getAttribute('data-status') || '';
-                const dueDate = row.getAttribute('data-due-date') || '';
-                const createdAt = row.getAttribute('data-created-at') || '';
+                const taskName = (row.getAttribute('data-task-name') || row.children[1]?.innerText || '').toLowerCase();
+                const projName = (row.getAttribute('data-project-name') || row.children[2]?.innerText || '').toLowerCase();
+                const desc = (row.getAttribute('data-description') || row.children[3]?.innerText || '').toLowerCase();
+                const rawStatus = (row.getAttribute('data-status') || row.querySelector('.status-select')?.value || row.children[5]?.innerText || '').toLowerCase();
+                const dueDate = row.getAttribute('data-due-date') || row.children[4]?.innerText || '';
+                const createdAt = row.getAttribute('data-created-at') || row.children[6]?.innerText || '';
+
+                const normStatus = rawStatus.replace(/[\s_-]+/g, '');
+                const normStatusVal = statusVal.replace(/[\s_-]+/g, '');
 
                 const matchSearch = !searchVal || taskName.includes(searchVal) || projName.includes(searchVal) || desc.includes(searchVal);
-                const matchStatus = (statusVal === 'all') || (status === statusVal) || (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
-                const matchProject = (projectVal === 'all') || (projName === projectVal);
+                const matchStatus = (statusVal === 'all') || 
+                    (normStatus === normStatusVal) || 
+                    (normStatusVal === 'onhold' && (normStatus === 'hold' || normStatus === 'onhold')) ||
+                    (normStatusVal === 'notworked' && (normStatus === 'notworked' || normStatus === ''));
+
+                const matchProject = (projectVal === 'all') || (projName.includes(projectVal));
 
                 let matchDate = true;
                 if (dateVal) {
@@ -3386,12 +3393,15 @@
             const matchingRows = [];
 
             rows.forEach(row => {
-                const taskName = row.getAttribute('data-task-name') || '';
-                const projName = row.getAttribute('data-project-name') || '';
-                const desc = row.getAttribute('data-description') || '';
-                const empName = row.getAttribute('data-employee-name') || '';
-                const status = row.getAttribute('data-status') || '';
-                const dueDateRaw = row.getAttribute('data-due-date') || '';
+                const taskName = (row.getAttribute('data-task-name') || row.children[1]?.innerText || '').toLowerCase();
+                const projName = (row.getAttribute('data-project-name') || row.children[2]?.innerText || '').toLowerCase();
+                const desc = (row.getAttribute('data-description') || row.children[3]?.innerText || '').toLowerCase();
+                const empName = (row.getAttribute('data-employee-name') || '').toLowerCase();
+                const rawStatus = (row.getAttribute('data-status') || row.querySelector('.status-select')?.value || row.children[5]?.innerText || '').toLowerCase();
+                const dueDateRaw = row.getAttribute('data-due-date') || row.children[4]?.innerText || '';
+
+                const normStatus = rawStatus.replace(/[\s_-]+/g, '');
+                const normStatusVal = statusVal.replace(/[\s_-]+/g, '');
 
                 // Text search matching task name, project, employee, description
                 const matchSearch = !searchVal ||
@@ -3402,8 +3412,9 @@
 
                 // Status match
                 const matchStatus = (statusVal === 'all') ||
-                    (status === statusVal) ||
-                    (statusVal === 'on hold' && (status === 'hold' || status === 'on hold'));
+                    (normStatus === normStatusVal) ||
+                    (normStatusVal === 'onhold' && (normStatus === 'hold' || normStatus === 'onhold')) ||
+                    (normStatusVal === 'notworked' && (normStatus === 'notworked' || normStatus === ''));
 
                 // Exact Due Date match
                 let matchDate = true;
@@ -3994,7 +4005,7 @@
                                 emptyRow.remove();
                             }
 
-                            tbody.querySelectorAll('tr.task-row').forEach(row => {
+                            tbody.querySelectorAll('tr.task-row, tr.employee-task-row').forEach(row => {
                                 const rowId = parseInt(row.getAttribute('data-task-id'), 10);
                                 if (!apiTaskIds.has(rowId)) {
                                     row.remove();
@@ -4005,7 +4016,7 @@
                                 const taskId = task.id;
                                 const newStatus = task.status || 'Not Worked';
                                 const slugStatus = newStatus.toLowerCase().replace(/\s+/g, '-');
-                                let row = tbody.querySelector(`tr.task-row[data-task-id="${taskId}"]`);
+                                let row = tbody.querySelector(`tr[data-task-id="${taskId}"]`);
 
                                 if (row) {
                                     row.setAttribute('data-status', newStatus.toLowerCase());
@@ -4044,7 +4055,7 @@
                                     }
                                 } else {
                                     const newTr = document.createElement('tr');
-                                    newTr.className = 'task-row';
+                                    newTr.className = 'task-row employee-task-row';
                                     newTr.setAttribute('data-task-id', task.id);
                                     newTr.setAttribute('data-task-name', (task.task_name || '').toLowerCase());
                                     newTr.setAttribute('data-project-name', (task.project_name || '').toLowerCase());
@@ -4065,7 +4076,7 @@
                                             <option value="Not Worked" ${newStatus === 'Not Worked' ? 'selected' : ''}>Not Worked</option>
                                             <option value="In Progress" ${newStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
                                             <option value="Pending" ${newStatus === 'Pending' ? 'selected' : ''}>Pending</option>
-                                            <option value="On Hold" ${newStatus === 'Hold' || newStatus === 'On Hold' ? 'selected' : ''}>On Hold</option>
+                                            <option value="On Hold" ${(newStatus === 'Hold' || newStatus === 'On Hold') ? 'selected' : ''}>On Hold</option>
                                             <option value="Completed" ${newStatus === 'Completed' ? 'selected' : ''}>Completed</option>
                                         </select>
                                     </td>
@@ -4086,14 +4097,15 @@
                                 }
                             });
 
-                            tbody.querySelectorAll('tr.task-row').forEach((r, idx) => {
+                            tbody.querySelectorAll('tr.task-row, tr.employee-task-row').forEach((r, idx) => {
                                 const snoCell = r.children[0];
                                 if (snoCell) snoCell.innerHTML = `<strong>${idx + 1}</strong>`;
                             });
 
                             if (typeof triggerEmployeeTaskFilter === 'function') {
                                 triggerEmployeeTaskFilter();
-                            } else if (typeof triggerFilter === 'function') {
+                            }
+                            if (typeof triggerFilter === 'function') {
                                 triggerFilter(empTaskCard);
                             }
                         }
