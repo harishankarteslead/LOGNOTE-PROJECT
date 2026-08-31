@@ -1099,24 +1099,6 @@
 
                         isFirstNotificationFetch = false;
 
-                        if (newUnreadCount > 0 && latestNewNotification) {
-                            let toastIcon = 'info';
-                            if (latestNewNotification.title.includes('Approved')) toastIcon = 'success';
-                            else if (latestNewNotification.title.includes('Rejected')) toastIcon = 'error';
-                            else if (latestNewNotification.title.includes('Request')) toastIcon = 'warning';
-
-                            Swal.fire({
-                                title: latestNewNotification.title,
-                                text: latestNewNotification.message,
-                                icon: toastIcon,
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false,
-                                timer: 4500,
-                                timerProgressBar: true
-                            });
-                        }
-
                         const listEl = document.getElementById('notification-list');
                         if (listEl) {
                             if (notifications.length > 0) {
