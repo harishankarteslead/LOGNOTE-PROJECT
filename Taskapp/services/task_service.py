@@ -164,7 +164,21 @@ def create_task(task_name, description, assigned_to_ids=None, employee_names=Non
                     INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
                     VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """, [task_name, proj_val, description, emp_name, due_val, status, emp_id])
-                created_task_ids.append(cursor.lastrowid)
+                new_task_id = cursor.lastrowid
+                created_task_ids.append(new_task_id)
+
+                # Send notification to assigned employee
+                try:
+                    from Taskapp.services import task_request_service
+                    task_request_service.create_notification(
+                        user_id=emp_id,
+                        user_role='employee',
+                        title='New Task Assigned',
+                        message=f'You have been assigned a new task: "{task_name}" under project "{proj_val or "-"}".',
+                        link='/dashboard/?tab=dashboard'
+                    )
+                except Exception:
+                    pass
         else:
             primary_emp_id = assigned_to_ids[0] if assigned_to_ids else 0
 
@@ -182,7 +196,20 @@ def create_task(task_name, description, assigned_to_ids=None, employee_names=Non
                     INSERT INTO tasks (task_name, project_name, description, employee_name, due_date, status, assigned_to_id)
                     VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """, [task_name, proj_val, description, '', due_val, status, primary_emp_id])
-                created_task_ids.append(cursor.lastrowid)
+                new_task_id = cursor.lastrowid
+                created_task_ids.append(new_task_id)
+
+                try:
+                    from Taskapp.services import task_request_service
+                    task_request_service.create_notification(
+                        user_id=primary_emp_id,
+                        user_role='employee',
+                        title='New Task Assigned',
+                        message=f'You have been assigned a new task: "{task_name}" under project "{proj_val or "-"}".',
+                        link='/dashboard/?tab=dashboard'
+                    )
+                except Exception:
+                    pass
 
     return created_task_ids[0] if created_task_ids else None
 

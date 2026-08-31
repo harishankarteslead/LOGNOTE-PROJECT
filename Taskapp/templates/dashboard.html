@@ -1046,6 +1046,13 @@
             </li>
             {% endif %}
 
+            <li class="menu-item {% if active_tab == 'notifications' %}active{% endif %}"
+                onclick="switchTab('notifications', this)">
+                <i class="fa-solid fa-bell"></i> Notifications
+                <span id="sidebar-notification-badge" class="badge"
+                    style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
+            </li>
+
             {% if role == 'superadmin' or role == 'admin' %}
             <li class="menu-item {% if active_tab == 'form-data' %}active{% endif %}"
                 onclick="switchTab('form-data', this)">
@@ -1066,13 +1073,6 @@
                 onclick="switchTab('task-requests', this)">
                 <i class="fa-solid fa-code-pull-request"></i> Task Request
                 <span id="sidebar-request-badge" class="badge"
-                    style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
-            </li>
-
-            <li class="menu-item {% if active_tab == 'notifications' %}active{% endif %}"
-                onclick="switchTab('notifications', this)">
-                <i class="fa-solid fa-bell"></i> Notifications
-                <span id="sidebar-notification-badge" class="badge"
                     style="display: none; background: #ef4444; color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: auto; font-weight: 700;">0</span>
             </li>
 
@@ -2311,8 +2311,7 @@
             </div>
             {% endif %}
 
-            <!-- TAB 7: NOTIFICATIONS (SUPERADMIN / ADMIN ONLY) -->
-            {% if role == 'superadmin' or role == 'admin' %}
+            <!-- TAB 7: NOTIFICATIONS -->
             <div id="tab-notifications" class="tab-content {% if active_tab == 'notifications' %}active{% endif %}">
                 <div class="card"
                     style="padding: 24px; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
@@ -2322,10 +2321,10 @@
                             <h2
                                 style="font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
                                 <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
-                                Notifications & Employee Request Activity
+                                Notifications & Activity
                             </h2>
                             <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">
-                                Track employee task requests, approval decisions.
+                                Track task assignments, request updates, and notifications.
                             </p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -2351,7 +2350,7 @@
                         <button type="button" class="btn btn-sm notif-filter-btn btn-outline"
                             onclick="filterNotificationTab('request', this)"
                             style="font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600;">
-                            Requests Received
+                            Requests & Assignments
                         </button>
                         <button type="button" class="btn btn-sm notif-filter-btn btn-outline"
                             onclick="filterNotificationTab('approved', this)"
@@ -2393,10 +2392,12 @@
                                     Mark Read
                                 </button>
                                 {% endif %}
+                                {% if role == 'superadmin' or role == 'admin' %}
                                 {% if 'Request' in notif.title and 'Approved' not in notif.title and 'Rejected' not in notif.title %}
                                 <button type="button" class="btn btn-sm btn-primary" onclick="switchTab('task-requests')" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
                                     View Request
                                 </button>
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </div>
@@ -2410,7 +2411,6 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
 
 
         </div>
