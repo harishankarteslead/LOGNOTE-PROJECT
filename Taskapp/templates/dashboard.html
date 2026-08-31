@@ -2152,7 +2152,7 @@
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;"
-                                            onsubmit="return confirmDeleteForm(event, 'Are you sure you want to delete this project?');">
+                                            onsubmit="return confirmProjectDelete(event);">
                                             {% csrf_token %}
                                             <input type="hidden" name="action" value="delete_project">
                                             <input type="hidden" name="project_id" value="{{ proj.id }}">
@@ -4776,6 +4776,32 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: '<i class="fa-solid fa-trash"></i> Yes, Delete It',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'swal-dark-glass',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-text',
+                    confirmButton: 'btn-danger-swal',
+                    cancelButton: 'swal-dark-cancel-btn'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
+
+        function confirmProjectDelete(event) {
+            event.preventDefault();
+            const form = event.target;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Are you sure you want to delete this project? Deleting this project will also delete all tasks assigned to employees under this project.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-trash"></i> Yes, Delete Project',
                 cancelButtonText: 'Cancel',
                 customClass: {
                     popup: 'swal-dark-glass',

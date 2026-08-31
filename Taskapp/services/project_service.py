@@ -98,10 +98,46 @@ def get_all_projects():
 
 def delete_project(project_id):
     """
-    Delete a project record from projects table.
+    Delete a project record from projects table and cascade delete
+    all assigned tasks, task requests, and task logs under that project.
     """
     create_project_table()
     with connection.cursor() as cursor:
+        # Fetch project_name to delete associated tasks
+        cursor.execute("SELECT project_name FROM projects WHERE id = %s;", [project_id])
+        row = cursor.fetchone()
+        if row and row[0]:
+            proj_name = row[0]
+
+            # Cascade delete task requests
+            try:
+                cursor.execute("""
+                    DELETE FROM task_requests 
+                    WHERE LOWER(project_name) = LOWER(%s)
+                       OR task_id IN (SELECT id FROM tasks WHERE LOWER(project_name) = LOWER(%s));
+                """, [proj_name, proj_name])
+            except Exception:
+                pass
+
+            # Cascade delete task logs
+            try:
+                cursor.execute("""
+                    DELETE FROM task_logs 
+                    WHERE task_id IN (SELECT id FROM tasks WHERE LOWER(project_name) = LOWER(%s));
+                """, [proj_name])
+            except Exception:
+                pass
+
+            # Cascade delete all tasks assigned under this project
+            try:
+                cursor.execute("""
+                    DELETE FROM tasks
+                    WHERE LOWER(project_name) = LOWER(%s);
+                """, [proj_name])
+            except Exception:
+                pass
+
+        # Delete project from projects table
         cursor.execute("""
             DELETE FROM projects
             WHERE id = %s;
