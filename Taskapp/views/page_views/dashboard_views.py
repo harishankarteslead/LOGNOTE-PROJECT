@@ -124,10 +124,23 @@ def dashboard(request):
             new_username = request.POST.get('username', '').strip()
             new_password = request.POST.get('password', '').strip()
             new_email = request.POST.get('email', '').strip()
+            requested_role = request.POST.get('role', 'employee').strip()
 
-            if user_role == 'superadmin':
-                role = request.POST.get('role', 'employee').strip()
+            uname_lower = new_username.lower()
+            if uname_lower == 'superadmin':
+                if user_role != 'superadmin':
+                    messages.error(request, 'Permission denied. Only Superadmin can create superadmin accounts.')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+                role = 'superadmin'
+            elif uname_lower == 'admin':
+                if user_role not in ('superadmin', 'admin'):
+                    messages.error(request, 'Permission denied. Only Admin and Superadmin can create admin accounts.')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+                role = 'admin'
             else:
+                if requested_role in ('superadmin', 'admin'):
+                    messages.error(request, 'Invalid Credentials.')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
                 role = 'employee'
 
             if not new_username or not new_password or not new_email:
@@ -150,7 +163,24 @@ def dashboard(request):
             new_username = request.POST.get('username', '').strip()
             new_password = request.POST.get('password', '').strip()
             new_email = request.POST.get('email', '').strip()
-            role = request.POST.get('role', 'employee').strip()
+            requested_role = request.POST.get('role', 'employee').strip()
+
+            uname_lower = new_username.lower()
+            if uname_lower == 'superadmin':
+                if user_role != 'superadmin':
+                    messages.error(request, 'Permission denied. Only Superadmin can update superadmin accounts.')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+                role = 'superadmin'
+            elif uname_lower == 'admin':
+                if user_role not in ('superadmin', 'admin'):
+                    messages.error(request, 'Permission denied. Only Admin and Superadmin can update admin accounts.')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+                role = 'admin'
+            else:
+                if requested_role in ('superadmin', 'admin'):
+                    messages.error(request, 'Invalid Credentials')
+                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+                role = 'employee'
 
             if not target_user_id or not new_username or not new_email:
                 messages.error(request, 'Username and Email are required.')

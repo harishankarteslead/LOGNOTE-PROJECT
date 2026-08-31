@@ -2521,6 +2521,7 @@
                     <input type="text" id="add-username" name="username" class="form-control"
                         placeholder="Enter username" pattern="[a-zA-Z0-9]+"
                         title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
+                        oninput="syncUsernameRole(this)"
                         required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
@@ -2582,6 +2583,7 @@
                     <label for="edit-username">Username</label>
                     <input type="text" id="edit-username" name="username" class="form-control" pattern="[a-zA-Z0-9]+"
                         title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
+                        oninput="syncUsernameRole(this)"
                         required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
@@ -3344,6 +3346,32 @@
             }
         }
 
+        function syncUsernameRole(inputEl) {
+            if (!inputEl) return;
+            const val = (inputEl.value || '').trim().toLowerCase();
+            const isAdd = inputEl.id === 'add-username';
+            const roleSelect = document.getElementById(isAdd ? 'add-role' : 'edit-role');
+            if (!roleSelect) return;
+
+            if (val === 'superadmin') {
+                let superOption = Array.from(roleSelect.options).find(o => o.value === 'superadmin');
+                if (!superOption) {
+                    superOption = new Option('Super Admin', 'superadmin');
+                    roleSelect.add(superOption);
+                }
+                roleSelect.value = 'superadmin';
+            } else if (val === 'admin') {
+                let adminOption = Array.from(roleSelect.options).find(o => o.value === 'admin');
+                if (!adminOption) {
+                    adminOption = new Option('Admin', 'admin');
+                    roleSelect.add(adminOption);
+                }
+                roleSelect.value = 'admin';
+            } else {
+                roleSelect.value = 'employee';
+            }
+        }
+
         function openAddModal() {
             resetPasswordToggleField('add-password');
             const passField = document.getElementById('add-password');
@@ -3372,6 +3400,7 @@
 
             const roleField = document.getElementById('edit-role');
             if (roleField) roleField.value = role;
+            if (nameField) syncUsernameRole(nameField);
 
             const passField = document.getElementById('edit-password');
             if (passField) passField.value = '';
