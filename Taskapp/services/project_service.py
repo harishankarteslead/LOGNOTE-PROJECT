@@ -147,17 +147,34 @@ def delete_project(project_id):
 
 def delete_projects_bulk(project_ids):
     """
-    Delete multiple project records from projects table by their IDs.
+    Delete multiple project records from projects table by their IDs
+    and cascade delete associated tasks, task requests, and task logs.
     """
-    if not project_ids:
+    p_ids = [int(pid) for pid in project_ids if str(pid).isdigit()]
+    if not p_ids:
         return 0
     create_project_table()
-    placeholders = ', '.join(['%s'] * len(project_ids))
+    placeholders = ', '.join(['%s'] * len(p_ids))
     with connection.cursor() as cursor:
-        cursor.execute(f"""
-            DELETE FROM projects
-            WHERE id IN ({placeholders});
-        """, list(project_ids))
+        cursor.execute(f"SELECT project_name FROM projects WHERE id IN ({placeholders});", p_ids)
+        proj_names = [r[0] for r in cursor.fetchall() if r[0]]
+
+        if proj_names:
+            name_placeholders = ', '.join(['%s'] * len(proj_names))
+            try:
+                cursor.execute(f"DELETE FROM task_requests WHERE LOWER(project_name) IN ({name_placeholders});", [p.lower() for p in proj_names])
+            except Exception:
+                pass
+            try:
+                cursor.execute(f"DELETE FROM task_logs WHERE task_id IN (SELECT id FROM tasks WHERE LOWER(project_name) IN ({name_placeholders}));", [p.lower() for p in proj_names])
+            except Exception:
+                pass
+            try:
+                cursor.execute(f"DELETE FROM tasks WHERE LOWER(project_name) IN ({name_placeholders});", [p.lower() for p in proj_names])
+            except Exception:
+                pass
+
+        cursor.execute(f"DELETE FROM projects WHERE id IN ({placeholders});", p_ids)
         return cursor.rowcount
 
 

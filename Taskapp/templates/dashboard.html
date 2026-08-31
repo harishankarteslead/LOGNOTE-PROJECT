@@ -1826,7 +1826,7 @@
                     </div>
                     <div class="table-responsive">
                         <table>
-                            <thead>
+                            <thead
                                 <tr>
                                     <th>S.No</th>
                                     <th>Username</th>
@@ -2550,7 +2550,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-role">Role</label>
                     <select id="add-role" class="form-control" disabled
-                        style="background-color: #f1f5f9; cursor: not-allowed;">
+                        style="background-color: #f1f5f9; cursor: not-allowed; display: none;">
                         <option value="employee" selected>Employee</option>
                     </select>
                     <input type="hidden" name="role" value="employee">
@@ -2645,6 +2645,40 @@
             </form>
         </div>
     </div>
+
+    <!-- BULK DELETE TASKS CONFIRMATION MODAL -->
+    <div id="bulkDeleteTaskModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Task Deletion</h3>
+                <span style="cursor: pointer; font-size: 20px;" onclick="closeBulkDeleteTaskModal()">&times;</span>
+            </div>
+            <p style="font-size: 14px; color: var(--text-dark); margin-bottom: 20px;">
+                Are you sure you want to delete <strong id="bulk-delete-task-count-display">0</strong> selected task(s)? This action cannot be undone.
+            </p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkDeleteTaskModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteTasks()">Yes, Delete Tasks</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK DELETE PROJECTS CONFIRMATION MODAL -->
+    <div id="bulkDeleteProjectModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Project Deletion</h3>
+                <span style="cursor: pointer; font-size: 20px;" onclick="closeBulkDeleteProjectModal()">&times;</span>
+            </div>
+            <p style="font-size: 14px; color: var(--text-dark); margin-bottom: 20px;">
+                Are you sure you want to delete <strong id="bulk-delete-project-count-display">0</strong> selected project(s)? All assigned tasks under these projects will also be deleted.
+            </p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkDeleteProjectModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteProjects()">Yes, Delete Projects</button>
+            </div>
+        </div>
+    </div>
     <!-- ADD PROJECT POPUP MODAL -->
     {% if role == 'superadmin' or role == 'admin' %}
     <div id="addProjectModal" class="modal-overlay">
@@ -2699,7 +2733,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="project_description">Description</label>
                     <textarea id="project_description" name="description" class="form-control" rows="3"
-                        placeholder="Enter detailed project description..." required></textarea>
+                        placeholder="Enter detailed project description..." ></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -3368,6 +3402,207 @@
             if (modal) modal.classList.remove('active');
         }
 
+        /* --- Bulk Delete JS Functions (Tasks & Projects) --- */
+        function toggleSelectAllTasks(masterCb) {
+            const isChecked = masterCb.checked;
+            const taskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(c => c.querySelector('h2') && c.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
+            if (!taskCard) return;
+            const rows = taskCard.querySelectorAll('tbody tr.task-row');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.task-select-cb');
+                    if (cb) cb.checked = isChecked;
+                }
+            });
+            updateTaskBulkDeleteState();
+        }
+
+        function updateTaskBulkDeleteState() {
+            const taskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(c => c.querySelector('h2') && c.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
+            if (!taskCard) return;
+            const checkedCbs = taskCard.querySelectorAll('tbody tr.task-row .task-select-cb:checked');
+            const count = checkedCbs.length;
+
+            const countSpan = document.getElementById('selected-tasks-count');
+            if (countSpan) countSpan.innerText = count;
+
+            const btn = document.getElementById('btn-bulk-delete-tasks');
+            if (btn) {
+                btn.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
+
+            const masterCb = document.getElementById('select-all-tasks');
+            if (masterCb) {
+                const visibleRows = Array.from(taskCard.querySelectorAll('tbody tr.task-row')).filter(r => r.style.display !== 'none');
+                const visibleCbs = visibleRows.map(r => r.querySelector('.task-select-cb')).filter(Boolean);
+                if (visibleCbs.length > 0) {
+                    masterCb.checked = visibleCbs.every(cb => cb.checked);
+                } else {
+                    masterCb.checked = false;
+                }
+            }
+        }
+
+        function triggerBulkDeleteTasks() {
+            const taskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(c => c.querySelector('h2') && c.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
+            if (!taskCard) return;
+            const checkedCbs = taskCard.querySelectorAll('tbody tr.task-row .task-select-cb:checked');
+            if (checkedCbs.length === 0) return;
+
+            const count = checkedCbs.length;
+            const displaySpan = document.getElementById('bulk-delete-task-count-display');
+            if (displaySpan) displaySpan.innerText = count;
+
+            const modal = document.getElementById('bulkDeleteTaskModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeBulkDeleteTaskModal() {
+            const modal = document.getElementById('bulkDeleteTaskModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function confirmBulkDeleteTasks() {
+            const taskCard = document.querySelector('#tab-form-data .card') || Array.from(document.querySelectorAll('#tab-dashboard .card')).find(c => c.querySelector('h2') && c.querySelector('h2').innerText.includes('Assigned Tasks & Employee Status'));
+            if (!taskCard) return;
+            const checkedCbs = taskCard.querySelectorAll('tbody tr.task-row .task-select-cb:checked');
+            if (checkedCbs.length === 0) return;
+
+            const taskIds = [];
+            checkedCbs.forEach(cb => {
+                if (cb.value) {
+                    cb.value.split(',').forEach(idStr => {
+                        const idNum = parseInt(idStr.trim(), 10);
+                        if (idNum) taskIds.push(idNum);
+                    });
+                }
+            });
+
+            if (taskIds.length === 0) return;
+
+            const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+
+            const formData = new FormData();
+            formData.append('action', 'bulk_delete_tasks');
+            taskIds.forEach(id => formData.append('task_ids', id));
+
+            fetch('/dashboard/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            }).then(res => {
+                closeBulkDeleteTaskModal();
+                if (window.pollTaskStatus) {
+                    window.pollTaskStatus();
+                }
+                window.location.reload();
+            }).catch(err => {
+                console.error('Bulk delete tasks failed:', err);
+                closeBulkDeleteTaskModal();
+                window.location.reload();
+            });
+        }
+
+        function toggleSelectAllProjects(masterCb) {
+            const isChecked = masterCb.checked;
+            const projCard = document.querySelector('#tab-add-project .card');
+            if (!projCard) return;
+            const rows = projCard.querySelectorAll('tbody tr.project-row');
+            rows.forEach(row => {
+                if (row.style.display !== 'none') {
+                    const cb = row.querySelector('.project-select-cb');
+                    if (cb) cb.checked = isChecked;
+                }
+            });
+            updateProjectBulkDeleteState();
+        }
+
+        function updateProjectBulkDeleteState() {
+            const projCard = document.querySelector('#tab-add-project .card');
+            if (!projCard) return;
+            const checkedCbs = projCard.querySelectorAll('tbody tr.project-row .project-select-cb:checked');
+            const count = checkedCbs.length;
+
+            const countSpan = document.getElementById('selected-projects-count');
+            if (countSpan) countSpan.innerText = count;
+
+            const btn = document.getElementById('btn-bulk-delete-projects');
+            if (btn) {
+                btn.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
+
+            const masterCb = document.getElementById('select-all-projects');
+            if (masterCb) {
+                const visibleRows = Array.from(projCard.querySelectorAll('tbody tr.project-row')).filter(r => r.style.display !== 'none');
+                const visibleCbs = visibleRows.map(r => r.querySelector('.project-select-cb')).filter(Boolean);
+                if (visibleCbs.length > 0) {
+                    masterCb.checked = visibleCbs.every(cb => cb.checked);
+                } else {
+                    masterCb.checked = false;
+                }
+            }
+        }
+
+        function triggerBulkDeleteProjects() {
+            const projCard = document.querySelector('#tab-add-project .card');
+            if (!projCard) return;
+            const checkedCbs = projCard.querySelectorAll('tbody tr.project-row .project-select-cb:checked');
+            if (checkedCbs.length === 0) return;
+
+            const count = checkedCbs.length;
+            const displaySpan = document.getElementById('bulk-delete-project-count-display');
+            if (displaySpan) displaySpan.innerText = count;
+
+            const modal = document.getElementById('bulkDeleteProjectModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeBulkDeleteProjectModal() {
+            const modal = document.getElementById('bulkDeleteProjectModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function confirmBulkDeleteProjects() {
+            const projCard = document.querySelector('#tab-add-project .card');
+            if (!projCard) return;
+            const checkedCbs = projCard.querySelectorAll('tbody tr.project-row .project-select-cb:checked');
+            if (checkedCbs.length === 0) return;
+
+            const projIds = [];
+            checkedCbs.forEach(cb => {
+                if (cb.value && !isNaN(cb.value)) {
+                    projIds.push(parseInt(cb.value, 10));
+                }
+            });
+
+            if (projIds.length === 0) return;
+
+            const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
+
+            const formData = new FormData();
+            formData.append('action', 'bulk_delete_projects');
+            projIds.forEach(id => formData.append('project_ids', id));
+
+            fetch('/dashboard/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            }).then(res => {
+                closeBulkDeleteProjectModal();
+                window.location.reload();
+            }).catch(err => {
+                console.error('Bulk delete projects failed:', err);
+                closeBulkDeleteProjectModal();
+                window.location.reload();
+            });
+        }
+
         function confirmLogout(event) {
             event.preventDefault();
             const logoutUrl = event.currentTarget.getAttribute('href');
@@ -4015,6 +4250,9 @@
 
                             if (typeof triggerFilter === 'function') {
                                 triggerFilter(adminTaskCard);
+                            }
+                            if (typeof updateTaskBulkDeleteState === 'function') {
+                                updateTaskBulkDeleteState();
                             }
                         }
                     }
