@@ -729,36 +729,56 @@
 
         .filter-search-input {
             width: 100%;
-            padding: 8px 12px 8px 34px;
+            padding: 8px 14px 8px 36px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 20px;
             font-size: 13px;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
             background: #ffffff;
         }
 
         .filter-search-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
 
         .filter-status-select,
+        .filter-type-select,
         .filter-date-input {
-            padding: 8px 12px;
+            padding: 8px 16px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 20px;
             font-size: 13px;
+            font-weight: 500;
             outline: none;
             background: #ffffff;
             color: var(--text-dark);
-            transition: all 0.2s;
+            transition: all 0.25s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+        }
+
+        .filter-type-select {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .filter-type-select:hover,
+        .filter-status-select:hover,
+        .filter-date-input:hover {
+            border-color: #a5b4fc;
+            background-color: #f1f5f9;
         }
 
         .filter-status-select:focus,
+        .filter-type-select:focus,
         .filter-date-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+            background-color: #ffffff;
         }
 
         .filter-presets {
@@ -1247,7 +1267,16 @@
                                 <option value="not worked">Not Worked</option>
                                 <option value="pending">Pending</option>
                                 <option value="in progress">In Progress</option>
+                                <option value="on hold">On Hold</option>
                                 <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-group select-group">
+                            <label><i class="fa-solid fa-folder" style="color: var(--primary);"></i> Type:</label>
+                            <select class="filter-type-select" onchange="triggerProjectFilter(this)">
+                                <option value="all">All Types</option>
+                                <option value="data logger">Data Logger</option>
+                                <option value="internal project">Internal Project</option>
                             </select>
                         </div>
                     </div>
@@ -1273,7 +1302,7 @@
                                     data-description="{{ proj.description|default:''|lower }}"
                                     data-status="{{ proj.status|default:'Not Worked'|lower }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ proj.project_name }}</strong></td>
+                                    <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
                                     <td>
                                         <span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span>
                                     </td>
@@ -1283,7 +1312,7 @@
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date_str|default:"-" }}</td>
-                                    <td>{{ proj.description|default:"-" }}</td>
+                                    <td title="{{ proj.description|default:'-' }}">{{ proj.description|default:"-" }}</td>
                                     <td>{{ proj.created_at_str|default:"-" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1362,11 +1391,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td title="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -1491,11 +1520,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td title="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
@@ -1595,11 +1624,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td title="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
@@ -1734,14 +1763,14 @@
                                     data-due-date="{{ task.due_date_str|default:'' }}"
                                     data-created-at="{{ task.created_at_str|default:'' }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                     <td>
                                         <span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
                                             {{ task.project_name|default:"-" }}
                                         </span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td title="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
@@ -1950,11 +1979,11 @@
                                             onchange="updateTaskBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ task.task_name }}</strong></td>
+                                    <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td>{{ task.description|default:"-" }}</td>
+                                    <td title="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -2089,7 +2118,7 @@
                                             onchange="updateProjectBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td><strong>{{ proj.project_name }}</strong></td>
+                                    <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
                                     <td><span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span></td>
                                     <td>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
@@ -2109,7 +2138,7 @@
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date|default:"-" }}</td>
-                                    <td>{{ proj.description|default:"-" }}</td>
+                                    <td title="{{ proj.description|default:'-' }}">{{ proj.description|default:"-" }}</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
                                             style="margin-right: 4px;" data-id="{{ proj.id }}"
@@ -2194,7 +2223,7 @@
                                     {% for task in in_progress_tasks_list %}
                                     <tr>
                                         <td><strong>{{ forloop.counter }}</strong></td>
-                                        <td><strong>{{ task.task_name }}</strong></td>
+                                        <td title="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></td>
                                         <td>
                                             <span
                                                 style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"
@@ -2247,7 +2276,7 @@
                                     {% for proj in in_progress_projects_list %}
                                     <tr>
                                         <td><strong>{{ forloop.counter }}</strong></td>
-                                        <td><strong>{{ proj.project_name }}</strong></td>
+                                        <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
                                         <td>
                                             <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                         </td>
@@ -3844,9 +3873,9 @@
                                     if (hasCb) {
                                         // Superadmin / Admin table with bulk checkboxes (9 columns)
                                         if (cells.length >= 8) {
-                                            cells[2].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`;
+                                            cells[2].innerHTML = `<strong>${escapeHtml(task.task_name)}</strong>`; cells[2].title = task.task_name;
                                             cells[3].innerHTML = `<span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span>`;
-                                            cells[4].innerText = task.description || '-';
+                                            cells[4].innerText = task.description || '-'; cells[4].title = task.description || '-';
                                             cells[5].innerHTML = `<strong>${escapeHtml(task.employee_name || '-')}</strong>`;
                                             cells[6].innerText = task.due_date || '-';
 
@@ -3919,9 +3948,9 @@
                                             <input type="checkbox" class="task-select-cb" value="${task.id}" onchange="updateTaskBulkDeleteState()">
                                         </td>
                                         <td><strong>1</strong></td>
-                                        <td><strong>${escapeHtml(task.task_name)}</strong></td>
-                                        <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
-                                        <td>${escapeHtml(task.description || '-')}</td>
+                                        <td title="${escapeHtml(task.task_name)}"><strong>${escapeHtml(task.task_name)}</strong></td>
+                                        <td title="${escapeHtml(task.project_name || '-')}"><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
+                                        <td title="${escapeHtml(task.description || '-')}">${escapeHtml(task.description || '-')}</td>
                                         <td><strong>${escapeHtml(task.employee_name || '-')}</strong></td>
                                         <td>${escapeHtml(task.due_date || '-')}</td>
                                         <td>
@@ -3952,9 +3981,9 @@
                                     } else {
                                         newTr.innerHTML = `
                                         <td><strong>1</strong></td>
-                                        <td><strong>${escapeHtml(task.task_name)}</strong></td>
-                                        <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
-                                        <td>${escapeHtml(task.description || '-')}</td>
+                                        <td title="${escapeHtml(task.task_name)}"><strong>${escapeHtml(task.task_name)}</strong></td>
+                                        <td title="${escapeHtml(task.project_name || '-')}"><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
+                                        <td title="${escapeHtml(task.description || '-')}">${escapeHtml(task.description || '-')}</td>
                                         <td>${escapeHtml(task.due_date || '-')}</td>
                                         <td>
                                             <select class="status-select status-${slugStatus}" name="status" data-task-id="${task.id}" onchange="updateTaskStatus(this)">
@@ -4068,9 +4097,9 @@
 
                                     newTr.innerHTML = `
                                     <td><strong>1</strong></td>
-                                    <td><strong>${escapeHtml(task.task_name)}</strong></td>
-                                    <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
-                                    <td>${escapeHtml(task.description || '-')}</td>
+                                    <td title="${escapeHtml(task.task_name)}"><strong>${escapeHtml(task.task_name)}</strong></td>
+                                    <td title="${escapeHtml(task.project_name || '-')}"><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">${escapeHtml(task.project_name || '-')}</span></td>
+                                    <td title="${escapeHtml(task.description || '-')}">${escapeHtml(task.description || '-')}</td>
                                     <td>${escapeHtml(task.due_date || '-')}</td>
                                     <td>
                                         <select class="status-select status-${slugStatus}" name="status" data-task-id="${task.id}" onchange="updateTaskStatus(this)">

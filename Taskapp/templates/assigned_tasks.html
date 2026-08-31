@@ -562,10 +562,10 @@
                                         style="margin-left: 6px; font-size: 11px; transition: transform 0.2s;"></i>
                                 </span>
                             </td>
-                            <td>
+                            <td title="{{ item.project_name }}">
                                 <span class="project-tag">{{ item.project_name }}</span>
                             </td>
-                            <td>
+                            <td title="{{ item.task_name }}">
                                 {% if item.task_name != 'No Task Assigned' and item.task_name != '-' %}
                                 <strong>{{ item.task_name }}</strong>
                                 {% elif item.task_name == 'No Task Assigned' %}
@@ -597,8 +597,8 @@
                                         <div
                                             style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #f1f5f9;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
-                                                <strong style="color: #1e293b; font-size: 14px;">{{ t.task_name }}</strong>
-                                                <span class="project-tag">{{ t.project_name|default:"-" }}</span>
+                                                <strong style="color: #1e293b; font-size: 14px;" title="{{ t.task_name }}">{{ t.task_name }}</strong>
+                                                <span class="project-tag" title="{{ t.project_name|default:'-' }}">{{ t.project_name|default:"-" }}</span>
                                             </div>
                                             <div>
                                                 {% if t.status == 'In Progress' %}
