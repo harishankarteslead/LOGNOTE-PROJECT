@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOGNOTE</title>
     <!-- Google Fonts & FontAwesome -->
-     <link rel="icon" type="image/png" href="{% static 'images/lognote.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/lognote.png' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SweetAlert2 -->
@@ -1373,17 +1373,24 @@
                                     data-description="{{ proj.description|default:''|lower }}"
                                     data-status="{{ proj.status|default:'Not Worked'|lower }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}"><div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div></td>
-                                    <td>
-                                        <span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span>
+                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}">
+                                        <div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
+                                        <span
+                                            class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="status-badge status-{{ proj.status|default:'not-worked'|slugify }}">{{ proj.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date_str|default:"-" }}</td>
-                                    <td data-tooltip="{{ proj.description|default:'-' }}" title="{{ proj.description|default:'-' }}"><div class="task-desc-truncate">{{ proj.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ proj.description|default:'-' }}"
+                                        title="{{ proj.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ proj.description|default:"-" }}</div>
+                                    </td>
                                     <td>{{ proj.created_at_str|default:"-" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1462,15 +1469,21 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}">
+                                        <div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div>
+                                    </td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}"
+                                        title="{{ task.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ task.description|default:"-" }}</div>
+                                    </td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
+                                        <span
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ task.created_at }}</td>
                                 </tr>
@@ -1591,15 +1604,21 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}">
+                                        <div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div>
+                                    </td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}"
+                                        title="{{ task.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ task.description|default:"-" }}</div>
+                                    </td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
+                                        <span
+                                            class="status-badge status-{{ task.status|default:'Not Worked'|slugify }}">{{ task.status|default:"Not Worked" }}</span>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
                                 </tr>
@@ -1638,7 +1657,7 @@
                         <h2>
                             <i class="fa-solid fa-clock-rotate-left"
                                 style="color: var(--primary); margin-right: 8px;"></i>
-                            Recent Tasks 
+                            Recent Tasks
                         </h2>
                         <button type="button" class="btn btn-primary btn-sm" onclick="switchTab('employee-tasks')"
                             style="font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
@@ -1695,22 +1714,27 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}">
+                                        <div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div>
+                                    </td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}"
+                                        title="{{ task.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ task.description|default:"-" }}</div>
+                                    </td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
                                             class="status-select status-{{ task.status|default:'Not Worked'|slugify }}"
                                             name="status" data-task-id="{{ task.id }}"
                                             onchange="updateTaskStatus(this)">
-                                            <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
-                                            <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}> Pending</option>
-                                            <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
-                                            <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+                                            <option value="Not Worked" {% if task.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
+                                            <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                            <option value="On Hold" {% if task.status == 'Hold' or task.status == 'On Hold' %}selected{% endif %}>On Hold</option>
+                                            <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
                                         </select>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
@@ -1834,25 +1858,30 @@
                                     data-due-date="{{ task.due_date_str|default:'' }}"
                                     data-created-at="{{ task.created_at_str|default:'' }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}">
+                                        <div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div>
+                                    </td>
                                     <td>
                                         <span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
                                             {{ task.project_name|default:"-" }}
                                         </span>
                                     </td>
-                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}"
+                                        title="{{ task.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ task.description|default:"-" }}</div>
+                                    </td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
                                             class="status-select status-{{ task.status|default:'Not Worked'|slugify }}"
                                             name="status" data-task-id="{{ task.id }}"
                                             onchange="updateTaskStatus(this)">
-                                            <option value="Not Worked" {% if task.status == "Not Worked" %}selected{% endif %}>Not Worked</option>
-                                            <option value="In Progress" {% if task.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                            <option value="Pending" {% if task.status == "Pending" %}selected{% endif %}> Pending</option>
-                                            <option value="On Hold" {% if task.status == "Hold" or task.status == "On Hold" %}selected{% endif %}>On Hold</option>
-                                            <option value="Completed" {% if task.status == "Completed" %}selected{% endif %}>Completed</option>
+                                            <option value="Not Worked" {% if task.status == 'Not Worked' %}selected{% endif %}>Not Worked</option>
+                                            <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                            <option value="On Hold" {% if task.status == 'Hold' or task.status == 'On Hold' %}selected{% endif %}>On Hold</option>
+                                            <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
                                         </select>
                                     </td>
                                     <td>{{ task.created_at_str|default:"-" }}</td>
@@ -1897,7 +1926,7 @@
                     </div>
                     <div class="table-responsive">
                         <table>
-                            <thead
+                            <thead>
                                 <tr>
                                     <th>S.No</th>
                                     <th>Username</th>
@@ -1914,7 +1943,13 @@
                                     <td>{{ forloop.counter }}</td>
                                     <td><strong>{{ u.username }}</strong></td>
                                     <td>{{ u.email }}</td>
-                                    <td><span class="role-tag role-{{ u.role }}">{{ u.role }}</span></td>
+                                    <td>
+                                        {% if u.role == 'superadmin' %}
+                                        <span style="color: #94a3b8;">-</span>
+                                        {% else %}
+                                        <span class="role-tag role-{{ u.role }}">{{ u.role }}</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ u.created_at }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-edit" title="Edit"
@@ -1948,10 +1983,12 @@
                                             onclick="openEditModal('{{ emp.id }}', '{{ emp.username }}', '{{ emp.email }}', '{{ emp.role }}')">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
+                                        {% if emp.role != 'admin' %}
                                         <button class="btn btn-sm btn-del" title="Delete"
                                             onclick="openDeleteModal('{{ emp.id }}', '{{ emp.username }}')">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -2050,11 +2087,16 @@
                                             onchange="updateTaskBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}">
+                                        <div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div>
+                                    </td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}"
+                                        title="{{ task.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ task.description|default:"-" }}</div>
+                                    </td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -2121,7 +2163,7 @@
                             <button type="button" class="btn btn-primary" onclick="openAddProjectModal()">
                                 <i class="fa-solid fa-plus"></i> Add New Project
                             </button>
-                        </div>       
+                        </div>
                     </div>
                     <!-- Filter Toolbar for Projects -->
                     <div class="table-filter-bar" id="projects-filter-bar">
@@ -2151,7 +2193,8 @@
                             </select>
                         </div>
                         <div class="filter-group date-group">
-                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due Date:</label>
+                            <label><i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i> Due
+                                Date:</label>
                             <input type="date" class="filter-date-input filter-exact-date"
                                 onchange="triggerProjectFilter(this)">
                         </div>
@@ -2177,8 +2220,7 @@
                             </thead>
                             <tbody>
                                 {% for proj in projects %}
-                                <tr class="project-row"
-                                    data-project-id="{{ proj.id }}"
+                                <tr class="project-row" data-project-id="{{ proj.id }}"
                                     data-project-name="{{ proj.project_name|lower }}"
                                     data-project-type="{{ proj.project_type|lower }}"
                                     data-status="{{ proj.status|default:'not worked'|slugify }}"
@@ -2189,8 +2231,11 @@
                                             onchange="updateProjectBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}"><div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div></td>
-                                    <td><span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span></td>
+                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}">
+                                        <div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div>
+                                    </td>
+                                    <td><span
+                                            class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span></td>
                                     <td>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
                                             {% csrf_token %}
@@ -2209,7 +2254,10 @@
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date|default:"-" }}</td>
-                                    <td data-tooltip="{{ proj.description|default:'-' }}" title="{{ proj.description|default:'-' }}"><div class="task-desc-truncate">{{ proj.description|default:"-" }}</div></td>
+                                    <td data-tooltip="{{ proj.description|default:'-' }}"
+                                        title="{{ proj.description|default:'-' }}">
+                                        <div class="task-desc-truncate">{{ proj.description|default:"-" }}</div>
+                                    </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
                                             style="margin-right: 4px;" data-id="{{ proj.id }}"
@@ -2294,7 +2342,10 @@
                                     {% for task in in_progress_tasks_list %}
                                     <tr>
                                         <td><strong>{{ forloop.counter }}</strong></td>
-                                        <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                        <td title="{{ task.task_name }}"><span
+                                                class="text-truncate-cell task-name-truncate"
+                                                data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name
+                                                    }}</strong></span></td>
                                         <td>
                                             <span
                                                 style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"
@@ -2347,7 +2398,8 @@
                                     {% for proj in in_progress_projects_list %}
                                     <tr>
                                         <td><strong>{{ forloop.counter }}</strong></td>
-                                        <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
+                                        <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong>
+                                        </td>
                                         <td>
                                             <span class="role-tag role-employee">{{ proj.project_type }}</span>
                                         </td>
@@ -2448,24 +2500,32 @@
                                 </div>
                                 <div>
                                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                                        <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">{{ notif.title }}</span>
+                                        <span style="font-weight: 700; font-size: 14px; color: var(--text-dark);">{{
+                                            notif.title }}</span>
                                         {% if not notif.is_read %}
-                                        <span class="unread-tag-pill" style="background: #3b82f6; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">NEW</span>
+                                        <span class="unread-tag-pill"
+                                            style="background: #3b82f6; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;">NEW</span>
                                         {% endif %}
                                     </div>
-                                    <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; line-height: 1.4;">{{ notif.message }}</p>
-                                    <span style="font-size: 11px; color: #94a3b8;"><i class="fa-regular fa-clock" style="margin-right: 4px;"></i>{{ notif.created_at }}</span>
+                                    <p style="font-size: 13px; color: #334155; margin: 0 0 4px 0; line-height: 1.4;">{{
+                                        notif.message }}</p>
+                                    <span style="font-size: 11px; color: #94a3b8;"><i class="fa-regular fa-clock"
+                                            style="margin-right: 4px;"></i>{{ notif.created_at }}</span>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
                                 {% if not notif.is_read %}
-                                <button type="button" class="btn btn-sm btn-outline" onclick="markSingleNotificationRead({{ notif.id }}, this)" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                <button type="button" class="btn btn-sm btn-outline"
+                                    onclick="markSingleNotificationRead({{ notif.id }}, this)"
+                                    style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
                                     Mark Read
                                 </button>
                                 {% endif %}
                                 {% if role == 'superadmin' or role == 'admin' %}
                                 {% if 'Request' in notif.title and 'Approved' not in notif.title and 'Rejected' not in notif.title %}
-                                <button type="button" class="btn btn-sm btn-primary" onclick="switchTab('task-requests')" style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    onclick="switchTab('task-requests')"
+                                    style="font-size: 11px; padding: 3px 8px; border-radius: 4px;">
                                     View Request
                                 </button>
                                 {% endif %}
@@ -2559,7 +2619,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="task_description">Description</label>
                     <textarea id="task_description" name="description" class="form-control" rows="3"
-                        placeholder="Enter detailed task description..." ></textarea>
+                        placeholder="Enter detailed task description..."></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -2592,8 +2652,7 @@
                     <input type="text" id="add-username" name="username" class="form-control"
                         placeholder="Enter username" pattern="[a-zA-Z0-9]+"
                         title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
-                        oninput="syncUsernameRole(this)"
-                        required>
+                        oninput="syncUsernameRole(this)" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-email">Email Address</label>
@@ -2621,8 +2680,8 @@
                 {% else %}
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="add-role">Role</label>
-                    <select id="add-role" class="form-control" disabled
-                        style="background-color: #f1f5f9; cursor: not-allowed; display: none;">
+                    <select id="add-role" class="form-control" 
+                        style="background-color: #f1f5f9; color: #04080bd8; font-weight: 600;">
                         <option value="employee" selected>Employee</option>
                     </select>
                     <input type="hidden" name="role" value="employee">
@@ -2654,8 +2713,7 @@
                     <label for="edit-username">Username</label>
                     <input type="text" id="edit-username" name="username" class="form-control" pattern="[a-zA-Z0-9]+"
                         title="Only letters (A-Z, a-z) and numbers (0-9) are allowed without spaces or special characters."
-                        oninput="syncUsernameRole(this)"
-                        required>
+                        oninput="syncUsernameRole(this)" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-email">Email Address</label>
@@ -2674,13 +2732,17 @@
                     </div>
                 </div>
 
-                {% if role == 'superadmin' %}
-                <div class="form-group" style="margin-bottom: 14px;">
+                {% if role == 'superadmin' or role == 'admin' %}
+                <div id="edit-role-group" class="form-group" style="margin-bottom: 14px;">
                     <label for="edit-role">Role</label>
                     <select id="edit-role" name="role" class="form-control" required>
-                        <option value="admin">Admin</option>
                         <option value="employee">Employee</option>
+                        {% if role == 'superadmin' %}
+                        <option value="admin">Admin</option>
                         <option value="superadmin">Super Admin</option>
+                        {% elif role == 'admin' %}
+                        <option value="admin">Admin</option>
+                        {% endif %}
                     </select>
                 </div>
                 {% else %}
@@ -2723,15 +2785,18 @@
     <div id="bulkDeleteTaskModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Task Deletion</h3>
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Task
+                    Deletion</h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeBulkDeleteTaskModal()">&times;</span>
             </div>
             <p style="font-size: 14px; color: var(--text-dark); margin-bottom: 20px;">
-                Are you sure you want to delete <strong id="bulk-delete-task-count-display">0</strong> selected task(s)? This action cannot be undone.
+                Are you sure you want to delete <strong id="bulk-delete-task-count-display">0</strong> selected task(s)?
+                This action cannot be undone.
             </p>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeBulkDeleteTaskModal()">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteTasks()">Yes, Delete Tasks</button>
+                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteTasks()">Yes, Delete
+                    Tasks</button>
             </div>
         </div>
     </div>
@@ -2740,15 +2805,18 @@
     <div id="bulkDeleteProjectModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Project Deletion</h3>
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Bulk Project
+                    Deletion</h3>
                 <span style="cursor: pointer; font-size: 20px;" onclick="closeBulkDeleteProjectModal()">&times;</span>
             </div>
             <p style="font-size: 14px; color: var(--text-dark); margin-bottom: 20px;">
-                Are you sure you want to delete <strong id="bulk-delete-project-count-display">0</strong> selected project(s)? All assigned tasks under these projects will also be deleted.
+                Are you sure you want to delete <strong id="bulk-delete-project-count-display">0</strong> selected
+                project(s)? All assigned tasks under these projects will also be deleted.
             </p>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeBulkDeleteProjectModal()">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteProjects()">Yes, Delete Projects</button>
+                <button type="button" class="btn btn-danger" onclick="confirmBulkDeleteProjects()">Yes, Delete
+                    Projects</button>
             </div>
         </div>
     </div>
@@ -2806,7 +2874,7 @@
                 <div class="form-group" style="margin-bottom: 14px;">
                     <label for="project_description">Description</label>
                     <textarea id="project_description" name="description" class="form-control" rows="3"
-                        placeholder="Enter detailed project description..." ></textarea>
+                        placeholder="Enter detailed project description..."></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -3276,8 +3344,8 @@
                 const normStatusVal = statusVal.replace(/[\s_-]+/g, '');
 
                 const matchSearch = !searchVal || taskName.includes(searchVal) || projName.includes(searchVal) || desc.includes(searchVal);
-                const matchStatus = (statusVal === 'all') || 
-                    (normStatus === normStatusVal) || 
+                const matchStatus = (statusVal === 'all') ||
+                    (normStatus === normStatusVal) ||
                     (normStatusVal === 'onhold' && (normStatus === 'hold' || normStatus === 'onhold')) ||
                     (normStatusVal === 'notworked' && (normStatus === 'notworked' || normStatus === ''));
 
@@ -3471,7 +3539,37 @@
 
             const roleField = document.getElementById('edit-role');
             if (roleField) roleField.value = role;
-            if (nameField) syncUsernameRole(nameField);
+
+            const loggedInRole = "{{ role }}";
+            const targetRole = (role || '').toLowerCase();
+            const targetUsername = (username || '').toLowerCase();
+
+            const isTargetSuperadmin = (targetRole === 'superadmin' || targetUsername === 'superadmin');
+            const isTargetAdminEditedByAdmin = (loggedInRole === 'admin' && (targetRole === 'admin' || targetUsername === 'admin'));
+
+            if (nameField) {
+                nameField.removeAttribute('readonly');
+                nameField.style.backgroundColor = '#ffffff';
+                nameField.style.cursor = 'text';
+                nameField.style.color = '#1e293b';
+            }
+            if (emailField) {
+                emailField.removeAttribute('readonly');
+                emailField.style.backgroundColor = '#ffffff';
+                emailField.style.cursor = 'text';
+                emailField.style.color = '#1e293b';
+            }
+
+            const roleGroup = document.getElementById('edit-role-group');
+            if (roleGroup) {
+                if (isTargetSuperadmin || isTargetAdminEditedByAdmin) {
+                    roleGroup.style.display = 'none';
+                    if (roleField) roleField.removeAttribute('required');
+                } else {
+                    roleGroup.style.display = 'block';
+                    if (roleField) roleField.setAttribute('required', 'required');
+                }
+            }
 
             const passField = document.getElementById('edit-password');
             if (passField) passField.value = '';
@@ -4009,8 +4107,8 @@
                     projType.includes(searchVal) ||
                     desc.includes(searchVal);
 
-                const matchStatus = (statusVal === 'all') || 
-                    (normStatus === normStatusVal) || 
+                const matchStatus = (statusVal === 'all') ||
+                    (normStatus === normStatusVal) ||
                     (normStatusVal === 'onhold' && normStatus === 'hold') ||
                     (normStatusVal === 'notworked' && (normStatus === 'notworked' || normStatus === ''));
 

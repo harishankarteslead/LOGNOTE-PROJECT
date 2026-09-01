@@ -165,24 +165,28 @@ def dashboard(request):
             new_email = request.POST.get('email', '').strip()
             requested_role = request.POST.get('role', 'employee').strip()
 
-            uname_lower = new_username.lower()
-            if uname_lower == 'superadmin':
+            if not target_user_id or not target_user_id.isdigit():
+                messages.error(request, 'Invalid user ID.')
+                return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+
+            target_user = employee_service.get_user_by_id(int(target_user_id))
+            if not target_user:
+                messages.error(request, 'User account not found.')
+                return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
+
+            db_role = target_user['role']
+            if db_role == 'superadmin':
                 if user_role != 'superadmin':
                     messages.error(request, 'Permission denied. Only Superadmin can update superadmin accounts.')
                     return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
                 role = 'superadmin'
-            elif uname_lower == 'admin':
-                if user_role not in ('superadmin', 'admin'):
-                    messages.error(request, 'Permission denied. Only Admin and Superadmin can update admin accounts.')
-                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
-                role = 'admin'
             else:
-                if requested_role in ('superadmin', 'admin'):
-                    messages.error(request, 'Invalid Credentials')
-                    return redirect(f'/dashboard/?tab={active_tab_post or "add-members"}')
-                role = 'employee'
+                if requested_role in ('admin', 'employee'):
+                    role = requested_role
+                else:
+                    role = db_role
 
-            if not target_user_id or not new_username or not new_email:
+            if not new_username or not new_email:
                 messages.error(request, 'Username and Email are required.')
             elif not re.match(r'^[a-zA-Z0-9]+$', new_username) or (new_password and not re.match(r'^[a-zA-Z0-9]+$', new_password)):
                 messages.error(request, 'Username and Password must contain only letters (A-Z, a-z) and numbers (0-9). Special characters and spaces are not allowed.')
@@ -194,6 +198,7 @@ def dashboard(request):
                     messages.success(request, f'User "{new_username}" updated successfully!')
                 except Exception as e:
                     messages.error(request, f'Failed to update user: {str(e)}')
+
             dest_tab = active_tab_post or 'add-members'
             return redirect(f'/dashboard/?tab={dest_tab}')
 
@@ -625,10 +630,15 @@ def dashboard(request):
             'total_employees': len(employees),
         })
     elif user_role == 'admin':
-        employees = employee_service.get_users_by_role('employee')
+        admin_user = employee_service.get_user_by_id(user_id)
+        raw_employees = employee_service.get_users_by_role('employee')
+        employees_list = []
+        if admin_user:
+            employees_list.append(admin_user)
+        employees_list.extend(raw_employees)
         context.update({
-            'employees': employees,
-            'total_employees': len(employees),
+            'employees': employees_list,
+            'total_employees': len(employees_list),
         })
     elif user_role == 'employee':
         user_info = employee_service.get_user_by_id(user_id)
