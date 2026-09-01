@@ -117,116 +117,146 @@
 </div>
 
 <script>
-    function loadTaskRequestsTab(isSilent = false) {
-        const tbody = document.getElementById('task-requests-tbody');
-        if (!tbody) return;
-        
-        if (!isSilent && (!window.allTaskRequests || window.allTaskRequests.length === 0)) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
-                        <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>
-                        <p style="margin-top: 10px; font-size: 14px;">Loading task requests...</p>
-                    </td>
-                </tr>
-            `;
+    // Global variable to store task requests loaded from Django API
+    window.allTaskRequests = [];
+
+    // Function to fetch task requests from the Django backend
+    function loadTaskRequestsTab(isSilent) {
+        if (isSilent === undefined) {
+            isSilent = false;
         }
 
+        var tbody = document.getElementById('task-requests-tbody');
+        if (!tbody) {
+            return;
+        }
+        
+        // Show loading spinner if not a silent background refresh
+        if (!isSilent && window.allTaskRequests.length === 0) {
+            tbody.innerHTML = '<tr>' +
+                '<td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">' +
+                    '<i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary);"></i>' +
+                    '<p style="margin-top: 10px; font-size: 14px;">Loading task requests...</p>' +
+                '</td>' +
+            '</tr>';
+        }
+
+        // Fetch task requests from the Django endpoint
         fetch('/api/tasks/requests/', { credentials: 'same-origin' })
-            .then(res => res.json())
-            .then(data => {
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
                 if (data.status === 'success') {
                     window.allTaskRequests = data.requests || [];
-                    const filterVal = document.getElementById('request-status-filter') ? document.getElementById('request-status-filter').value : 'ALL';
-                    renderTaskRequestsTable(filterVal);
+                    
+                    // Check currently selected filter dropdown value
+                    var filterSelect = document.getElementById('request-status-filter');
+                    var selectedFilter = filterSelect ? filterSelect.value : 'ALL';
+                    
+                    renderTaskRequestsTable(selectedFilter);
                 } else if (!isSilent) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">${data.message || 'Failed to load task requests.'}</td></tr>`;
+                    var errorMsg = data.message || 'Failed to load task requests.';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">' + errorMsg + '</td></tr>';
                 }
             })
-            .catch(err => {
+            .catch(function(error) {
                 if (!isSilent) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">Error connecting to server.</td></tr>`;
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--danger); padding: 20px;">Error connecting to server.</td></tr>';
                 }
             });
     }
 
-    function renderTaskRequestsTable(filter) {
-        const tbody = document.getElementById('task-requests-tbody');
-        if (!tbody) return;
-
-        let list = window.allTaskRequests || [];
-        if (filter && filter !== 'ALL') {
-            list = list.filter(r => r.status === filter);
-        }
-
-        if (list.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                        <i class="fa-regular fa-folder-open fa-2x" style="margin-bottom: 10px; display: block; opacity: 0.5;"></i>
-                        No ${filter !== 'ALL' ? filter : ''} task requests found.
-                    </td>
-                </tr>
-            `;
+    // Function to render the table rows based on selected status filter
+    function renderTaskRequestsTable(filterValue) {
+        var tbody = document.getElementById('task-requests-tbody');
+        if (!tbody) {
             return;
         }
 
-        let html = '';
-        list.forEach((r, index) => {
-            let statusBadge = '';
-            if (r.status === 'Approved') {
-                statusBadge = `<span class="status-badge status-completed"><i class="fa-solid fa-circle-check"></i> Approved</span>`;
-            } else if (r.status === 'Rejected') {
-                statusBadge = `<span class="status-badge status-on-hold" style="background:#fee2e2; color:#ef4444;" title="Reason: ${r.rejection_reason || 'N/A'}"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`;
+        var requestsList = window.allTaskRequests || [];
+        
+        // Filter the list if a specific status is chosen
+        if (filterValue && filterValue !== 'ALL') {
+            requestsList = requestsList.filter(function(item) {
+                return item.status === filterValue;
+            });
+        }
+
+        // Show empty message if no requests match
+        if (requestsList.length === 0) {
+            var filterLabel = (filterValue !== 'ALL') ? filterValue : '';
+            tbody.innerHTML = '<tr>' +
+                '<td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">' +
+                    '<i class="fa-regular fa-folder-open fa-2x" style="margin-bottom: 10px; display: block; opacity: 0.5;"></i>' +
+                    'No ' + filterLabel + ' task requests found.' +
+                '</td>' +
+            '</tr>';
+            return;
+        }
+
+        // Build HTML table rows
+        var rowsHtml = '';
+        
+        for (var i = 0; i < requestsList.length; i++) {
+            var request = requestsList[i];
+            var rowNumber = i + 1;
+            
+            // Status badge HTML
+            var statusBadge = '';
+            if (request.status === 'Approved') {
+                statusBadge = '<span class="status-badge status-completed"><i class="fa-solid fa-circle-check"></i> Approved</span>';
+            } else if (request.status === 'Rejected') {
+                var rejReason = request.rejection_reason || 'N/A';
+                statusBadge = '<span class="status-badge status-on-hold" style="background:#fee2e2; color:#ef4444;" title="Reason: ' + escapeHtml(rejReason) + '"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>';
             } else {
-                statusBadge = `<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-clock"></i> Pending</span>`;
+                statusBadge = '<span class="status-badge status-pending" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-clock"></i> Pending</span>';
             }
 
-            let actionBtns = '';
-            if (r.status === 'Pending') {
-                actionBtns = `
-                    <div style="display: flex; gap: 8px; justify-content: center;">
-                        <button onclick="approveRequest(${r.id})" class="btn" style="background: #10b981; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">
-                            <i class="fa-solid fa-check"></i> Approve
-                        </button>
-                        <button onclick="openRejectRequestModal(${r.id}, '${escapeHtml(r.employee_name)}', '${escapeHtml(r.task_name)}')" class="btn" style="background: #ef4444; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">
-                            <i class="fa-solid fa-xmark"></i> Reject
-                        </button>
-                    </div>
-                `;
+            // Action buttons HTML
+            var actionButtons = '';
+            if (request.status === 'Pending') {
+                actionButtons = '<div style="display: flex; gap: 8px; justify-content: center;">' +
+                    '<button onclick="approveRequest(' + request.id + ')" class="btn" style="background: #10b981; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">' +
+                        '<i class="fa-solid fa-check"></i> Approve' +
+                    '</button>' +
+                    '<button onclick="openRejectRequestModal(' + request.id + ', \'' + escapeHtml(request.employee_name) + '\', \'' + escapeHtml(request.task_name) + '\')" class="btn" style="background: #ef4444; color: #fff; padding: 6px 12px; font-size: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s;">' +
+                        '<i class="fa-solid fa-xmark"></i> Reject' +
+                    '</button>' +
+                '</div>';
             } else {
-                actionBtns = `<span style="font-size: 12px; color: var(--text-muted); italic;">Completed</span>`;
+                actionButtons = '<span style="font-size: 12px; color: var(--text-muted); font-style: italic;">Completed</span>';
             }
 
-            let reasonDisplay = escapeHtml(r.reason || '-');
-            if (r.status === 'Rejected' && r.rejection_reason) {
-                reasonDisplay += `<br><small style="color: #ef4444; font-weight: 600;">Rejection Reason: ${escapeHtml(r.rejection_reason)}</small>`;
+            // Request reason text
+            var reasonDisplay = escapeHtml(request.reason || '-');
+            if (request.status === 'Rejected' && request.rejection_reason) {
+                reasonDisplay += '<br><small style="color: #ef4444; font-weight: 600;">Rejection Reason: ' + escapeHtml(request.rejection_reason) + '</small>';
             }
 
-            html += `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 14px 16px; font-weight: 600;">${index + 1}</td>
-                    <td style="padding: 14px 16px;">
-                        <strong style="color: var(--text-dark); display: block; font-size: 14px;">${escapeHtml(r.employee_name)}</strong>
-                    </td>
-                    <td style="padding: 14px 16px; font-weight: 600; color: var(--primary);" data-tooltip="${escapeHtml(r.task_name)}" title="${escapeHtml(r.task_name)}"><div class="task-name-truncate">${escapeHtml(r.task_name)}</div></td>
-                    <td style="padding: 14px 16px;" title="${escapeHtml(r.project_name || '-')}">${escapeHtml(r.project_name || '-')}</td>
-                    <td style="padding: 14px 16px; font-size: 13px;" data-tooltip="${escapeHtml(r.reason || '-')}" title="${escapeHtml(r.reason || '-')}"><div class="task-desc-truncate">${reasonDisplay}</div></td>
-                    <td style="padding: 14px 16px; font-size: 12px; color: var(--text-muted);">${r.created_at || '-'}</td>
-                    <td style="padding: 14px 16px;">${statusBadge}</td>
-                    <td style="padding: 14px 16px; text-align: center;">${actionBtns}</td>
-                </tr>
-            `;
-        });
+            // Combine into table row
+            rowsHtml += '<tr style="border-bottom: 1px solid #f1f5f9;">' +
+                '<td style="padding: 14px 16px; font-weight: 600;">' + rowNumber + '</td>' +
+                '<td style="padding: 14px 16px;"><strong style="color: var(--text-dark); display: block; font-size: 14px;">' + escapeHtml(request.employee_name) + '</strong></td>' +
+                '<td style="padding: 14px 16px; font-weight: 600; color: var(--primary);" data-tooltip="' + escapeHtml(request.task_name) + '" title="' + escapeHtml(request.task_name) + '"><div class="task-name-truncate">' + escapeHtml(request.task_name) + '</div></td>' +
+                '<td style="padding: 14px 16px;" title="' + escapeHtml(request.project_name || '-') + '">' + escapeHtml(request.project_name || '-') + '</td>' +
+                '<td style="padding: 14px 16px; font-size: 13px;" data-tooltip="' + escapeHtml(request.reason || '-') + '" title="' + escapeHtml(request.reason || '-') + '"><div class="task-desc-truncate">' + reasonDisplay + '</div></td>' +
+                '<td style="padding: 14px 16px; font-size: 12px; color: var(--text-muted);">' + (request.created_at || '-') + '</td>' +
+                '<td style="padding: 14px 16px;">' + statusBadge + '</td>' +
+                '<td style="padding: 14px 16px; text-align: center;">' + actionButtons + '</td>' +
+            '</tr>';
+        }
 
-        tbody.innerHTML = html;
+        tbody.innerHTML = rowsHtml;
     }
 
-    function filterTaskRequests(val) {
-        renderTaskRequestsTable(val);
+    // Filter table rows when user selects a different status option
+    function filterTaskRequests(statusValue) {
+        renderTaskRequestsTable(statusValue);
     }
 
-    function approveRequest(reqId) {
+    // Approve a task request using POST request
+    function approveRequest(requestId) {
         Swal.fire({
             title: 'Approve Request?',
             text: 'Allow employee to work on this task concurrently?',
@@ -239,18 +269,20 @@
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#10b981',
             cancelButtonColor: '#64748b'
-        }).then((res) => {
-            if (res.isConfirmed) {
+        }).then(function(result) {
+            if (result.isConfirmed) {
                 fetch('/api/tasks/request/approve/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ request_id: reqId })
+                    body: JSON.stringify({ request_id: requestId })
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
                     if (data.status === 'success') {
                         Swal.fire({
                             title: 'Approved',
@@ -260,7 +292,9 @@
                             confirmButtonColor: '#4f46e5'
                         });
                         loadTaskRequestsTab();
-                        if (typeof fetchUnreadNotifications === 'function') fetchUnreadNotifications();
+                        if (typeof fetchUnreadNotifications === 'function') {
+                            fetchUnreadNotifications();
+                        }
                     } else {
                         Swal.fire({
                             title: 'Error',
@@ -275,19 +309,18 @@
         });
     }
 
-    function openRejectRequestModal(reqId, empName, taskName) {
+    // Open rejection modal to prompt for rejection reason
+    function openRejectRequestModal(requestId, employeeName, taskName) {
         Swal.fire({
             title: 'Reject Request',
             width: '420px',
             padding: '16px 20px',
-            html: `
-                <div style="text-align: left; font-size: 13px; color: #475569; margin-top: 6px;">
-                    <p style="margin-bottom: 10px;">
-                        Provide reason for rejecting <strong style="color: #0f172a;">${escapeHtml(empName)}</strong>'s request for <strong style="color: #4f46e5;">"${escapeHtml(taskName)}"</strong>:
-                    </p>
-                    <textarea id="swal-rejection-reason" class="swal2-textarea" placeholder="Reason for rejection..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 13px; min-height: 70px; box-shadow: none;"></textarea>
-                </div>
-            `,
+            html: '<div style="text-align: left; font-size: 13px; color: #475569; margin-top: 6px;">' +
+                '<p style="margin-bottom: 10px;">' +
+                    'Provide reason for rejecting <strong style="color: #0f172a;">' + escapeHtml(employeeName) + '</strong>\'s request for <strong style="color: #4f46e5;">"' + escapeHtml(taskName) + '"</strong>:' +
+                '</p>' +
+                '<textarea id="swal-rejection-reason" class="swal2-textarea" placeholder="Reason for rejection..." style="width: 100%; margin: 0; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 13px; min-height: 70px; box-shadow: none;"></textarea>' +
+            '</div>',
             icon: 'warning',
             iconColor: '#ef4444',
             showCancelButton: true,
@@ -295,16 +328,17 @@
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
-            preConfirm: () => {
-                const reason = document.getElementById('swal-rejection-reason').value.trim();
+            preConfirm: function() {
+                var reasonInput = document.getElementById('swal-rejection-reason');
+                var reason = reasonInput ? reasonInput.value.trim() : '';
                 if (!reason) {
                     Swal.showValidationMessage('Rejection reason is required.');
                     return false;
                 }
                 return reason;
             }
-        }).then((res) => {
-            if (res.isConfirmed && res.value) {
+        }).then(function(result) {
+            if (result.isConfirmed && result.value) {
                 fetch('/api/tasks/request/reject/', {
                     method: 'POST',
                     headers: {
@@ -312,12 +346,14 @@
                         'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify({
-                        request_id: reqId,
-                        rejection_reason: res.value
+                        request_id: requestId,
+                        rejection_reason: result.value
                     })
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
                     if (data.status === 'success') {
                         Swal.fire({
                             title: 'Rejected',
@@ -327,7 +363,9 @@
                             confirmButtonColor: '#4f46e5'
                         });
                         loadTaskRequestsTab();
-                        if (typeof fetchUnreadNotifications === 'function') fetchUnreadNotifications();
+                        if (typeof fetchUnreadNotifications === 'function') {
+                            fetchUnreadNotifications();
+                        }
                     } else {
                         Swal.fire({
                             title: 'Error',
@@ -342,9 +380,12 @@
         });
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
+    // Helper function to safely escape special HTML characters
+    function escapeHtml(text) {
+        if (!text) {
+            return '';
+        }
+        return String(text)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')

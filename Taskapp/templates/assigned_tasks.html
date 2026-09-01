@@ -815,89 +815,117 @@
     </main>
 
     <script>
+        // Toggle subrow display for employee tasks
         function toggleEmpTasksRow(empId) {
-            const subrow = document.getElementById(`subrow-${empId}`);
-            const chevron = document.getElementById(`chevron-${empId}`);
-            if (!subrow) return;
+            var subrow = document.getElementById('subrow-' + empId);
+            var chevron = document.getElementById('chevron-' + empId);
+            if (!subrow) {
+                return;
+            }
 
             if (subrow.style.display === 'none' || !subrow.style.display) {
                 subrow.style.display = 'table-row';
-                if (chevron) chevron.style.transform = 'rotate(90deg)';
+                if (chevron) {
+                    chevron.style.transform = 'rotate(90deg)';
+                }
             } else {
                 subrow.style.display = 'none';
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
+                }
             }
         }
 
-        // Fullscreen API toggle
+        // Toggle web page full screen mode
         function toggleFullScreen() {
-            const btn = document.getElementById('fullscreenBtn');
-            const icon = document.getElementById('fullscreenIcon');
-            const text = document.getElementById('fullscreenText');
+            var btn = document.getElementById('fullscreenBtn');
+            var icon = document.getElementById('fullscreenIcon');
+            var text = document.getElementById('fullscreenText');
 
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().then(() => {
-                    icon.className = 'fa-solid fa-compress';
-                    text.innerText = 'Exit Fullscreen';
-                }).catch(err => {
+                document.documentElement.requestFullscreen().then(function() {
+                    if (icon) {
+                        icon.className = 'fa-solid fa-compress';
+                    }
+                    if (text) {
+                        text.innerText = 'Exit Fullscreen';
+                    }
+                }).catch(function(err) {
                     console.log('Error requesting fullscreen:', err);
                 });
             } else {
                 if (document.exitFullscreen) {
-                    document.exitFullscreen().then(() => {
-                        icon.className = 'fa-solid fa-expand';
-                        text.innerText = 'Full Screen';
+                    document.exitFullscreen().then(function() {
+                        if (icon) {
+                            icon.className = 'fa-solid fa-expand';
+                        }
+                        if (text) {
+                            text.innerText = 'Full Screen';
+                        }
                     });
                 }
             }
         }
 
-        // Subtab Navigation
+        // Subtab Navigation function
         function showSubtab(tab) {
-            document.getElementById('tab-tasks').style.display = 'none';
-            document.getElementById('tab-projects').style.display = 'none';
-            document.getElementById('tab-all-tasks').style.display = 'none';
+            var tabTasks = document.getElementById('tab-tasks');
+            var tabProjects = document.getElementById('tab-projects');
+            var tabAllTasks = document.getElementById('tab-all-tasks');
 
-            document.getElementById('btn-tasks').classList.remove('active');
-            document.getElementById('btn-projects').classList.remove('active');
-            document.getElementById('btn-all-tasks').classList.remove('active');
+            var btnTasks = document.getElementById('btn-tasks');
+            var btnProjects = document.getElementById('btn-projects');
+            var btnAllTasks = document.getElementById('btn-all-tasks');
+
+            if (tabTasks) tabTasks.style.display = 'none';
+            if (tabProjects) tabProjects.style.display = 'none';
+            if (tabAllTasks) tabAllTasks.style.display = 'none';
+
+            if (btnTasks) btnTasks.classList.remove('active');
+            if (btnProjects) btnProjects.classList.remove('active');
+            if (btnAllTasks) btnAllTasks.classList.remove('active');
 
             if (tab === 'tasks') {
-                document.getElementById('tab-tasks').style.display = 'block';
-                document.getElementById('btn-tasks').classList.add('active');
+                if (tabTasks) tabTasks.style.display = 'block';
+                if (btnTasks) btnTasks.classList.add('active');
             } else if (tab === 'projects') {
-                document.getElementById('tab-projects').style.display = 'none';
-                document.getElementById('tab-projects').style.display = 'block';
-                document.getElementById('btn-projects').classList.add('active');
+                if (tabProjects) tabProjects.style.display = 'block';
+                if (btnProjects) btnProjects.classList.add('active');
             } else if (tab === 'all-tasks') {
-                document.getElementById('tab-all-tasks').style.display = 'block';
-                document.getElementById('btn-all-tasks').classList.add('active');
+                if (tabAllTasks) tabAllTasks.style.display = 'block';
+                if (btnAllTasks) btnAllTasks.classList.add('active');
             }
         }
 
-        // Real-time table filter search
+        // Filter active table rows by search input text
         function filterTables() {
-            const query = document.getElementById('tableSearch').value.toLowerCase();
-            const activeTableContainer = document.querySelector('.table-container:not([style*="display: none"])');
+            var searchInput = document.getElementById('tableSearch');
+            if (!searchInput) return;
+            var query = searchInput.value.toLowerCase();
+            
+            var activeTableContainer = document.querySelector('.table-container:not([style*="display: none"])');
             if (!activeTableContainer) return;
 
-            const rows = activeTableContainer.querySelectorAll('tbody tr:not(.emp-tasks-subrow)');
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                if (text.includes(query)) {
+            var rows = activeTableContainer.querySelectorAll('tbody tr:not(.emp-tasks-subrow)');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var text = row.innerText.toLowerCase();
+                if (text.indexOf(query) !== -1) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
-                    // also hide subrow if main row hidden
-                    const empId = row.getAttribute('data-emp-id');
+                    var empId = row.getAttribute('data-emp-id');
                     if (empId) {
-                        const subrow = document.getElementById(`subrow-${empId}`);
-                        if (subrow) subrow.style.display = 'none';
+                        var subrow = document.getElementById('subrow-' + empId);
+                        if (subrow) {
+                            subrow.style.display = 'none';
+                        }
                     }
                 }
-            });
+            }
         }
 
+        // Helper function to escape HTML special characters
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -908,8 +936,9 @@
                 .replace(/'/g, "&#039;");
         }
 
+        // Helper function to generate status badge HTML string
         function renderStatusBadge(status) {
-            const statusStr = (status || '').trim();
+            var statusStr = (status || '').trim();
             if (statusStr === 'In Progress') {
                 return '<span style="color: #2563eb; font-weight: 600;">In Progress</span>';
             } else if (statusStr === 'Completed') {
