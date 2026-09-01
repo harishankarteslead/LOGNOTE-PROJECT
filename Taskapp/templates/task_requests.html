@@ -1,4 +1,76 @@
 {% load static %}
+<style>
+    /* Custom Tooltip & Text Truncation for Task Requests */
+    .task-name-truncate {
+        max-width: 200px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+    }
+
+    .task-desc-truncate {
+        max-width: 280px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+    }
+
+    /* Hover Tooltip Popup */
+    [data-tooltip] {
+        position: relative;
+        cursor: pointer;
+    }
+
+    [data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-6px);
+        background: #0f172a;
+        color: #ffffff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.4;
+        white-space: normal;
+        word-break: break-word;
+        max-width: 360px;
+        width: max-content;
+        box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+        z-index: 999999;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    }
+
+    [data-tooltip]:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(0px);
+        border-width: 6px 6px 0 6px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+        z-index: 999999;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    }
+
+    [data-tooltip]:hover::after,
+    [data-tooltip]:hover::before {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-2px);
+    }
+</style>
 <div class="table-card" style="margin-top: 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
         <h3 style="font-size: 18px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 10px;">
@@ -137,9 +209,9 @@
                     <td style="padding: 14px 16px;">
                         <strong style="color: var(--text-dark); display: block; font-size: 14px;">${escapeHtml(r.employee_name)}</strong>
                     </td>
-                    <td style="padding: 14px 16px; font-weight: 600; color: var(--primary);" title="${escapeHtml(r.task_name)}">${escapeHtml(r.task_name)}</td>
+                    <td style="padding: 14px 16px; font-weight: 600; color: var(--primary);" data-tooltip="${escapeHtml(r.task_name)}" title="${escapeHtml(r.task_name)}"><div class="task-name-truncate">${escapeHtml(r.task_name)}</div></td>
                     <td style="padding: 14px 16px;" title="${escapeHtml(r.project_name || '-')}">${escapeHtml(r.project_name || '-')}</td>
-                    <td style="padding: 14px 16px; max-width: 250px; font-size: 13px;" title="${escapeHtml(r.reason || '-')}">${reasonDisplay}</td>
+                    <td style="padding: 14px 16px; font-size: 13px;" data-tooltip="${escapeHtml(r.reason || '-')}" title="${escapeHtml(r.reason || '-')}"><div class="task-desc-truncate">${reasonDisplay}</div></td>
                     <td style="padding: 14px 16px; font-size: 12px; color: var(--text-muted);">${r.created_at || '-'}</td>
                     <td style="padding: 14px 16px;">${statusBadge}</td>
                     <td style="padding: 14px 16px; text-align: center;">${actionBtns}</td>

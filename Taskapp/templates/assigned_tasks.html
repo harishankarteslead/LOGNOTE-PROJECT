@@ -310,25 +310,26 @@
         }
 
         /* Custom Tooltip & Text Truncation */
-        .text-truncate-cell {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: middle;
-        }
-
         .task-name-truncate {
-            max-width: 220px;
+            max-width: 200px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
         }
 
         .task-desc-truncate {
-            max-width: 280px;
+            max-width: 280px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
         }
 
         /* Hover Tooltip Popup */
         [data-tooltip] {
             position: relative;
+            cursor: pointer;
         }
 
         [data-tooltip]:hover::after {
@@ -346,10 +347,10 @@
             line-height: 1.4;
             white-space: normal;
             word-break: break-word;
-            max-width: 320px;
+            max-width: 360px;
             width: max-content;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-            z-index: 99999;
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+            z-index: 999999;
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
@@ -365,7 +366,7 @@
             border-width: 6px 6px 0 6px;
             border-style: solid;
             border-color: #0f172a transparent transparent transparent;
-            z-index: 99999;
+            z-index: 999999;
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
@@ -635,9 +636,9 @@
                             <td title="{{ item.project_name }}">
                                 <span class="project-tag">{{ item.project_name }}</span>
                             </td>
-                            <td title="{{ item.task_name }}">
+                            <td data-tooltip="{{ item.task_name }}" title="{{ item.task_name }}">
                                 {% if item.task_name != 'No Task Assigned' and item.task_name != '-' %}
-                                <span class="text-truncate-cell task-name-truncate" data-tooltip="{{ item.task_name }}"><strong>{{ item.task_name }}</strong></span>
+                                <div class="task-name-truncate"><strong>{{ item.task_name }}</strong></div>
                                 {% elif item.task_name == 'No Task Assigned' %}
                                 <span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>
                                 {% else %}
@@ -775,7 +776,7 @@
                             <td>
                                 <span class="project-tag">{{ task.project_name|default:"-" }}</span>
                             </td>
-                            <td><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                            <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                             <td>{{ task.due_date|default:"-" }}</td>
                             <td>
                                 {% if task.status == 'In Progress' %}
@@ -961,7 +962,9 @@
                                     if (cells.length >= 6) {
                                         cells[1].innerHTML = `<span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span>`;
                                         cells[2].innerHTML = `<span class="project-tag">${escapeHtml(task.project_name || '-')}</span>`;
-                                        cells[3].innerHTML = `<span class="text-truncate-cell task-name-truncate" data-tooltip="${escapeHtml(task.task_name)}"><strong>${escapeHtml(task.task_name)}</strong></span>`;
+                                        cells[3].setAttribute('data-tooltip', task.task_name || '');
+                                        cells[3].setAttribute('title', task.task_name || '');
+                                        cells[3].innerHTML = `<div class="task-name-truncate"><strong>${escapeHtml(task.task_name)}</strong></div>`;
                                          cells[4].innerText = task.due_date || '-';
                                         cells[5].innerHTML = renderStatusBadge(task.status);
                                     }
@@ -973,7 +976,7 @@
                                     <td><strong>1</strong></td>
                                     <td><span class="emp-tag"><i class="fa-solid fa-user"></i> ${escapeHtml(task.employee_name || '-')}</span></td>
                                     <td><span class="project-tag">${escapeHtml(task.project_name || '-')}</span></td>
-                                    <td><span class="text-truncate-cell task-name-truncate" data-tooltip="${escapeHtml(task.task_name)}"><strong>${escapeHtml(task.task_name)}</strong></span></td>
+                                    <td data-tooltip="${escapeHtml(task.task_name)}" title="${escapeHtml(task.task_name)}"><div class="task-name-truncate"><strong>${escapeHtml(task.task_name)}</strong></div></td>
                                     <td>${escapeHtml(task.due_date || '-')}</td>
                                     <td>${renderStatusBadge(task.status)}</td>
                                 `;
@@ -1030,7 +1033,7 @@
                                 let subrow = tbody.querySelector(`tr.emp-tasks-subrow[id="subrow-${item.employee_id}"]`);
                                 const isAssignedTask = item.task_name && item.task_name !== 'No Task Assigned' && item.task_name !== '-';
                                 const taskHtml = isAssignedTask
-                                    ? `<span class="text-truncate-cell task-name-truncate" data-tooltip="${escapeHtml(item.task_name)}"><strong>${escapeHtml(item.task_name)}</strong></span>`
+                                    ? `<div class="task-name-truncate"><strong>${escapeHtml(item.task_name)}</strong></div>`
                                     : (item.task_name === 'No Task Assigned'
                                         ? `<span style="color: #94a3b8; font-style: italic;">No Task Assigned</span>`
                                         : `<span style="color: #94a3b8;">-</span>`);

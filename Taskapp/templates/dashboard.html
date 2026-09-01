@@ -485,25 +485,26 @@
         }
 
         /* Custom Tooltip & Text Truncation */
-        .text-truncate-cell {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: middle;
-        }
-
         .task-name-truncate {
-            max-width: 220px;
+            max-width: 200px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
         }
 
         .task-desc-truncate {
-            max-width: 280px;
+            max-width: 280px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
         }
 
         /* Hover Tooltip Popup */
         [data-tooltip] {
             position: relative;
+            cursor: pointer;
         }
 
         [data-tooltip]:hover::after {
@@ -521,10 +522,10 @@
             line-height: 1.4;
             white-space: normal;
             word-break: break-word;
-            max-width: 320px;
+            max-width: 360px;
             width: max-content;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-            z-index: 99999;
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+            z-index: 999999;
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
@@ -540,7 +541,7 @@
             border-width: 6px 6px 0 6px;
             border-style: solid;
             border-color: #0f172a transparent transparent transparent;
-            z-index: 99999;
+            z-index: 999999;
             pointer-events: none;
             opacity: 0;
             visibility: hidden;
@@ -1372,7 +1373,7 @@
                                     data-description="{{ proj.description|default:''|lower }}"
                                     data-status="{{ proj.status|default:'Not Worked'|lower }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
+                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}"><div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div></td>
                                     <td>
                                         <span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span>
                                     </td>
@@ -1382,7 +1383,7 @@
                                     <td>{{ proj.start_date_str|default:"-" }}</td>
                                     <td>{{ proj.due_date_str|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date_str|default:"-" }}</td>
-                                    <td title="{{ proj.description|default:'-' }}">{{ proj.description|default:"-" }}</td>
+                                    <td data-tooltip="{{ proj.description|default:'-' }}" title="{{ proj.description|default:'-' }}"><div class="task-desc-truncate">{{ proj.description|default:"-" }}</div></td>
                                     <td>{{ proj.created_at_str|default:"-" }}</td>
                                 </tr>
                                 {% empty %}
@@ -1461,11 +1462,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td title="{{ task.description|default:'-' }}"><span class="text-truncate-cell task-desc-truncate" data-tooltip="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</span></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -1590,11 +1591,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td title="{{ task.description|default:'-' }}"><span class="text-truncate-cell task-desc-truncate" data-tooltip="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</span></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
@@ -1694,11 +1695,11 @@
                                     data-due-date="{{ task.due_date|date:'Y-m-d'|default:task.due_date|default:'' }}"
                                     data-created-at="{{ task.created_at|date:'Y-m-d'|default:task.created_at }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td title="{{ task.description|default:'-' }}"><span class="text-truncate-cell task-desc-truncate" data-tooltip="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</span></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
@@ -1833,14 +1834,14 @@
                                     data-due-date="{{ task.due_date_str|default:'' }}"
                                     data-created-at="{{ task.created_at_str|default:'' }}">
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                                     <td>
                                         <span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">
                                             {{ task.project_name|default:"-" }}
                                         </span>
                                     </td>
-                                    <td title="{{ task.description|default:'-' }}"><span class="text-truncate-cell task-desc-truncate" data-tooltip="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</span></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
                                     <td>{{ task.due_date_str|default:"-" }}</td>
                                     <td>
                                         <select
@@ -2049,11 +2050,11 @@
                                             onchange="updateTaskBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ task.task_name }}"><span class="text-truncate-cell task-name-truncate" data-tooltip="{{ task.task_name }}"><strong>{{ task.task_name }}</strong></span></td>
+                                    <td data-tooltip="{{ task.task_name }}" title="{{ task.task_name }}"><div class="task-name-truncate"><strong>{{ task.task_name }}</strong></div></td>
                                     <td><span
                                             style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{task.project_name|default:"-"}}</span>
                                     </td>
-                                    <td title="{{ task.description|default:'-' }}"><span class="text-truncate-cell task-desc-truncate" data-tooltip="{{ task.description|default:'-' }}">{{ task.description|default:"-" }}</span></td>
+                                    <td data-tooltip="{{ task.description|default:'-' }}" title="{{ task.description|default:'-' }}"><div class="task-desc-truncate">{{ task.description|default:"-" }}</div></td>
                                     <td><strong>{{ task.employee_name }}</strong></td>
                                     <td>{{ task.due_date|default:"-" }}</td>
                                     <td>
@@ -2188,7 +2189,7 @@
                                             onchange="updateProjectBulkDeleteState()">
                                     </td>
                                     <td><strong>{{ forloop.counter }}</strong></td>
-                                    <td title="{{ proj.project_name }}"><strong>{{ proj.project_name }}</strong></td>
+                                    <td data-tooltip="{{ proj.project_name }}" title="{{ proj.project_name }}"><div class="task-name-truncate"><strong>{{ proj.project_name }}</strong></div></td>
                                     <td><span class="proj-type-badge {% if 'data logger' in proj.project_type|lower %}proj-type-data-logger{% elif 'internal' in proj.project_type|lower %}proj-type-internal-project{% else %}proj-type-default{% endif %}">{{ proj.project_type }}</span></td>
                                     <td>
                                         <form method="POST" action="{% url 'dashboard' %}" style="display:inline;">
@@ -2208,7 +2209,7 @@
                                     <td>{{ proj.start_date|default:"-" }}</td>
                                     <td>{{ proj.due_date|default:"-" }}</td>
                                     <td>{{ proj.actual_complete_date|default:"-" }}</td>
-                                    <td title="{{ proj.description|default:'-' }}">{{ proj.description|default:"-" }}</td>
+                                    <td data-tooltip="{{ proj.description|default:'-' }}" title="{{ proj.description|default:'-' }}"><div class="task-desc-truncate">{{ proj.description|default:"-" }}</div></td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-edit" title="Edit"
                                             style="margin-right: 4px;" data-id="{{ proj.id }}"
